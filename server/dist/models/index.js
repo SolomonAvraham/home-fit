@@ -1,0 +1,26 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Notification = exports.Progress = exports.Exercise = exports.WorkoutPlan = exports.Workout = exports.User = exports.sequelize = void 0;
+const User_1 = __importDefault(require("./User"));
+exports.User = User_1.default;
+const Workout_1 = __importDefault(require("./Workout"));
+exports.Workout = Workout_1.default;
+const WorkoutPlan_1 = __importDefault(require("./WorkoutPlan"));
+exports.WorkoutPlan = WorkoutPlan_1.default;
+const Exercise_1 = __importDefault(require("./Exercise"));
+exports.Exercise = Exercise_1.default;
+const Progress_1 = __importDefault(require("./Progress"));
+exports.Progress = Progress_1.default;
+const Notification_1 = __importDefault(require("./Notification"));
+exports.Notification = Notification_1.default;
+const database_1 = __importDefault(require("../config/database"));
+exports.sequelize = database_1.default;
+User_1.default.associate();
+Workout_1.default.associate();
+WorkoutPlan_1.default.associate();
+Exercise_1.default.associate();
+Progress_1.default.associate();
+Notification_1.default.associate();
