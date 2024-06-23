@@ -16,9 +16,9 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: test_home_workout_app
+          POSTGRES_USER: solomon
+          POSTGRES_PASSWORD: 12341234
         ports:
           - 5432:5432
         options: >-
@@ -36,36 +36,19 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Wait for PostgreSQL to be healthy
-        run: |
-          echo "Waiting for PostgreSQL to be healthy..."
-          for i in {1..10}; do
-            if pg_isready -h localhost -U ${{ secrets.POSTGRES_USER }}; then
-              echo "PostgreSQL is ready."
-              break
-            else
-              echo "Waiting for PostgreSQL..."
-              sleep 5
-            fi
-          done
-
-      - name: Print PostgreSQL logs for debugging
-        run: docker logs $(docker ps -a -q --filter ancestor=postgres:latest)
-
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm install
         working-directory: ./server
 
       - name: Build the project
-        run: npm run build
+        run: |
+          npm run build
         working-directory: ./server
 
       - name: Run tests
         env:
-          DATABASE_URL_TEST: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
-        run: npm test
+          DATABASE_URL_TEST: postgres://solomon:12341234@localhost:5432/test_home_workout_app
+        run: |
+          npm test
         working-directory: ./server
-
-      - name: Print PostgreSQL logs if the container failed to start
-        if: failure()
-        run: docker logs $(docker ps -a -q --filter ancestor=postgres:latest)
