@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install
@@ -29,10 +29,12 @@ jobs:
         run: npm run build
         working-directory: ./server
 
+      - name: Set up environment variables
+        run: |
+          echo "DATABASE_URL_TEST=${{ secrets.DATABASE_URL_TEST }}" >> $GITHUB_ENV
+
       - name: Run tests
+        env:
+          DATABASE_URL_TEST: ${{ secrets.DATABASE_URL_TEST }}
         run: npm test
         working-directory: ./server
-
-      # Optional: Add deployment step here
-      # - name: Deploy
-      #   run: echo "Add your deployment script here"
