@@ -16,13 +16,13 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          TEST_DB_NAME: test_home_workout_app
-          DB_USER: solomon
-          DB_PASSWORD: 12341234
+          POSTGRES_DB: test_home_workout_app
+          POSTGRES_USER: solomon
+          POSTGRES_PASSWORD: 12341234
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U solomon"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -35,6 +35,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Wait for PostgreSQL to be healthy
+        run: |
+          echo "Waiting for PostgreSQL to be healthy..."
+          for i in {1..10}; do
+            if docker ps | grep 'postgres:latest'; then
+              echo "PostgreSQL container is running."
+              break
+            else
+              echo "Waiting for PostgreSQL container to start..."
+              sleep 5
+            fi
+          done
 
       - name: Install dependencies
         run: npm install
@@ -49,3 +62,7 @@ jobs:
           DATABASE_URL_TEST: postgres://solomon:12341234@localhost:5432/test_home_workout_app
         run: npm test
         working-directory: ./server
+
+      - name: Print PostgreSQL logs if the container failed to start
+        if: failure()
+        run: docker logs $(docker ps -a -q --filter ancestor=postgres:latest)
