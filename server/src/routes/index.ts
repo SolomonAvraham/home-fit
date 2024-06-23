@@ -4,6 +4,8 @@ import progressRoutes from "./progressRoutes";
 import notificationRoutes from "./notificationRoutes";
 import workoutPlanRoutes from "./workoutPlanRoutes";
 import exerciseRoutes from "./exerciseRoutes";
+import testRoute from "./testRoute";
+import errorRoute from "./errorRoute";
 
 export {
   userRoute,
@@ -12,4 +14,6 @@ export {
   notificationRoutes,
   workoutPlanRoutes,
   exerciseRoutes,
+  testRoute,
+  errorRoute,
 };

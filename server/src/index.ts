@@ -1,7 +1,7 @@
 import express, { Application, Request, Response } from "express";
 import sequelize from "./config/database";
 import bodyParser from "body-parser";
-import { errorHandler } from "./middleware/errorMiddleware";
+import errorMiddleware from "./middleware/errorMiddleware";
 import {
   userRoute,
   workoutRoute,
@@ -9,6 +9,8 @@ import {
   notificationRoutes,
   workoutPlanRoutes,
   exerciseRoutes,
+  testRoute,
+  errorRoute,
 } from "./routes/index";
 import "../src/models/index";
 
@@ -18,7 +20,6 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(bodyParser.json());
 
-
 app.use("/api/users", userRoute);
 app.use("/api/workouts", workoutRoute);
 app.use("/api/progress", progressRoutes);
@@ -26,7 +27,10 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/workout-plans", workoutPlanRoutes);
 app.use("/api/exercises", exerciseRoutes);
 
-app.use(errorHandler);
+app.use("/api/test", testRoute);
+app.use("/api/test", errorRoute);
+
+app.use(errorMiddleware);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, world!");

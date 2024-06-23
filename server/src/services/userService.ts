@@ -1,6 +1,8 @@
 import User from "../models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { validate as validateUUID } from "uuid";
+import { Progress, Workout, sequelize, Notification } from "../models";
 
 interface UserData {
   name: string;
@@ -11,7 +13,7 @@ interface UserData {
 
 class UserService {
   public static async createUser(data: UserData) {
-    if (!data.email || !data.password || !data.name || !data.role) {
+    if (!data.email || !data.password || !data.name) {
       throw new Error("All fields are required");
     }
 
@@ -26,6 +28,9 @@ class UserService {
   }
 
   public static async getUserById(id: string) {
+    if (!validateUUID(id)) {
+      throw new Error("Invalid UUID format");
+    }
     const user = await User.findByPk(id);
     if (!user) {
       throw new Error("User not found");
@@ -37,30 +42,45 @@ class UserService {
     return User.findAll();
   }
 
-  public static async updateUser(id: string, data: Partial<User>) {
-    // Check if the user exists
+  public static async updateUser(id: string, data: any) {
+    if (!validateUUID(id)) {
+      throw new Error("Invalid UUID format");
+    }
     const user = await User.findByPk(id);
     if (!user) {
-      console.log("User not found");
       throw new Error("User not found");
     }
-
-    // Update the user
-    const [updatedCount, updatedUsers] = await User.update(data, {
-      where: { id },
-      returning: true,
-    });
-
-    if (updatedCount === 0) {
-      console.log("Update failed");
-      throw new Error("Update failed");
-    }
-
-    return updatedUsers[0];
+    return await user.update(data);
   }
 
   public static async deleteUser(id: string) {
-    return User.destroy({ where: { id } });
+    if (!validateUUID(id)) {
+      throw new Error("Invalid UUID format");
+    }
+    const transaction = await sequelize.transaction();
+    try {
+      const user = await User.findByPk(id, { transaction });
+      if (!user) {
+        await transaction.rollback();
+        return 0; // Returning 0 to indicate no user was found
+      }
+      // Delete related records
+      await Workout.destroy({ where: { userId: id }, transaction });
+      await Progress.destroy({ where: { userId: id }, transaction });
+      await Notification.destroy({ where: { userId: id }, transaction });
+
+      await user.destroy({ transaction });
+      await transaction.commit();
+      return 1; // Returning 1 to indicate user was deleted
+    } catch (error: any) {
+      await transaction.rollback();
+      console.error(
+        "Error in deleteUser service method:",
+        error.message,
+        error.stack
+      ); // Added logging
+      throw new Error("Failed to delete user");
+    }
   }
 
   public static async authenticateUser(email: string, password: string) {

@@ -1,9 +1,25 @@
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/database";
 import Workout from "./WorkoutPlan";
 import Progress from "./Progress";
 import Notification from "./Notification";
-class User extends Model {
+
+export interface UserAttributes {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
+
+class User
+  extends Model<UserAttributes, UserCreationAttributes>
+  implements UserAttributes
+{
   public id!: string;
   public name!: string;
   public email!: string;
@@ -34,6 +50,11 @@ User.init(
       type: DataTypes.STRING(255),
       allowNull: false,
       unique: true,
+      validate: {
+        isEmail: {
+          msg: "Must be a valid email address",
+        },
+      },
     },
     password: {
       type: DataTypes.STRING(255),

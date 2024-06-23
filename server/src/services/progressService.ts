@@ -1,4 +1,5 @@
 import Progress from "../models/Progress";
+import { validate as validateUUID } from "uuid";
 
 class ProgressService {
   async createProgress(data: {
@@ -11,6 +12,9 @@ class ProgressService {
   }
 
   async getProgressById(id: string) {
+    if (!validateUUID(id)) {
+      throw new Error("Invalid UUID format");
+    }
     return await Progress.findByPk(id);
   }
 
@@ -18,22 +22,27 @@ class ProgressService {
     return await Progress.findAll();
   }
 
-    async updateProgress(id: string, data: any) {
+  async updateProgress(id: string, data: any) {
+    if (!validateUUID(id)) {
+      throw new Error("Invalid UUID format");
+    }
     const progress = await Progress.findByPk(id);
     if (!progress) {
-      return null;
+      throw new Error("Progress not found");
     }
-    return progress.update(data);
+    return await progress.update(data);
   }
 
   async deleteProgress(id: string) {
-    return await Progress.destroy({ where: { id } });
-  }
-
-  async trackProgress(data: any) {
-    // Example logic: Save progress data to the database
-    const progress = { id: 1, ...data }; // Simulate database save
-    return progress;
+    if (!validateUUID(id)) {
+      throw new Error("Invalid UUID format");
+    }
+    const progress = await Progress.findByPk(id);
+    if (!progress) {
+      return 0; // Returning 0 to indicate no progress was found
+    }
+    await progress.destroy();
+    return 1; // Returning 1 to indicate progress was deleted
   }
 }
 

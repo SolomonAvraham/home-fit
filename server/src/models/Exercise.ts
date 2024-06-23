@@ -1,7 +1,24 @@
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/database";
 
-class Exercise extends Model {
+
+export interface ExerciseAttributes {
+  id?: string;
+  name: string;
+  description: string;
+  muscleGroup: string;
+  media: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface ExerciseCreationAttributes
+  extends Optional<ExerciseAttributes, "id"> {}
+
+class Exercise
+  extends Model<ExerciseAttributes, ExerciseCreationAttributes>
+  implements ExerciseAttributes
+{
   public id!: string;
   public name!: string;
   public description!: string;

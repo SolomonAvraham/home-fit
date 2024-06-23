@@ -3,10 +3,10 @@ import { ExerciseController } from "../controllers/exerciseController";
 
 const router = Router();
 
-router.post("/", ExerciseController.createExercise);
+router.post("/createExercise", ExerciseController.createExercise);
 router.get("/all", ExerciseController.getAllExercises);
-router.get("/:id", ExerciseController.getExerciseById);
-router.put("/:id", ExerciseController.updateExercise);
-router.delete("/:id", ExerciseController.deleteExercise);
+router.get("/getExerciseById/:id", ExerciseController.getExerciseById);
+router.put("/updateExercise/:id", ExerciseController.updateExercise);
+router.delete("/deleteExercise/:id", ExerciseController.deleteExercise);
 
 export default router;

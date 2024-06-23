@@ -5,12 +5,13 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc",
-    "test": "NODE_ENV=test",
+    "test": "NODE_ENV=test mocha --config mocha.config.js",
+    "coverage": "nyc npm test",
     "dev": "nodemon src/index.ts",
     "start": "nodemon dist/index.js",
     "migrate": "npx sequelize-cli db:migrate",
     "migrate:undo": "npx sequelize-cli db:migrate:undo",
-    "seed": "npx sequelize-cli db:seed:all"
+    "seed": "ts-node ./node_modules/.bin/sequelize-cli db:seed:all"
   },
   "keywords": [],
   "author": "",
@@ -29,13 +30,23 @@
     "uuid": "^10.0.0"
   },
   "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
+    "@types/chai": "^4.3.16",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
-    "@types/node": "^20.14.2",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.14.5",
+    "@types/supertest": "^6.0.2",
     "@types/uuid": "^9.0.8",
+    "chai": "^4.4.1",
+    "mocha": "^10.4.0",
+    "nyc": "^17.0.0",
     "sequelize-cli": "^6.6.2",
-    "tsx": "^4.15.6",
-    "typescript": "^5.4.5"
+    "source-map-support": "^0.5.21",
+    "supertest": "^7.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.2"
   }
 }
