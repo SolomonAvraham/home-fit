@@ -27,7 +27,8 @@ class WorkoutPlanService {
     id: string,
     data: { name?: string; description?: string }
   ) {
-    return await WorkoutPlan.update(data, { where: { id } });
+    await WorkoutPlan.update(data, { where: { id } });
+    return await WorkoutPlan.findByPk(id); // Fetch the updated record
   }
 
   async deleteWorkoutPlan(id: string) {

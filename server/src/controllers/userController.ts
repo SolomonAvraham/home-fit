@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import UserService from "../services/userService";
+import { validate as validateUUID } from "uuid";
 
 class UserController {
   public async createUser(req: Request, res: Response): Promise<void> {
@@ -26,14 +27,11 @@ class UserController {
 
   public async getUserById(req: Request, res: Response): Promise<void> {
     const userId = req.params.id;
-
-    // if (!userId.match(/^[0-9a-fA-F-]{36}$/)) {
-    //   console.log("Invalid user ID format");
-    // }
     const uuidRegex =
       /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
     if (!uuidRegex.test(userId)) {
-      console.log("Invalid user ID format");
+      res.status(400).json({ message: "Invalid UUID format" });
+      return;
     }
     try {
       const user = await UserService.getUserById(userId);
@@ -56,30 +54,45 @@ class UserController {
     }
   }
 
-  public  async updateUser(req: Request, res: Response) {
+  public async updateUser(req: Request, res: Response): Promise<void> {
     const userId = req.params.id;
     const data = req.body;
-
+    const uuidRegex =
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    if (!uuidRegex.test(userId)) {
+      res.status(400).json({ message: "Invalid UUID format" });
+      return;
+    }
     try {
       const updatedUser = await UserService.updateUser(userId, data);
       res.json(updatedUser);
-    } catch (error:any) {
+    } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   }
 
   public async deleteUser(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
+    const uuidRegex =
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    if (!uuidRegex.test(id)) {
+      res.status(400).json({ message: "Invalid UUID format" });
+      return;
+    }
     try {
-      const deletedRows = await UserService.deleteUser( req.params.id);
-      if (deletedRows > 0) {
-        res.status(200).json({ message: "User deleted" });
-      } else {
+      const deleted = await UserService.deleteUser(id);
+      if (deleted === 0) {
         res.status(404).json({ message: "User not found" });
+        return;
       }
+      res.status(204).json();
     } catch (error: any) {
-      res.status(400).json({ error: error.message });
+      console.error("Delete user error:", error.message, error.stack); // Added logging
+      res.status(500).json({ error: error.message });
     }
   }
+
+  
 }
 
 export default new UserController();

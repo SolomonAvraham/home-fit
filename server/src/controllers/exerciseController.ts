@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import ExerciseService from "../services/exerciseService";
+import { validate as isValidUUID } from "uuid";
 
 export class ExerciseController {
   static async createExercise(req: Request, res: Response) {
@@ -28,7 +29,12 @@ export class ExerciseController {
 
   static async getExerciseById(req: Request, res: Response) {
     try {
-      const exercise = await ExerciseService.getExerciseById(req.params.id);
+      const { id } = req.params;
+      if (!isValidUUID(id)) {
+        return res.status(400).json({ error: "Invalid UUID format" });
+      }
+
+      const exercise = await ExerciseService.getExerciseById(id);
       if (!exercise) {
         return res.status(404).json({ message: "Exercise not found" });
       }
@@ -43,10 +49,12 @@ export class ExerciseController {
 
   static async updateExercise(req: Request, res: Response) {
     try {
-      const exercise = await ExerciseService.updateExercise(
-        req.params.id,
-        req.body
-      );
+      const { id } = req.params;
+      if (!isValidUUID(id)) {
+        return res.status(400).json({ error: "Invalid UUID format" });
+      }
+
+      const exercise = await ExerciseService.updateExercise(id, req.body);
       if (!exercise) {
         return res.status(404).json({ message: "Exercise not found" });
       }
@@ -61,7 +69,12 @@ export class ExerciseController {
 
   static async deleteExercise(req: Request, res: Response) {
     try {
-      const deleted = await ExerciseService.deleteExercise(req.params.id);
+      const { id } = req.params;
+      if (!isValidUUID(id)) {
+        return res.status(400).json({ error: "Invalid UUID format" });
+      }
+
+      const deleted = await ExerciseService.deleteExercise(id);
       if (!deleted) {
         return res.status(404).json({ message: "Exercise not found" });
       }

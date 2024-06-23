@@ -1,76 +1,119 @@
 import { Request, Response } from "express";
-import WorkoutPlanService from "../services/workoutPlanService";
+import { WorkoutPlan } from "../models";
+import { v4 as uuidv4, validate as uuidValidate } from "uuid";
 
-export default class WorkoutPlanController {
-  static async createWorkoutPlan(req: Request, res: Response) {
+class WorkoutPlanController {
+  public async createWorkoutPlan(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
     try {
-      const workoutPlan = await WorkoutPlanService.createWorkoutPlan(req.body);
-      res.status(201).json(workoutPlan);
-    } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
+      const { userId, name, description, duration } = req.body;
+      const workoutPlan = await WorkoutPlan.create({
+        id: uuidv4(),
+        userId,
+        name,
+        description,
+        duration,
+      });
+      return res.status(201).json(workoutPlan);
+    } catch (error: any) {
+      return res
+        .status(400)
+        .json({
+          message: "Failed to create workout plan",
+          error: error.message,
+        });
+    }
+  }
+
+  public async getWorkoutPlanById(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    try {
+      const { id } = req.params;
+      if (!uuidValidate(id)) {
+        return res.status(400).json({ message: "Invalid UUID format" });
       }
-      console.log(error);
-    }
-  }
-
-  static async getAllWorkoutPlans(req: Request, res: Response) {
-    try {
-      const workoutPlans = await WorkoutPlanService.getAllWorkoutPlans();
-      res.status(200).json(workoutPlans);
-    } catch (error) {
-      console.error("Controller error:", error);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  }
-
-  static async getWorkoutPlanById(req: Request, res: Response) {
-    try {
-      const workoutPlan = await WorkoutPlanService.getWorkoutPlanById(
-        req.params.id
-      );
+      const workoutPlan = await WorkoutPlan.findByPk(id);
       if (!workoutPlan) {
         return res.status(404).json({ message: "Workout plan not found" });
       }
-      res.status(200).json(workoutPlan);
-    } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      }
-      console.log(error);
+      return res.status(200).json(workoutPlan);
+    } catch (error: any) {
+      return res
+        .status(400)
+        .json({ message: "Failed to get workout plan", error: error.message });
     }
   }
 
-  static async updateWorkoutPlan(req: Request, res: Response) {
+  public async getAllWorkoutPlans(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
     try {
-      const workoutPlan = await WorkoutPlanService.updateWorkoutPlan(
-        req.params.id,
-        req.body
+      const workoutPlans = await WorkoutPlan.findAll();
+      return res.status(200).json(workoutPlans);
+    } catch (error: any) {
+      return res
+        .status(400)
+        .json({ message: "Failed to get workout plans", error: error.message });
+    }
+  }
+
+  public async updateWorkoutPlan(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    try {
+      const { id } = req.params;
+      if (!uuidValidate(id)) {
+        return res.status(400).json({ message: "Invalid UUID format" });
+      }
+      const { name, description, duration } = req.body;
+      const [updated] = await WorkoutPlan.update(
+        { name, description, duration },
+        { where: { id } }
       );
-      if (!workoutPlan) {
+      if (!updated) {
         return res.status(404).json({ message: "Workout plan not found" });
       }
-      res.status(200).json(workoutPlan);
-    } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      }
-      console.log(error);
+      const updatedWorkoutPlan = await WorkoutPlan.findByPk(id);
+      return res.status(200).json(updatedWorkoutPlan);
+    } catch (error: any) {
+      return res
+        .status(400)
+        .json({
+          message: "Failed to update workout plan",
+          error: error.message,
+        });
     }
   }
 
-  static async deleteWorkoutPlan(req: Request, res: Response) {
+  public async deleteWorkoutPlan(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
     try {
-      const deleted = await WorkoutPlanService.deleteWorkoutPlan(req.params.id);
+      const { id } = req.params;
+      if (!uuidValidate(id)) {
+        return res.status(400).json({ message: "Invalid UUID format" });
+      }
+      const deleted = await WorkoutPlan.destroy({ where: { id } });
       if (!deleted) {
         return res.status(404).json({ message: "Workout plan not found" });
       }
-      res.status(204).json();
-    } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      }
-      console.log(error);
+      return res.status(204).send();
+    } catch (error: any) {
+      return res
+        .status(400)
+        .json({
+          message: "Failed to delete workout plan",
+          error: error.message,
+        });
     }
   }
 }
+
+export default new WorkoutPlanController();
