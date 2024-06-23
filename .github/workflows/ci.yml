@@ -12,6 +12,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          TEST_DB_NAME: test_home_workout_app
+          DB_USER: solomon
+          DB_PASSWORD: 12341234
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,12 +44,8 @@ jobs:
         run: npm run build
         working-directory: ./server
 
-      - name: Set up environment variables
-        run: |
-          echo "DATABASE_URL_TEST=${{ secrets.DATABASE_URL_TEST }}" >> $GITHUB_ENV
-
       - name: Run tests
         env:
-          DATABASE_URL_TEST: ${{ secrets.DATABASE_URL_TEST }}
+          DATABASE_URL_TEST: postgres://solomon:12341234@localhost:5432/test_home_workout_app
         run: npm test
         working-directory: ./server
