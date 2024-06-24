@@ -16,9 +16,9 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_DB: test_home_workout_app
-          POSTGRES_USER: solomon
-          POSTGRES_PASSWORD: 12341234
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         ports:
           - 5432:5432
         options: >-
@@ -55,8 +55,8 @@ jobs:
 
       - name: Run tests
         env:
-          DATABASE_URL_TEST: postgres://solomon:12341234@localhost:5432/test_home_workout_app
-          JWT_SECRET: your_jwt_secret
+          DATABASE_URL_TEST: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           npm test
         working-directory: ./server
