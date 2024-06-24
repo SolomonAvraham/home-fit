@@ -56,6 +56,7 @@ jobs:
       - name: Run tests
         env:
           DATABASE_URL_TEST: postgres://solomon:12341234@localhost:5432/test_home_workout_app
+          JWT_SECRET: your_jwt_secret
         run: |
           npm test
         working-directory: ./server
