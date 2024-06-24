@@ -41,6 +41,13 @@ jobs:
           npm install
         working-directory: ./server
 
+      - name: Wait for PostgreSQL
+        run: |
+          until pg_isready -h localhost -p 5432; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 1
+          done
+
       - name: Build the project
         run: |
           npm run build
