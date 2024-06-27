@@ -9,10 +9,12 @@ interface UserData {
   email: string;
   password: string;
   role?: "user" | "admin";
+  token?: string;
 }
 
 class UserService {
   public static async createUser(data: UserData) {
+    console.log("🚀 ~ UserService ~ createUser ~ data:", data)
     if (!data.email || !data.password || !data.name) {
       throw new Error("All fields are required");
     }
@@ -24,7 +26,19 @@ class UserService {
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const user = await User.create({ ...data, password: hashedPassword });
-    return { id: user.id, name: user.name, email: user.email, role: user.role };
+    const token = jwt.sign(
+      { id: user.id, email: user.email, name: user.name, role: user.role },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "1h" }
+    );
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token,
+    };
   }
 
   public static async getUserById(id: string) {
@@ -84,6 +98,9 @@ class UserService {
   }
 
   public static async authenticateUser(email: string, password: string) {
+
+    console.log("email", email, "password", password)
+    
     const user = await User.findOne({ where: { email } });
     if (!user) throw new Error("User not found");
 
