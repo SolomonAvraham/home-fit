@@ -14,9 +14,27 @@ interface UserData {
 
 class UserService {
   public static async createUser(data: UserData) {
-    console.log("🚀 ~ UserService ~ createUser ~ data:", data)
     if (!data.email || !data.password || !data.name) {
       throw new Error("All fields are required");
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+      throw new Error("Invalid email format");
+    }
+
+   const passwordRegex = /^(?=.*[A-Za-z]).{8,}$/;  
+   if (!passwordRegex.test(data.password)) {
+     throw new Error(
+       "Password must be at least 8 characters long and include at least one letter"
+     );
+   }
+
+    const nameRegex = /^[a-zA-Z ]{2,30}$/;
+    if (!nameRegex.test(data.name)) {
+      throw new Error(
+        "Name must be between 2 and 30 characters and contain only letters and spaces"
+      );
     }
 
     const existingUser = await User.findOne({ where: { email: data.email } });
@@ -98,9 +116,21 @@ class UserService {
   }
 
   public static async authenticateUser(email: string, password: string) {
+    if (!email || !password) {
+      throw new Error("All fields are required");
+    }
 
-    console.log("email", email, "password", password)
-    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error("Invalid email format");
+    }
+ const passwordRegex = /^(?=.*[A-Za-z]).{8,}$/;  
+ if (!passwordRegex.test( password)) {
+   throw new Error(
+     "Password must be at least 8 characters long and include at least one letter"
+   );
+ }
+
     const user = await User.findOne({ where: { email } });
     if (!user) throw new Error("User not found");
 

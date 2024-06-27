@@ -22,6 +22,8 @@ const LoginPage: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const router = useRouter();
 
   const mutation = useMutation<User, APIError, LoginCredentials>({
@@ -35,8 +37,38 @@ const LoginPage: React.FC = () => {
     },
   });
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password: string): boolean => {
+    const passwordRegex = /^(?=.*[A-Za-z]).{8,}$/; 
+
+    return passwordRegex.test(password);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Reset error messages
+    setEmailError(null);
+    setPasswordError(null);
+    setError(null);
+
+    // Validate email
+    if (!validateEmail(email)) {
+      setEmailError("Invalid email format");
+      return;
+    }
+
+    // Validate password
+    if (!validatePassword(password)) {
+      setPasswordError("Password must be at least 8 characters long and contain at least one letter");
+      return;
+    }
+
+    // If all validations pass, mutate
     mutation.mutate({ email, password });
   };
 
@@ -69,6 +101,8 @@ const LoginPage: React.FC = () => {
             autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            error={!!emailError}
+            helperText={emailError}
           />
           <TextField
             margin="normal"
@@ -81,6 +115,8 @@ const LoginPage: React.FC = () => {
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            error={!!passwordError}
+            helperText={passwordError}
           />
           {error && <Typography color="error">{error}</Typography>}
           <Button

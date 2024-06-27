@@ -3,6 +3,7 @@ import request from "supertest";
 import { expect } from "chai";
 import app from "../../../src/index";
 import jwt from "jsonwebtoken";
+import { describe, it } from "mocha";
 
 describe("Auth Middleware", () => {
   it("should return 401 if no token is provided", async () => {

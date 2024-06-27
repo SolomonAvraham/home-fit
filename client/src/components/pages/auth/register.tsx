@@ -23,6 +23,9 @@ const RegisterPage: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const router = useRouter();
 
   const mutation = useMutation<User, APIError, RegisterCredentials>({
@@ -36,8 +39,53 @@ const RegisterPage: React.FC = () => {
     },
   });
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password: string): boolean => {
+    const passwordRegex = /^(?=.*[A-Za-z]).{8,}$/; // At least 8 characters with at least one letter
+    return passwordRegex.test(password);
+  };
+
+  const validateName = (name: string): boolean => {
+    const nameRegex = /^[a-zA-Z ]{2,30}$/;
+    return nameRegex.test(name);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Reset error messages
+    setNameError(null);
+    setEmailError(null);
+    setPasswordError(null);
+    setError(null);
+
+    // Validate name
+    if (!validateName(name)) {
+      setNameError(
+        "Name must be between 2 and 30 characters and contain only letters and spaces"
+      );
+      return;
+    }
+
+    // Validate email
+    if (!validateEmail(email)) {
+      setEmailError("Invalid email format");
+      return;
+    }
+
+    // Validate password
+    if (!validatePassword(password)) {
+      setPasswordError(
+        "Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, a number, and a special character"
+      );
+      return;
+    }
+
+    // If all validations pass, mutate
     mutation.mutate({ name, email, password });
   };
 
@@ -71,6 +119,8 @@ const RegisterPage: React.FC = () => {
                 autoFocus
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                error={!!nameError}
+                helperText={nameError}
               />
             </Grid>
             <Grid item xs={12}>
@@ -83,6 +133,8 @@ const RegisterPage: React.FC = () => {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                error={!!emailError}
+                helperText={emailError}
               />
             </Grid>
             <Grid item xs={12}>
@@ -96,6 +148,8 @@ const RegisterPage: React.FC = () => {
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                error={!!passwordError}
+                helperText={passwordError}
               />
             </Grid>
           </Grid>

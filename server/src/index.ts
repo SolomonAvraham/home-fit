@@ -9,11 +9,10 @@ import {
   notificationRoutes,
   workoutPlanRoutes,
   exerciseRoutes,
-  protectedRoute,
-  errorRoute,
 } from "./routes/index";
 import "../src/models/index";
 import cors from "cors";
+import testRoutes from "./routes/testRoutes";
 
 const app: Application = express();
 const PORT = process.env.PORT || 9000;
@@ -39,16 +38,15 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 app.use("/api/users", userRoute);
-app.use("/protected", protectedRoute);
+
+app.use("/api/test", testRoutes);
+app.use(errorMiddleware);
+
 app.use("/api/workouts", workoutRoute);
 app.use("/api/progress", progressRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/workout-plans", workoutPlanRoutes);
 app.use("/api/exercises", exerciseRoutes);
-
-app.use("/error", errorRoute);
-
-app.use(errorMiddleware);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, world!");

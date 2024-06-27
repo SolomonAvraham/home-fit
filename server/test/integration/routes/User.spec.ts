@@ -1,7 +1,6 @@
 import {
   createTestEntities,
   testUserId,
-  testWorkoutId,
   cleanupTestEntities,
 } from "../../utils/generateTestEntities";
 import generateToken from "../../utils/generateToken";
@@ -23,11 +22,10 @@ describe("User Controller", () => {
     });
   });
 
-    after(async () => {
-      await cleanupTestEntities(); // Ensure proper cleanup after tests
-    });
-  
-  
+  after(async () => {
+    await cleanupTestEntities(); // Ensure proper cleanup after tests
+  });
+
   it("should create a user", async () => {
     const res = await request(app).post("/api/users/register").send({
       name: "New User",
@@ -64,15 +62,13 @@ describe("User Controller", () => {
     expect(res.body).to.have.property("message", "Invalid UUID format");
   });
 
-   it("should delete a user", async () => {
-     console.log("Deleting user with ID:", testUserId); // Added logging
-     const res = await request(app)
-       .delete(`/api/users/deleteUser/${testUserId}`)
-       .set("Authorization", `Bearer ${token}`);
-     console.log("Response status:", res.status); // Added logging
-     console.log("Response body:", res.body); // Added logging
-     expect(res.status).to.equal(204);
-   });
-
-  
+  it("should delete a user", async () => {
+    console.log("Deleting user with ID:", testUserId); // Added logging
+    const res = await request(app)
+      .delete(`/api/users/deleteUser/${testUserId}`)
+      .set("Authorization", `Bearer ${token}`);
+    console.log("Response status:", res.status); // Added logging
+    console.log("Response body:", res.body); // Added logging
+    expect(res.status).to.equal(204);
+  });
 });
