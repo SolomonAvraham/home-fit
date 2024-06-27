@@ -1,27 +1,67 @@
 import { Request, Response } from "express";
 import UserService from "../services/userService";
-import { validate as validateUUID } from "uuid";
 
 class UserController {
   public async createUser(req: Request, res: Response): Promise<void> {
     try {
       const user = await UserService.createUser(req.body);
-      res.status(201).json(user);
-    } catch (error: any) {
-      res.status(400).json({ error: error.message });
+
+      res.cookie("token", user.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+
+      const { token, ...userData } = user;
+
+      res.status(201).json(userData);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      }
+      console.error(error);
     }
   }
 
   public async login(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
+
       const { id, name, role, token } = await UserService.authenticateUser(
         email,
         password
       );
-      res.status(200).json({ id, name, role, token });
-    } catch (error: any) {
-      res.status(400).json({ error: error.message });
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+
+      res.status(200).json({ id, name, role });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      }
+      console.error(error);
+    }
+  }
+
+  public async logout(req: Request, res: Response): Promise<void> {
+    try {
+      res.cookie("token", "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        expires: new Date(0),
+      });
+
+      res.status(200).json({ message: "Logout successful" });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      }
+      console.error(error);
     }
   }
 
@@ -40,8 +80,11 @@ class UserController {
       } else {
         res.status(404).json({ message: "User not found" });
       }
-    } catch (error: any) {
-      res.status(400).json({ error: error.message });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      }
+      console.error(error);
     }
   }
 
@@ -49,8 +92,11 @@ class UserController {
     try {
       const users = await UserService.getAllUsers();
       res.status(200).json(users);
-    } catch (error: any) {
-      res.status(400).json({ error: error.message });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      }
+      console.error(error);
     }
   }
 
@@ -66,8 +112,11 @@ class UserController {
     try {
       const updatedUser = await UserService.updateUser(userId, data);
       res.json(updatedUser);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      }
+      console.error(error);
     }
   }
 
@@ -86,13 +135,14 @@ class UserController {
         return;
       }
       res.status(204).json();
-    } catch (error: any) {
-      console.error("Delete user error:", error.message, error.stack); // Added logging
-      res.status(500).json({ error: error.message });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Delete user error:", error.message, error.stack); // Added logging
+        res.status(400).json({ error: error.message });
+      }
+      console.error(error);
     }
   }
-
-  
 }
 
 export default new UserController();

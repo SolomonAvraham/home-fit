@@ -9,26 +9,44 @@ import {
   notificationRoutes,
   workoutPlanRoutes,
   exerciseRoutes,
-  testRoute,
+  protectedRoute,
   errorRoute,
 } from "./routes/index";
 import "../src/models/index";
+import cors from "cors";
 
 const app: Application = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 9000;
+
+const allowedOrigins = ["http://localhost:3000"];
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(bodyParser.json());
 
 app.use("/api/users", userRoute);
+app.use("/protected", protectedRoute);
 app.use("/api/workouts", workoutRoute);
 app.use("/api/progress", progressRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/workout-plans", workoutPlanRoutes);
 app.use("/api/exercises", exerciseRoutes);
 
-app.use("/api/test", testRoute);
-app.use("/api/test", errorRoute);
+app.use("/error", errorRoute);
 
 app.use(errorMiddleware);
 
