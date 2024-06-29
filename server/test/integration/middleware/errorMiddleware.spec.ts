@@ -1,6 +1,7 @@
 import request from "supertest";
 import { expect } from "chai";
 import app from "../../../src/index";
+import { describe, it } from "mocha";
 
 describe("Error Middleware", () => {
   it("should handle errors correctly", async () => {

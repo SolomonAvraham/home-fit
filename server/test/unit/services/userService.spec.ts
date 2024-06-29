@@ -102,12 +102,12 @@ describe("UserService Unit Tests", () => {
   describe("getAllUsers", () => {
     it("should return all users", async () => {
       const userData1 = {
-        name: "Test User 1",
+        name: "Test User one",
         email: "testuser1@example.com",
         password: "password123",
       };
       const userData2 = {
-        name: "Test User 2",
+        name: "Test User two",
         email: "testuser2@example.com",
         password: "password123",
       };
