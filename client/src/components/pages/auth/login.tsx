@@ -5,18 +5,8 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { APIError, LoginCredentials, User } from "@/types/auth";
 import { login } from "@/services/authService";
-import {
-  Container,
-  CssBaseline,
-  Avatar,
-  Button,
-  TextField,
-  Link,
-  Grid,
-  Box,
-  Typography,
-} from "@mui/material";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Link from "next/link";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -43,101 +33,86 @@ const LoginPage: React.FC = () => {
   };
 
   const validatePassword = (password: string): boolean => {
-    const passwordRegex = /^(?=.*[A-Za-z]).{8,}$/; 
-
+    const passwordRegex = /^(?=.*[A-Za-z]).{8,}$/;
     return passwordRegex.test(password);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Reset error messages
     setEmailError(null);
     setPasswordError(null);
     setError(null);
 
-    // Validate email
     if (!validateEmail(email)) {
       setEmailError("Invalid email format");
       return;
     }
 
-    // Validate password
     if (!validatePassword(password)) {
-      setPasswordError("Password must be at least 8 characters long and contain at least one letter");
+      setPasswordError(
+        "Password must be at least 8 characters long and contain at least one letter"
+      );
       return;
     }
 
-    // If all validations pass, mutate
-    mutation.mutate({ email, password });
+    mutation.mutateAsync({ email, password });
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <Box
-        sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign in
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            error={!!emailError}
-            helperText={emailError}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={!!passwordError}
-            helperText={passwordError}
-          />
-          {error && <Typography color="error">{error}</Typography>}
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? "Signing in..." : "Sign In"}
-          </Button>
-          <Grid container>
-            <Grid item>
-              <Link href="/auth/register" variant="body2">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="card w-96 bg-white shadow-xl">
+        <div className="card-body">
+          <div className="flex justify-center mb-4">
+            <div className="avatar">
+              <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                <UserCircleIcon className="text-black " />
+              </div>
+            </div>
+          </div>
+          <h2 className="text-center text-2xl font-semibold mb-4">Sign in</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <input
+                type="email"
+                placeholder="Email Address"
+                className={`input input-bordered w-full ${
+                  emailError ? "input-error" : ""
+                }`}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {emailError && (
+                <p className="text-red-500 text-sm">{emailError}</p>
+              )}
+            </div>
+            <div>
+              <input
+                type="password"
+                placeholder="Password"
+                className={`input input-bordered w-full ${
+                  passwordError ? "input-error" : ""
+                }`}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              {passwordError && (
+                <p className="text-red-500 text-sm">{passwordError}</p>
+              )}
+            </div>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            <button type="submit" className="btn btn-primary w-full">
+              {mutation.isPending ? "Signing in..." : "Sign In"}
+            </button>
+            <div className="flex justify-between mt-4">
+              <Link href="/auth/register" className="link link-primary">
                 {"Don't have an account? Sign Up"}
               </Link>
-            </Grid>
-          </Grid>
-        </Box>
-      </Box>
-    </Container>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };
 
