@@ -2,7 +2,7 @@ import User from "../models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { validate as validateUUID } from "uuid";
-import { Progress, Workout, sequelize, Notification } from "../models";
+import { Progress, Workout, sequelize, Notification } from "../models/index";
 
 interface UserData {
   name: string;

@@ -5,18 +5,8 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { register } from "@/services/authService";
 import { RegisterCredentials, User, APIError } from "@/types/auth";
-import {
-  Container,
-  CssBaseline,
-  Avatar,
-  Button,
-  TextField,
-  Link,
-  Grid,
-  Box,
-  Typography,
-} from "@mui/material";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Link from "next/link";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
 
 const RegisterPage: React.FC = () => {
   const [name, setName] = useState<string>("");
@@ -45,7 +35,7 @@ const RegisterPage: React.FC = () => {
   };
 
   const validatePassword = (password: string): boolean => {
-    const passwordRegex = /^(?=.*[A-Za-z]).{8,}$/; // At least 8 characters with at least one letter
+    const passwordRegex = /^(?=.*[A-Za-z]).{8,}$/;
     return passwordRegex.test(password);
   };
 
@@ -57,13 +47,11 @@ const RegisterPage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Reset error messages
     setNameError(null);
     setEmailError(null);
     setPasswordError(null);
     setError(null);
 
-    // Validate name
     if (!validateName(name)) {
       setNameError(
         "Name must be between 2 and 30 characters and contain only letters and spaces"
@@ -71,108 +59,87 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
-    // Validate email
     if (!validateEmail(email)) {
       setEmailError("Invalid email format");
       return;
     }
 
-    // Validate password
     if (!validatePassword(password)) {
       setPasswordError(
-        "Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, a number, and a special character"
+        "Password must be at least 8 characters long and contain at least one letter"
       );
       return;
     }
 
-    // If all validations pass, mutate
     mutation.mutate({ name, email, password });
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <Box
-        sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign up
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                autoComplete="name"
-                name="name"
-                required
-                fullWidth
-                id="name"
-                label="Name"
-                autoFocus
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="card w-96 bg-white shadow-xl">
+        <div className="card-body">
+          <div className="flex justify-center mb-4">
+            <div className="avatar">
+              <div className="w-24  rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                <UserCircleIcon className="text-black " />
+              </div>
+            </div>
+          </div>
+          <h2 className="text-center text-2xl font-semibold mb-4">Sign up</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <input
+                type="text"
+                placeholder="Name"
+                className={`input input-bordered w-full ${
+                  nameError ? "input-error" : ""
+                }`}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                error={!!nameError}
-                helperText={nameError}
               />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
+              {nameError && <p className="text-red-500 text-sm">{nameError}</p>}
+            </div>
+            <div>
+              <input
+                type="email"
+                placeholder="Email Address"
+                className={`input input-bordered w-full ${
+                  emailError ? "input-error" : ""
+                }`}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                error={!!emailError}
-                helperText={emailError}
               />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                name="password"
-                label="Password"
+              {emailError && (
+                <p className="text-red-500 text-sm">{emailError}</p>
+              )}
+            </div>
+            <div>
+              <input
                 type="password"
-                id="password"
-                autoComplete="new-password"
+                placeholder="Password"
+                className={`input input-bordered w-full ${
+                  passwordError ? "input-error" : ""
+                }`}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                error={!!passwordError}
-                helperText={passwordError}
               />
-            </Grid>
-          </Grid>
-          {error && <Typography color="error">{error}</Typography>}
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? "Signing up..." : "Sign Up"}
-          </Button>
-          <Grid container justifyContent="flex-end">
-            <Grid item>
-              <Link href="/auth/login" variant="body2">
+              {passwordError && (
+                <p className="text-red-500 text-sm">{passwordError}</p>
+              )}
+            </div>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            <button type="submit" className="btn btn-primary w-full">
+              {mutation.isPending ? "Signing up..." : "Sign Up"}
+            </button>
+            <div className="flex justify-between mt-4">
+              <Link href="/auth/login" className="link link-primary">
                 Already have an account? Sign in
               </Link>
-            </Grid>
-          </Grid>
-        </Box>
-      </Box>
-    </Container>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };
 

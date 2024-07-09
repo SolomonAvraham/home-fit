@@ -1,15 +1,16 @@
- 
+import Link from "next/link";
+
 export default function NotFound() {
   return (
-    <div className=" flex h-screen flex-col items-center justify-center bg-admin font-extrabold text-slate-800 drop-shadow-xl">
-       <h2 className="sAndM:text-7xl mt-10 rounded-3xl border-2 border-black  bg-white p-3 text-4xl">
-        שגיאה 404
-        <hr className="hrTop" />
-      </h2>
-      <h2 className="sAndM:text-4xl mb-16 mt-4 rounded-3xl border-2 border-black bg-white p-3 text-2xl">
-        דף לא נמצא
-        <hr className="hrTop" />
-      </h2>
+    <div className="flex flex-col items-center justify-center h-screen">
+      <h2 className="text-2xl font-bold mb-4">404 - Page Not Found</h2>
+      <p className="mb-4">Could not find requested resource</p>
+      <Link
+        href="/"
+        className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-700"
+      >
+        Return Home
+      </Link>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import Progress from "../models/Progress";
+import { Progress } from "../models/index";
 import { validate as validateUUID } from "uuid";
 
 class ProgressService {
@@ -8,41 +8,73 @@ class ProgressService {
     workoutId: string;
     performanceMetrics: object;
   }) {
-    return await Progress.create(data);
+    try {
+      const progress = await Progress.create(data);
+      return progress;
+    } catch (error) {
+      console.error("Create Progress Service Error:", error);
+      throw new Error("Failed to create progress");
+    }
   }
 
   async getProgressById(id: string) {
-    if (!validateUUID(id)) {
-      throw new Error("Invalid UUID format");
+    try {
+      if (!validateUUID(id)) {
+        throw new Error("Invalid UUID format");
+      }
+      const progress = await Progress.findByPk(id);
+      if (!progress) {
+        throw new Error("Progress not found");
+      }
+      return progress;
+    } catch (error) {
+      console.error("Get Progress By ID Service Error:", error);
+      throw new Error("Failed to fetch progress");
     }
-    return await Progress.findByPk(id);
   }
 
   async getAllProgress() {
-    return await Progress.findAll();
+    try {
+      const progress = await Progress.findAll();
+      return progress;
+    } catch (error) {
+      console.error("Get All Progress Service Error:", error);
+      throw new Error("Failed to fetch progress");
+    }
   }
 
   async updateProgress(id: string, data: any) {
-    if (!validateUUID(id)) {
-      throw new Error("Invalid UUID format");
+    try {
+      if (!validateUUID(id)) {
+        throw new Error("Invalid UUID format");
+      }
+      const progress = await Progress.findByPk(id);
+      if (!progress) {
+        throw new Error("Progress not found");
+      }
+      const updatedProgress = await progress.update(data);
+      return updatedProgress;
+    } catch (error) {
+      console.error("Update Progress Service Error:", error);
+      throw new Error("Failed to update progress");
     }
-    const progress = await Progress.findByPk(id);
-    if (!progress) {
-      throw new Error("Progress not found");
-    }
-    return await progress.update(data);
   }
 
   async deleteProgress(id: string) {
-    if (!validateUUID(id)) {
-      throw new Error("Invalid UUID format");
+    try {
+      if (!validateUUID(id)) {
+        throw new Error("Invalid UUID format");
+      }
+      const progress = await Progress.findByPk(id);
+      if (!progress) {
+        return 0; // Indicate progress not found
+      }
+      await progress.destroy();
+      return 1; // Indicate progress was deleted
+    } catch (error) {
+      console.error("Delete Progress Service Error:", error);
+      throw new Error("Failed to delete progress");
     }
-    const progress = await Progress.findByPk(id);
-    if (!progress) {
-      return 0; // Returning 0 to indicate no progress was found
-    }
-    await progress.destroy();
-    return 1; // Returning 1 to indicate progress was deleted
   }
 }
 

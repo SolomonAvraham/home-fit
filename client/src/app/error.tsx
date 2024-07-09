@@ -1,27 +1,27 @@
 "use client";
 
-import Link from "next/link";
- 
-const Error = ({ reset }: { reset: () => void }) => {
+import { useEffect } from "react";
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+
   return (
-    <div className=" flex h-screen flex-col items-center justify-center bg-admin font-semibold">
-       <h2 className="mt-10 cursor-default rounded-2xl border-2 border-black bg-white p-3 text-3xl sAndM:text-6xl">
-        משהו ישתבש
-        <hr className="hrTop" />
-      </h2>
-      {/* <div className="my-6 flex gap-12">
-        <button
-          className=" rounded-2xl bg-black p-5  text-white hover:bg-slate-600 sAndM:text-xl"
-          onClick={() => reset()}
-        >
-          נסה שנית
-        </button>
-        <button className=" rounded-2xl bg-black p-5 text-white hover:bg-slate-600 sAndM:text-xl">
-          <Link href={"/"}>חזור לדף הבית</Link>
-        </button>
-      </div> */}
+    <div className="flex flex-col items-center justify-center h-screen">
+      <h2 className="text-2xl font-bold mb-4">Something went wrong!</h2>
+      <button
+        className="px-4 py-2 bg-blue-800 text-white rounded hover:bg-blue-700"
+        onClick={() => reset()}
+      >
+        Try again
+      </button>
     </div>
   );
-};
-
-export default Error;
+}

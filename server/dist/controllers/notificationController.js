@@ -13,17 +13,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const notificationService_1 = __importDefault(require("../services/notificationService"));
+const uuid_1 = require("uuid");
 class NotificationController {
     static createNotification(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 console.log("NotificationController ~ createNotification ~ data:", req.body);
+                const { userId, message } = req.body;
+                if (!userId || !message) {
+                    return res.status(400).json({ error: "Missing required fields" });
+                }
                 const notification = yield notificationService_1.default.createNotification(req.body);
-                res.status(201).json(notification);
+                return res.status(201).json(notification);
             }
             catch (error) {
                 console.error("Controller error:", error);
-                res.status(500).json({ error: "Internal Server Error" });
+                return res.status(500).json({ error: "Internal Server Error" });
             }
         });
     }
@@ -32,11 +37,11 @@ class NotificationController {
             try {
                 const { userId } = req.params;
                 const notifications = yield notificationService_1.default.getNotificationsByUserId(userId);
-                res.status(200).json(notifications);
+                return res.status(200).json(notifications);
             }
             catch (error) {
                 console.error("Controller error:", error);
-                res.status(500).json({ error: "Internal Server Error" });
+                return res.status(500).json({ error: "Internal Server Error" });
             }
         });
     }
@@ -45,12 +50,15 @@ class NotificationController {
             try {
                 const { id } = req.params;
                 console.log("NotificationController ~ markAsRead ~ id:", id);
+                if (!(0, uuid_1.validate)(id)) {
+                    return res.status(400).json({ error: "Invalid UUID format" });
+                }
                 const notification = yield notificationService_1.default.markAsRead(id);
-                res.status(200).json(notification);
+                return res.status(200).json(notification);
             }
             catch (error) {
                 console.error("Controller error:", error);
-                res.status(500).json({ error: "Internal Server Error" });
+                return res.status(500).json({ error: "Internal Server Error" });
             }
         });
     }

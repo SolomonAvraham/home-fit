@@ -1,22 +1,23 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/database";
-import User from "./User";
-import WorkoutPlan from "./WorkoutPlan";
+import {  User } from ".";
+import Models from "../types/models";
 
 class Workout extends Model {
   public id!: string;
   public date!: Date;
   public duration!: number;
   public userId!: string;
-  public workoutPlanId!: string;
+  public description!: string;
+  public name!: string;
   public createdAt!: Date;
   public updatedAt!: Date;
 
-  static associate() {
-    Workout.belongsTo(User, { foreignKey: "userId", as: "user" });
-    Workout.belongsTo(WorkoutPlan, {
-      foreignKey: "workoutPlanId",
-      as: "workoutPlan",
+  static associate(model: Models) {
+    Workout.belongsTo(model.User, { foreignKey: "userId", as: "user" });
+    Workout.hasMany(model.Exercise, {
+      foreignKey: "workoutId",
+      as: "exercises",
     });
   }
 }
@@ -44,13 +45,13 @@ Workout.init(
         key: "id",
       },
     },
-    workoutPlanId: {
-      type: DataTypes.UUID,
+    description: {
+      type: DataTypes.TEXT,
       allowNull: false,
-      references: {
-        model: WorkoutPlan,
-        key: "id",
-      },
+    },
+    name: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
     },
     createdAt: {
       type: DataTypes.DATE,

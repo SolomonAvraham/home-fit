@@ -1,3 +1,50 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menu-item {
+  opacity: 0;
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.menu-item-delay-1 { animation-delay: 0.1s; }
+.menu-item-delay-2 { animation-delay: 0.2s; }
+.menu-item-delay-3 { animation-delay: 0.3s; }
+.menu-item-delay-4 { animation-delay: 0.4s; }
+.menu-item-delay-5 { animation-delay: 0.5s; }
+
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-90deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0);
+  }
+}
+
+.menu-button {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.menu-button-open {
+  animation: rotateIn 0.3s ease forwards;
+}
+
+.menu-button-closed {
+  opacity: 1;
+  transform: rotate(0);
+}

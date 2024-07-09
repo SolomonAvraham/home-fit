@@ -1,20 +1,39 @@
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/database";
-import User from "./User";
-import Workout from "./Workout";
+import { Workout, User } from ".";
+import Models from "../types/models";
 
-class Progress extends Model {
+export interface ProgressAttributes {
+  id?: string;
+  date: Date;
+  userId: string;
+  workoutId: string;
+  performanceMetrics: any;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface ProgressCreationAttributes
+  extends Optional<ProgressAttributes, "id"> {}
+
+class Progress
+  extends Model<ProgressAttributes, ProgressCreationAttributes>
+  implements ProgressAttributes
+{
   public id!: string;
   public date!: Date;
   public userId!: string;
   public workoutId!: string;
-  public performanceMetrics!: object;
+  public performanceMetrics!: any;
   public createdAt!: Date;
   public updatedAt!: Date;
 
-  static associate() {
-    Progress.belongsTo(User, { foreignKey: "userId", as: "user" });
-    Progress.belongsTo(Workout, { foreignKey: "workoutId", as: "workout" });
+  static associate(model: Models) {
+    Progress.belongsTo(model.User, { foreignKey: "userId", as: "user" });
+    Progress.belongsTo(model.Workout, {
+      foreignKey: "workoutId",
+      as: "workout",
+    });
   }
 }
 
@@ -36,8 +55,6 @@ Progress.init(
         model: User,
         key: "id",
       },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
     },
     workoutId: {
       type: DataTypes.UUID,
@@ -46,8 +63,6 @@ Progress.init(
         model: Workout,
         key: "id",
       },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
     },
     performanceMetrics: {
       type: DataTypes.JSON,
@@ -65,6 +80,7 @@ Progress.init(
   {
     sequelize,
     tableName: "progress",
+    timestamps: true,
   }
 );
 

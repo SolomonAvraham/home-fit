@@ -8,46 +8,88 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const Progress_1 = __importDefault(require("../models/Progress"));
+const index_1 = require("../models/index");
+const uuid_1 = require("uuid");
 class ProgressService {
     createProgress(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield Progress_1.default.create(data);
+            try {
+                const progress = yield index_1.Progress.create(data);
+                return progress;
+            }
+            catch (error) {
+                console.error("Create Progress Service Error:", error);
+                throw new Error("Failed to create progress");
+            }
         });
     }
     getProgressById(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield Progress_1.default.findByPk(id);
+            try {
+                if (!(0, uuid_1.validate)(id)) {
+                    throw new Error("Invalid UUID format");
+                }
+                const progress = yield index_1.Progress.findByPk(id);
+                if (!progress) {
+                    throw new Error("Progress not found");
+                }
+                return progress;
+            }
+            catch (error) {
+                console.error("Get Progress By ID Service Error:", error);
+                throw new Error("Failed to fetch progress");
+            }
         });
     }
     getAllProgress() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield Progress_1.default.findAll();
+            try {
+                const progress = yield index_1.Progress.findAll();
+                return progress;
+            }
+            catch (error) {
+                console.error("Get All Progress Service Error:", error);
+                throw new Error("Failed to fetch progress");
+            }
         });
     }
     updateProgress(id, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const progress = yield Progress_1.default.findByPk(id);
-            if (!progress) {
-                return null;
+            try {
+                if (!(0, uuid_1.validate)(id)) {
+                    throw new Error("Invalid UUID format");
+                }
+                const progress = yield index_1.Progress.findByPk(id);
+                if (!progress) {
+                    throw new Error("Progress not found");
+                }
+                const updatedProgress = yield progress.update(data);
+                return updatedProgress;
             }
-            return progress.update(data);
+            catch (error) {
+                console.error("Update Progress Service Error:", error);
+                throw new Error("Failed to update progress");
+            }
         });
     }
     deleteProgress(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield Progress_1.default.destroy({ where: { id } });
-        });
-    }
-    trackProgress(data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            // Example logic: Save progress data to the database
-            const progress = Object.assign({ id: 1 }, data); // Simulate database save
-            return progress;
+            try {
+                if (!(0, uuid_1.validate)(id)) {
+                    throw new Error("Invalid UUID format");
+                }
+                const progress = yield index_1.Progress.findByPk(id);
+                if (!progress) {
+                    return 0; // Indicate progress not found
+                }
+                yield progress.destroy();
+                return 1; // Indicate progress was deleted
+            }
+            catch (error) {
+                console.error("Delete Progress Service Error:", error);
+                throw new Error("Failed to delete progress");
+            }
         });
     }
 }

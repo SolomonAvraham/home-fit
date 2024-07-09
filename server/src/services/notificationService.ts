@@ -1,6 +1,6 @@
 import { v4 as uuidv4, validate as validateUUID } from "uuid";
 import Notification, { NotificationData } from "../models/Notification";
-import User from "../models/User";
+import { User } from "../models/index";
 
 class NotificationService {
   static async createNotification(data: NotificationData) {

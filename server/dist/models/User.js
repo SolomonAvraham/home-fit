@@ -5,14 +5,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
 const database_1 = __importDefault(require("../config/database"));
-const WorkoutPlan_1 = __importDefault(require("./WorkoutPlan"));
-const Progress_1 = __importDefault(require("./Progress"));
-const Notification_1 = __importDefault(require("./Notification"));
 class User extends sequelize_1.Model {
-    static associate() {
-        User.hasMany(WorkoutPlan_1.default, { foreignKey: "userId", as: "workouts" });
-        User.hasMany(Progress_1.default, { foreignKey: "userId", as: "progress" });
-        User.hasMany(Notification_1.default, { foreignKey: "userId", as: "notifications" });
+    static associate(models) {
+        User.hasMany(models.Workout, { foreignKey: "userId", as: "workouts" });
+        User.hasMany(models.Progress, { foreignKey: "userId", as: "progress" });
+        User.hasMany(models.Notification, {
+            foreignKey: "userId",
+            as: "notifications",
+        });
     }
 }
 User.init({
@@ -29,6 +29,11 @@ User.init({
         type: sequelize_1.DataTypes.STRING(255),
         allowNull: false,
         unique: true,
+        validate: {
+            isEmail: {
+                msg: "Must be a valid email address",
+            },
+        },
     },
     password: {
         type: sequelize_1.DataTypes.STRING(255),

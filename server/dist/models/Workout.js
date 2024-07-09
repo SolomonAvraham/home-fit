@@ -5,14 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
 const database_1 = __importDefault(require("../config/database"));
-const User_1 = __importDefault(require("./User"));
-const WorkoutPlan_1 = __importDefault(require("./WorkoutPlan"));
+const _1 = require(".");
 class Workout extends sequelize_1.Model {
-    static associate() {
-        Workout.belongsTo(User_1.default, { foreignKey: "userId", as: "user" });
-        Workout.belongsTo(WorkoutPlan_1.default, {
-            foreignKey: "workoutPlanId",
-            as: "workoutPlan",
+    static associate(model) {
+        Workout.belongsTo(model.User, { foreignKey: "userId", as: "user" });
+        Workout.hasMany(model.Exercise, {
+            foreignKey: "workoutId",
+            as: "exercises",
         });
     }
 }
@@ -34,17 +33,17 @@ Workout.init({
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,
         references: {
-            model: User_1.default,
+            model: _1.User,
             key: "id",
         },
     },
-    workoutPlanId: {
-        type: sequelize_1.DataTypes.UUID,
+    description: {
+        type: sequelize_1.DataTypes.TEXT,
         allowNull: false,
-        references: {
-            model: WorkoutPlan_1.default,
-            key: "id",
-        },
+    },
+    name: {
+        type: sequelize_1.DataTypes.STRING(255),
+        allowNull: false,
     },
     createdAt: {
         type: sequelize_1.DataTypes.DATE,

@@ -1,15 +1,19 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/database";
-
+import { Workout } from ".";
+import Models from "../types/models";
 
 export interface ExerciseAttributes {
   id?: string;
   name: string;
   description: string;
-  muscleGroup: string;
-  media: string;
+  duration?: string;
+  sets: string;
+  reps: string;
+  media?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  workoutId?: string;
 }
 
 export interface ExerciseCreationAttributes
@@ -22,12 +26,20 @@ class Exercise
   public id!: string;
   public name!: string;
   public description!: string;
-  public muscleGroup!: string;
-  public media!: string;
+  public duration?: string;
+  public sets!: string;
+  public reps!: string;
+  public media?: string;
+  public workoutId!: string;
   public createdAt!: Date;
   public updatedAt!: Date;
 
-  static associate() {}
+  static associate(model: Models) {
+    Exercise.belongsTo(model.Workout, {
+      foreignKey: "workoutId",
+      as: "workout",
+    });
+  }
 }
 
 Exercise.init(
@@ -45,13 +57,28 @@ Exercise.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    muscleGroup: {
-      type: DataTypes.STRING(255),
+    duration: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    sets: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    reps: {
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     media: {
       type: DataTypes.TEXT,
       allowNull: false,
+    },
+    workoutId: {
+      type: DataTypes.UUID,
+      references: {
+        model: Workout,
+        key: "id",
+      },
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -65,6 +92,7 @@ Exercise.init(
   {
     sequelize,
     tableName: "exercises",
+    timestamps: true,
   }
 );
 

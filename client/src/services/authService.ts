@@ -1,15 +1,16 @@
-import axios from "axios";
 import {
   APIError,
   LoginCredentials,
   RegisterCredentials,
   User,
 } from "../types/auth";
+import axiosInstance from "../utils/axiosInstance";
+import axios from "axios";
 
 export const login = async (credentials: LoginCredentials): Promise<User> => {
   try {
-    const response = await axios.post<User>(
-      `${process.env.NEXT_PUBLIC_LOCAL_SERVER_URL}/api/users/login`,
+    const response = await axiosInstance.post<User>(
+      `/api/users/login`,
       credentials,
       { withCredentials: true }
     );
@@ -31,10 +32,7 @@ export const login = async (credentials: LoginCredentials): Promise<User> => {
 
 export const logout = async (): Promise<void> => {
   try {
-    await axios.get(
-      `${process.env.NEXT_PUBLIC_LOCAL_SERVER_URL}/api/users/logout`,
-      { withCredentials: true }
-    );
+    await axiosInstance.get(`/api/users/logout`, { withCredentials: true });
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const apiError: APIError = {
@@ -54,8 +52,8 @@ export const register = async (
   credentials: RegisterCredentials
 ): Promise<any> => {
   try {
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_LOCAL_SERVER_URL}/api/users/register`,
+    const response = await axiosInstance.post(
+      `/api/users/register`,
       credentials
     );
     return response.data;

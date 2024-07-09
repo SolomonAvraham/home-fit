@@ -5,12 +5,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
 const database_1 = __importDefault(require("../config/database"));
-const User_1 = __importDefault(require("./User"));
-const Workout_1 = __importDefault(require("./Workout"));
+const _1 = require(".");
 class Progress extends sequelize_1.Model {
-    static associate() {
-        Progress.belongsTo(User_1.default, { foreignKey: "userId", as: "user" });
-        Progress.belongsTo(Workout_1.default, { foreignKey: "workoutId", as: "workout" });
+    static associate(model) {
+        Progress.belongsTo(model.User, { foreignKey: "userId", as: "user" });
+        Progress.belongsTo(model.Workout, {
+            foreignKey: "workoutId",
+            as: "workout",
+        });
     }
 }
 Progress.init({
@@ -27,21 +29,17 @@ Progress.init({
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,
         references: {
-            model: User_1.default,
+            model: _1.User,
             key: "id",
         },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
     },
     workoutId: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,
         references: {
-            model: Workout_1.default,
+            model: _1.Workout,
             key: "id",
         },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
     },
     performanceMetrics: {
         type: sequelize_1.DataTypes.JSON,
@@ -58,5 +56,6 @@ Progress.init({
 }, {
     sequelize: database_1.default,
     tableName: "progress",
+    timestamps: true,
 });
 exports.default = Progress;

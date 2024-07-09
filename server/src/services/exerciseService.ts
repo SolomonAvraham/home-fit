@@ -1,42 +1,76 @@
 import { validate as isValidUUID } from "uuid";
-import Exercise from "../models/Exercise";
+import { Exercise } from "../models/index";
 
-export default class ExerciseService {
+class ExerciseService {
   static async createExercise(data: any) {
-    return Exercise.create(data);
+    try {
+      const exercise = await Exercise.create(data);
+      return exercise;
+    } catch (error) {
+      console.error("Create Exercise Service Error:", error);
+      throw new Error("Failed to create exercise");
+    }
   }
 
   static async getAllExercises() {
-    return Exercise.findAll();
+    try {
+      const exercises = await Exercise.findAll();
+      return exercises;
+    } catch (error) {
+      console.error("Get All Exercises Service Error:", error);
+      throw new Error("Failed to fetch exercises");
+    }
   }
 
   static async getExerciseById(id: string) {
-    if (!isValidUUID(id)) {
-      throw new Error("Invalid UUID format");
+    try {
+      if (!isValidUUID(id)) {
+        throw new Error("Invalid UUID format");
+      }
+      const exercise = await Exercise.findByPk(id);
+      if (!exercise) {
+        throw new Error("Exercise not found");
+      }
+      return exercise;
+    } catch (error) {
+      console.error("Get Exercise By ID Service Error:", error);
+      throw new Error("Failed to fetch exercise");
     }
-    return Exercise.findByPk(id);
   }
 
   static async updateExercise(id: string, data: any) {
-    if (!isValidUUID(id)) {
-      throw new Error("Invalid UUID format");
+    try {
+      if (!isValidUUID(id)) {
+        throw new Error("Invalid UUID format");
+      }
+      const exercise = await Exercise.findByPk(id);
+      if (!exercise) {
+        throw new Error("Exercise not found");
+      }
+      const updatedExercise = await exercise.update(data);
+      return updatedExercise;
+    } catch (error) {
+      console.error("Update Exercise Service Error:", error);
+      throw new Error("Failed to update exercise");
     }
-    const exercise = await Exercise.findByPk(id);
-    if (!exercise) {
-      return null;
-    }
-    return exercise.update(data);
   }
 
   static async deleteExercise(id: string) {
-    if (!isValidUUID(id)) {
-      throw new Error("Invalid UUID format");
+    try {
+      if (!isValidUUID(id)) {
+        throw new Error("Invalid UUID format");
+      }
+      const exercise = await Exercise.findByPk(id);
+      if (!exercise) {
+        throw new Error("Exercise not found");
+      }
+      await exercise.destroy();
+      return exercise;
+    } catch (error) {
+      console.error("Delete Exercise Service Error:", error);
+      throw new Error("Failed to delete exercise");
     }
-    const exercise = await Exercise.findByPk(id);
-    if (!exercise) {
-      return null;
-    }
-    await exercise.destroy();
-    return exercise;
   }
 }
+
+export default ExerciseService;
