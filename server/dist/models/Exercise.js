@@ -5,8 +5,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
 const database_1 = __importDefault(require("../config/database"));
+const _1 = require(".");
 class Exercise extends sequelize_1.Model {
-    static associate() { }
+    static associate(model) {
+        Exercise.belongsTo(model.Workout, {
+            foreignKey: "workoutId",
+            as: "workout",
+        });
+    }
 }
 Exercise.init({
     id: {
@@ -22,13 +28,28 @@ Exercise.init({
         type: sequelize_1.DataTypes.TEXT,
         allowNull: false,
     },
-    muscleGroup: {
-        type: sequelize_1.DataTypes.STRING(255),
+    duration: {
+        type: sequelize_1.DataTypes.TEXT,
+        allowNull: false,
+    },
+    sets: {
+        type: sequelize_1.DataTypes.TEXT,
+        allowNull: false,
+    },
+    reps: {
+        type: sequelize_1.DataTypes.TEXT,
         allowNull: false,
     },
     media: {
         type: sequelize_1.DataTypes.TEXT,
         allowNull: false,
+    },
+    workoutId: {
+        type: sequelize_1.DataTypes.UUID,
+        references: {
+            model: _1.Workout,
+            key: "id",
+        },
     },
     createdAt: {
         type: sequelize_1.DataTypes.DATE,
@@ -41,5 +62,6 @@ Exercise.init({
 }, {
     sequelize: database_1.default,
     tableName: "exercises",
+    timestamps: true,
 });
 exports.default = Exercise;

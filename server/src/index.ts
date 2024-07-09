@@ -7,8 +7,7 @@ import {
   workoutRoute,
   progressRoutes,
   notificationRoutes,
-  workoutPlanRoutes,
-  exerciseRoutes,
+   exerciseRoutes,
 } from "./routes/index";
 import "../src/models/index";
 import cors from "cors";
@@ -41,12 +40,11 @@ app.use("/api/users", userRoute);
 
 app.use("/api/test", testRoutes);
 app.use(errorMiddleware);
-
+  
 app.use("/api/workouts", workoutRoute);
 app.use("/api/progress", progressRoutes);
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/workout-plans", workoutPlanRoutes);
-app.use("/api/exercises", exerciseRoutes);
+ app.use("/api/exercises", exerciseRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, world!");

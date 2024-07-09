@@ -4,37 +4,39 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable("notifications", {
       id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.fn("uuid_generate_v4"),
+        allowNull: false,
         primaryKey: true,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
       },
       userId: {
+        allowNull: false,
         type: Sequelize.UUID,
         references: {
           model: "users",
           key: "id",
         },
-        allowNull: false,
       },
       message: {
-        type: Sequelize.TEXT,
         allowNull: false,
+        type: Sequelize.TEXT,
       },
       read: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
       },
       createdAt: {
+        allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.fn("now"),
+        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
+        allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.fn("now"),
+        defaultValue: Sequelize.NOW,
       },
     });
   },
-
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable("notifications");
   },

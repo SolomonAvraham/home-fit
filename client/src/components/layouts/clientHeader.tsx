@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import axios from "axios";
 import { useMediaQuery } from "react-responsive";
 import { Bars3Icon } from "@heroicons/react/24/outline";
@@ -14,9 +13,12 @@ import {
   UserGroupIcon,
   ArrowRightCircleIcon,
   UserCircleIcon,
+  ArrowsPointingInIcon,
+  ArrowsPointingOutIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import { logout } from "@/services/authService";
+import Loading from "@/app/loading";
 
 interface ClientHeaderProps {
   initialIsLoggedIn: boolean;
@@ -28,6 +30,7 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const isMobile = useMediaQuery({ maxWidth: 768 });
+  const [isClient, setIsClient] = useState(false);
 
   const loginMutation = useMutationState({
     filters: { mutationKey: ["login"] },
@@ -38,17 +41,14 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
     mutationKey: ["logout"],
     mutationFn: logout,
     onSuccess: () => {
+      localStorage.removeItem("userId");
+      localStorage.removeItem("userName");
       router.push("/");
     },
     onError: (error) => {
       console.error("Logout failed:", error);
     },
   });
-
-  const handleLogout = async () => {
-    await logoutMutation.mutateAsync();
-    setIsLoggedIn(false);
-  };
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -64,12 +64,26 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
         }
       } catch (error: any) {
         console.error(error.message);
+
         setIsLoggedIn(false);
       }
     };
 
     checkAuthStatus();
   }, [loginMutation]);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return <Loading />;
+  }
+
+  const handleLogout = async () => {
+    await logoutMutation.mutateAsync();
+    setIsLoggedIn(false);
+  };
 
   const handleDrawerToggle = () => setDrawerOpen(!drawerOpen);
 
@@ -86,9 +100,19 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
       icon: <UserGroupIcon className="h-5 w-5" />,
     },
     {
+      text: "About",
+      path: "/about",
+      icon: <UserGroupIcon className="h-5 w-5" />,
+    },
+    {
+      text: "Sign Up",
+      path: "/auth/register",
+      icon: <ArrowRightCircleIcon className="h-5 w-5" />,
+    },
+    {
       text: "Login",
       path: "/auth/login",
-      icon: <ArrowRightCircleIcon className="h-5 w-5" />,
+      icon: <ArrowsPointingInIcon className="h-5 w-5" />,
     },
   ];
 
@@ -151,18 +175,22 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
       ))}
       {isLoggedIn && (
         <li
-          className={`${isMobile ? "w-full" : ""} ${
+          className={`${isMobile ? "w-full mx-auto" : ""} ${
             drawerOpen
-              ? `menu-item menu-item-delay-${menuItems.length + 1}`
+              ? `menu-item menu-item-delay-${menuItems.length + 1} `
               : ""
           }`}
         >
           <button
             onClick={handleLogout}
             disabled={logoutMutation.isPending}
-            className="flex flex-col font-semibold text-white"
+            className={` flex flex-col font-semibold text-white justify-center items-center   ${
+              isMobile
+                ? "text-center font-semibold text-4xl bg-slate-700 bg-opacity-20 w-full p-1 tracking-[0.2rem] "
+                : ""
+            } `}
           >
-            <ArrowRightCircleIcon className="h-5 w-5" />
+            <ArrowsPointingOutIcon className="h-5 w-5" />
             {logoutMutation.isPending ? "Logging out..." : "Logout"}
           </button>{" "}
         </li>
@@ -174,13 +202,11 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
     <header>
       <div className="navbar bg-slate-800 tracking-[0.2rem] h-[4.7rem] ">
         <div className="flex-1">
-          <Link href="/">
-            <Image src="/logo/logo.png" alt="logo" width={70} height={70} />
-          </Link>
+          <Logo w={70} h={70} />
         </div>
         <div className="flex-none">
           {isMobile ? (
-            <>
+            <div>
               <button
                 className="text-5xl text-white"
                 aria-label="menu"
@@ -208,7 +234,7 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
                   <Logo w={120} h={120} />
                 </div>
               )}
-            </>
+            </div>
           ) : (
             renderMenuItems
           )}

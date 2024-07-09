@@ -4,52 +4,47 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable("progress", {
       id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.literal("uuid_generate_v4()"),
-        primaryKey: true,
         allowNull: false,
+        primaryKey: true,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
       },
       date: {
-        type: Sequelize.DATE,
         allowNull: false,
+        type: Sequelize.DATE,
       },
       userId: {
+        allowNull: false,
         type: Sequelize.UUID,
         references: {
           model: "users",
           key: "id",
         },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-        allowNull: false,
       },
       workoutId: {
+        allowNull: false,
         type: Sequelize.UUID,
         references: {
           model: "workouts",
           key: "id",
         },
-        onDelete: "NO ACTION",
-        onUpdate: "CASCADE",
-        allowNull: false,
       },
       performanceMetrics: {
-        type: Sequelize.JSON,
         allowNull: false,
+        type: Sequelize.JSON,
       },
       createdAt: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn("now"),
         allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn("now"),
         allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
       },
     });
   },
-
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable("progress");
   },

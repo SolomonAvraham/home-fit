@@ -5,10 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
 const database_1 = __importDefault(require("../config/database"));
-const User_1 = __importDefault(require("./User"));
 class Notification extends sequelize_1.Model {
-    static associate() {
-        Notification.belongsTo(User_1.default, {
+    static associate(model) {
+        Notification.belongsTo(model.User, {
             foreignKey: "userId",
             as: "user",
         });

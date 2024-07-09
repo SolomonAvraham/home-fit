@@ -7,7 +7,7 @@ export default function Logo(props: { w: number; h: number }) {
       alt="logo"
       width={props.w}
       height={props.h}
-      priority
-    />
+      priority={false}
+     />
   );
 }

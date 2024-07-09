@@ -4,52 +4,51 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable("workouts", {
       id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.literal("uuid_generate_v4()"),
-        primaryKey: true,
         allowNull: false,
+        primaryKey: true,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
       },
       date: {
-        type: Sequelize.DATE,
         allowNull: false,
+        type: Sequelize.DATE,
       },
       duration: {
-        type: Sequelize.INTEGER,
         allowNull: false,
+        type: Sequelize.INTEGER,
       },
       userId: {
+        allowNull: false,
         type: Sequelize.UUID,
         references: {
           model: "users",
           key: "id",
         },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-        allowNull: false,
       },
-      workoutPlanId: {
-        type: Sequelize.UUID,
-        references: {
-          model: "workout_plans",
-          key: "id",
-        },
-        onDelete: "NO ACTION",
-        onUpdate: "CASCADE",
+      description: {
         allowNull: false,
+        type: Sequelize.TEXT,
+      },
+      name: {
+        allowNull: false,
+        type: Sequelize.STRING(255),
+      },
+      exercises: {
+        type: Sequelize.ARRAY(Sequelize.UUID),
+        allowNull: true,
       },
       createdAt: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn("now"),
         allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn("now"),
         allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
       },
     });
   },
-
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable("workouts");
   },

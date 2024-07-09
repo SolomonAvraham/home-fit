@@ -6,4 +6,3 @@ export default async function Header() {
 
   return <ClientHeader initialIsLoggedIn={isLoggedIn} />;
 }
-

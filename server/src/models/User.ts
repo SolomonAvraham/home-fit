@@ -1,8 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/database";
-import Workout from "./WorkoutPlan";
-import Progress from "./Progress";
-import Notification from "./Notification";
+import Models from "../types/models";
 
 export interface UserAttributes {
   id: string;
@@ -28,10 +26,13 @@ class User
   public createdAt!: Date;
   public updatedAt!: Date;
 
-  static associate() {
-    User.hasMany(Workout, { foreignKey: "userId", as: "workouts" });
-    User.hasMany(Progress, { foreignKey: "userId", as: "progress" });
-    User.hasMany(Notification, { foreignKey: "userId", as: "notifications" });
+  static associate(models: Models) {
+    User.hasMany(models.Workout, { foreignKey: "userId", as: "workouts" });
+    User.hasMany(models.Progress, { foreignKey: "userId", as: "progress" });
+    User.hasMany(models.Notification, {
+      foreignKey: "userId",
+      as: "notifications",
+    });
   }
 }
 

@@ -19,7 +19,9 @@ const LoginPage: React.FC = () => {
   const mutation = useMutation<User, APIError, LoginCredentials>({
     mutationKey: ["login"],
     mutationFn: login,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      localStorage.setItem("userId", data.id);
+      localStorage.setItem("userName", data.name);
       router.push("/");
     },
     onError: (error: APIError) => {

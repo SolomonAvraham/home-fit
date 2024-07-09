@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/database";
-import User from "./User";
+import Models from "../types/models";
 
 export interface NotificationData {
   userId: string;
@@ -37,8 +37,8 @@ class Notification
   public createdAt!: Date;
   public updatedAt!: Date;
 
-  static associate() {
-    Notification.belongsTo(User, {
+  static associate(model: Models) {
+    Notification.belongsTo(model.User, {
       foreignKey: "userId",
       as: "user",
     });

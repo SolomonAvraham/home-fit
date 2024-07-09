@@ -4,41 +4,40 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable("users", {
       id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.literal("uuid_generate_v4()"),
-        primaryKey: true,
         allowNull: false,
+        primaryKey: true,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
       },
       name: {
-        type: Sequelize.STRING,
         allowNull: false,
+        type: Sequelize.STRING(255),
       },
       email: {
-        type: Sequelize.STRING,
-        unique: true,
         allowNull: false,
+        unique: true,
+        type: Sequelize.STRING(255),
       },
       password: {
-        type: Sequelize.STRING,
         allowNull: false,
+        type: Sequelize.STRING(255),
       },
       role: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         defaultValue: "user",
       },
       createdAt: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn("now"),
         allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn("now"),
         allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
       },
     });
   },
-
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable("users");
   },

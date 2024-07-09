@@ -1,23 +1,26 @@
 import { Request, Response } from "express";
 import WorkoutService from "../services/workoutService";
-import Workout from "../models/Workout";
- import { v4 as uuidv4, validate as uuidValidate } from "uuid";
+import { v4 as uuidv4, validate as uuidValidate } from "uuid";
 
 class WorkoutController {
   public async createWorkout(req: Request, res: Response): Promise<Response> {
     try {
-      const { userId, workoutPlanId, date, duration } = req.body;
+      const { userId, date, duration, description, name, exercises } = req.body;
       console.log("Creating workout with data:", {
         userId,
-        workoutPlanId,
         date,
         duration,
+        description,
+        name,
+        exercises,
       });
       const workout = await WorkoutService.createWorkout({
         userId,
-        workoutPlanId,
         date,
         duration,
+        description,
+        name,
+        exercises,
       });
       return res.status(201).json(workout);
     } catch (error: any) {
@@ -34,7 +37,7 @@ class WorkoutController {
       if (!uuidValidate(id)) {
         return res.status(400).json({ message: "Invalid UUID format" });
       }
-      const workout = await Workout.findByPk(id);
+      const workout = await WorkoutService.getWorkoutById(id);
       if (!workout) {
         return res.status(404).json({ message: "Workout not found" });
       }
@@ -48,13 +51,12 @@ class WorkoutController {
 
   public async getAllWorkouts(req: Request, res: Response): Promise<Response> {
     try {
-      console.log("Fetching all workouts");
       const workouts = await WorkoutService.getAllWorkouts();
       return res.status(200).json(workouts);
     } catch (error: any) {
       console.error("Error in getAllWorkouts:", error.message);
       return res
-        .status(400)
+        .status(500)
         .json({ message: "Failed to get workouts", error: error.message });
     }
   }
@@ -65,12 +67,17 @@ class WorkoutController {
       if (!uuidValidate(id)) {
         return res.status(400).json({ message: "Invalid UUID format" });
       }
-      const { date, duration } = req.body;
-      const workout = await Workout.findByPk(id);
+      const { date, duration, description, name, exercises } = req.body;
+      const workout = await WorkoutService.updateWorkout(id, {
+        date,
+        duration,
+        description,
+        name,
+        exercises,
+      });
       if (!workout) {
         return res.status(404).json({ message: "Workout not found" });
       }
-      await workout.update({ date, duration });
       return res.status(200).json(workout);
     } catch (error: any) {
       return res
@@ -85,11 +92,10 @@ class WorkoutController {
       if (!uuidValidate(id)) {
         return res.status(400).json({ message: "Invalid UUID format" });
       }
-      const workout = await Workout.findByPk(id);
-      if (!workout) {
+      const result = await WorkoutService.deleteWorkout(id);
+      if (result === 0) {
         return res.status(404).json({ message: "Workout not found" });
       }
-      await workout.destroy();
       return res.status(204).send();
     } catch (error: any) {
       return res

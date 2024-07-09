@@ -13,80 +13,118 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const workoutService_1 = __importDefault(require("../services/workoutService"));
+const uuid_1 = require("uuid");
 class WorkoutController {
-    static createWorkout(req, res) {
+    createWorkout(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const workout = yield workoutService_1.default.createWorkout(req.body);
-                res.status(201).json(workout);
+                const { userId, date, duration, description, name, exercises } = req.body;
+                console.log("Creating workout with data:", {
+                    userId,
+                    date,
+                    duration,
+                    description,
+                    name,
+                    exercises,
+                });
+                const workout = yield workoutService_1.default.createWorkout({
+                    userId,
+                    date,
+                    duration,
+                    description,
+                    name,
+                    exercises,
+                });
+                return res.status(201).json(workout);
             }
             catch (error) {
-                if (error instanceof Error) {
-                    res.status(400).json({ error: error.message });
-                }
-                console.log(error);
+                console.error("Error in createWorkout:", error.message);
+                return res
+                    .status(400)
+                    .json({ message: "Failed to create workout", error: error.message });
             }
         });
     }
-    static getAllWorkouts(req, res) {
+    getWorkoutById(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { id } = req.params;
+                if (!(0, uuid_1.validate)(id)) {
+                    return res.status(400).json({ message: "Invalid UUID format" });
+                }
+                const workout = yield workoutService_1.default.getWorkoutById(id);
+                if (!workout) {
+                    return res.status(404).json({ message: "Workout not found" });
+                }
+                return res.status(200).json(workout);
+            }
+            catch (error) {
+                return res
+                    .status(400)
+                    .json({ message: "Failed to get workout", error: error.message });
+            }
+        });
+    }
+    getAllWorkouts(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const workouts = yield workoutService_1.default.getAllWorkouts();
-                res.status(200).json(workouts);
+                return res.status(200).json(workouts);
             }
             catch (error) {
-                if (error instanceof Error) {
-                    res.status(400).json({ error: error.message });
-                }
-                console.log(error);
+                console.error("Error in getAllWorkouts:", error.message);
+                return res
+                    .status(500)
+                    .json({ message: "Failed to get workouts", error: error.message });
             }
         });
     }
-    static getWorkoutById(req, res) {
+    updateWorkout(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const workout = yield workoutService_1.default.getWorkoutById(req.params.id);
+                const { id } = req.params;
+                if (!(0, uuid_1.validate)(id)) {
+                    return res.status(400).json({ message: "Invalid UUID format" });
+                }
+                const { date, duration, description, name, exercises } = req.body;
+                const workout = yield workoutService_1.default.updateWorkout(id, {
+                    date,
+                    duration,
+                    description,
+                    name,
+                    exercises,
+                });
                 if (!workout) {
                     return res.status(404).json({ message: "Workout not found" });
                 }
-                res.status(200).json(workout);
-            }
-            catch (error) { }
-        });
-    }
-    static updateWorkout(req, res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const workout = yield workoutService_1.default.updateWorkout(req.params.id, req.body);
-                if (!workout) {
-                    return res.status(404).json({ message: "Workout not found" });
-                }
-                res.status(200).json(workout);
+                return res.status(200).json(workout);
             }
             catch (error) {
-                if (error instanceof Error) {
-                    res.status(400).json({ error: error.message });
-                }
-                console.log(error);
+                return res
+                    .status(400)
+                    .json({ message: "Failed to update workout", error: error.message });
             }
         });
     }
-    static deleteWorkout(req, res) {
+    deleteWorkout(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const deleted = yield workoutService_1.default.deleteWorkout(req.params.id);
-                if (!deleted) {
+                const { id } = req.params;
+                if (!(0, uuid_1.validate)(id)) {
+                    return res.status(400).json({ message: "Invalid UUID format" });
+                }
+                const result = yield workoutService_1.default.deleteWorkout(id);
+                if (result === 0) {
                     return res.status(404).json({ message: "Workout not found" });
                 }
-                res.status(204).json();
+                return res.status(204).send();
             }
             catch (error) {
-                if (error instanceof Error) {
-                    res.status(400).json({ error: error.message });
-                }
-                console.log(error);
+                return res
+                    .status(400)
+                    .json({ message: "Failed to delete workout", error: error.message });
             }
         });
     }
 }
-exports.default = WorkoutController;
+exports.default = new WorkoutController();

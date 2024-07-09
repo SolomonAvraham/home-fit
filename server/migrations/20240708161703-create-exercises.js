@@ -4,37 +4,47 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable("exercises", {
       id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.fn("uuid_generate_v4"),
+        allowNull: false,
         primaryKey: true,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
       },
       name: {
-        type: Sequelize.STRING(255),
         allowNull: false,
+        type: Sequelize.STRING(255),
       },
       description: {
+        allowNull: false,
         type: Sequelize.TEXT,
-        allowNull: false,
       },
-      muscleGroup: {
-        type: Sequelize.STRING(255),
+      duration: {
         allowNull: false,
+        type: Sequelize.TEXT,
+      },
+      sets: {
+        allowNull: false,
+        type: Sequelize.TEXT,
+      },
+      reps: {
+        allowNull: false,
+        type: Sequelize.TEXT,
       },
       media: {
+        allowNull: false,
         type: Sequelize.TEXT,
-        allowNull: true,
       },
       createdAt: {
+        allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.fn("now"),
+        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
+        allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.fn("now"),
+        defaultValue: Sequelize.NOW,
       },
     });
   },
-
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable("exercises");
   },

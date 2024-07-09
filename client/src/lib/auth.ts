@@ -14,8 +14,9 @@ export async function getAuthStatus() {
       token.value,
       new TextEncoder().encode(process.env.JWT_SECRET)
     );
+
     return true;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("JWT Verification Error:", error);
     return false;
   }
