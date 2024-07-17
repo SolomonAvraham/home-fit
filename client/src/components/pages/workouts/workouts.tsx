@@ -6,6 +6,7 @@ import WorkoutCard from "@/components/ui/cards/workoutCard";
 
 const Workouts = () => {
   const { data } = UseWorkoutQuery();
+  console.log("🚀 ~ Workouts ~ data:", data)
 
   return (
     <div className="container mx-auto p-4 min-h-screen">

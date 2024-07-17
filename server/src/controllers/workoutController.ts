@@ -5,14 +5,13 @@ import { v4 as uuidv4, validate as uuidValidate } from "uuid";
 class WorkoutController {
   public async createWorkout(req: Request, res: Response): Promise<Response> {
     try {
-      const { userId, date, duration, description, name, exercises } = req.body;
+      const { userId, date, duration, description, name } = req.body;
       console.log("Creating workout with data:", {
         userId,
         date,
         duration,
         description,
         name,
-        exercises,
       });
       const workout = await WorkoutService.createWorkout({
         userId,
@@ -20,7 +19,6 @@ class WorkoutController {
         duration,
         description,
         name,
-        exercises,
       });
       return res.status(201).json(workout);
     } catch (error: any) {

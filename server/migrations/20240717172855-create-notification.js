@@ -1,8 +1,7 @@
 "use strict";
-
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("notifications", {
+    await queryInterface.createTable("Notifications", {
       id: {
         allowNull: false,
         primaryKey: true,
@@ -10,15 +9,14 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
       },
       userId: {
-        allowNull: false,
         type: Sequelize.UUID,
         references: {
-          model: "users",
+          model: "Users",
           key: "id",
         },
+        onDelete: "CASCADE",
       },
       message: {
-        allowNull: false,
         type: Sequelize.TEXT,
       },
       read: {
@@ -28,16 +26,14 @@ module.exports = {
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
       },
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("notifications");
+    await queryInterface.dropTable("Notifications");
   },
 };

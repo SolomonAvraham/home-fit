@@ -3,16 +3,9 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
+import { ExerciseAttributes } from "@/types/exercise";
 
-interface ExerciseAttributes {
-  id: string;
-  name: string;
-  sets?: number;
-  reps?: number;
-  duration?: string;
-  description: string;
-  media: string;
-}
+
 
 export default function WorkoutCard({ workout }: any) {
   const router = useRouter();
@@ -32,10 +25,13 @@ export default function WorkoutCard({ workout }: any) {
     return router.push(`/workouts/${id}`);
   };
   return (
-    <div
-      className="card w-96 bg-base-100 shadow-xl m-4 cursor-pointer"
-      onClick={() => getWorkout(workout.id)}
-    >
+    <div className="card w-96 bg-base-100 shadow-xl m-4">
+      <button
+        onClick={() => getWorkout(workout.id)}
+        className=" cursor-pointer bg-gray-500 p-3 w-1/2 mx-auto  rounded-xl text-center mt-10 text-xl text-white"
+      >
+        WORKOUT
+      </button>
       <div className="card-body">
         <h2 className="card-title">{workout.name}</h2>
         <p>Date: {format(new Date(workout.date), "MMMM d, yyyy")}</p>

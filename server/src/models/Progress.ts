@@ -1,7 +1,7 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/database";
 import { Workout, User } from ".";
-import Models from "../types/models";
+import { ProgressAssociate } from "../types/models";
 
 export interface ProgressAttributes {
   id?: string;
@@ -28,7 +28,7 @@ class Progress
   public createdAt!: Date;
   public updatedAt!: Date;
 
-  static associate(model: Models) {
+  static associate(model: ProgressAssociate) {
     Progress.belongsTo(model.User, { foreignKey: "userId", as: "user" });
     Progress.belongsTo(model.Workout, {
       foreignKey: "workoutId",

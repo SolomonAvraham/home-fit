@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/database";
-import {  User } from ".";
-import Models from "../types/models";
+import { User } from ".";
+import { WorkoutAssociate } from "../types/models";
 
 class Workout extends Model {
   public id!: string;
@@ -13,10 +13,12 @@ class Workout extends Model {
   public createdAt!: Date;
   public updatedAt!: Date;
 
-  static associate(model: Models) {
+  static associate(model: WorkoutAssociate) {
     Workout.belongsTo(model.User, { foreignKey: "userId", as: "user" });
-    Workout.hasMany(model.Exercise, {
+    Workout.belongsToMany(model.Exercise, {
+      through: model.Workout_exercises,
       foreignKey: "workoutId",
+      otherKey: "exerciseId",
       as: "exercises",
     });
   }

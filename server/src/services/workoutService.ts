@@ -9,7 +9,6 @@ class WorkoutService {
     userId: string;
     description: string;
     name: string;
-    exercises: string[];
   }) {
     try {
       const workoutData = {
@@ -21,33 +20,6 @@ class WorkoutService {
     } catch (error) {
       console.error("Create Workout Service Error:", error);
       throw new Error("Failed to create workout");
-    }
-  }
-
-  async getWorkoutById(id: string) {
-    try {
-      console.log("Service: Fetching workout by ID:", id);
-      const workout = await Workout.findByPk(id, {
-        include: [
-          {
-            model: User,
-            as: "user",
-            attributes: ["id", "name"],
-          },
-          {
-            model: Exercise,
-            as: "exercises",
-            attributes: ["id", "name", "sets", "reps", "duration"],
-          },
-        ],
-      });
-      if (!workout) {
-        throw new Error("Workout not found");
-      }
-      return workout;
-    } catch (error) {
-      console.error("Get Workout By ID Service Error:", error);
-      throw new Error("Workout not found");
     }
   }
 
@@ -63,6 +35,7 @@ class WorkoutService {
           {
             model: Exercise,
             as: "exercises",
+            through: { attributes: [] },
             attributes: [
               "id",
               "name",
@@ -107,6 +80,33 @@ class WorkoutService {
     } catch (error) {
       console.error("Get All Workouts Service Error:", error);
       throw new Error("Failed to fetch workouts");
+    }
+  }
+
+  async getWorkoutById(id: string) {
+    try {
+      console.log("Service: Fetching workout by ID:", id);
+      const workout = await Workout.findByPk(id, {
+        include: [
+          {
+            model: User,
+            as: "user",
+            attributes: ["id", "name"],
+          },
+          {
+            model: Exercise,
+            as: "exercises",
+            attributes: ["id", "name", "sets", "reps", "duration"],
+          },
+        ],
+      });
+      if (!workout) {
+        throw new Error("Workout not found");
+      }
+      return workout;
+    } catch (error) {
+      console.error("Get Workout By ID Service Error:", error);
+      throw new Error("Workout not found");
     }
   }
 

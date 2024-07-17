@@ -1,10 +1,16 @@
 import { validate as isValidUUID } from "uuid";
-import { Exercise } from "../models/index";
+import { Exercise, Workout_exercises } from "../models/index";
+import { ExerciseAttributes } from "../types/models";
 
 class ExerciseService {
-  static async createExercise(data: any) {
+  static async createExercise(data: ExerciseAttributes) {
     try {
       const exercise = await Exercise.create(data);
+      await Workout_exercises.create({
+        workoutId: data.workoutId,
+        exerciseId: exercise.id,
+      });
+
       return exercise;
     } catch (error) {
       console.error("Create Exercise Service Error:", error);

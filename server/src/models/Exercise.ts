@@ -1,20 +1,9 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/database";
 import { Workout } from ".";
-import Models from "../types/models";
+import { ExerciseAssociate, ExerciseAttributes } from "../types/models";
 
-export interface ExerciseAttributes {
-  id?: string;
-  name: string;
-  description: string;
-  duration?: string;
-  sets: string;
-  reps: string;
-  media?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  workoutId?: string;
-}
+
 
 export interface ExerciseCreationAttributes
   extends Optional<ExerciseAttributes, "id"> {}
@@ -34,10 +23,12 @@ class Exercise
   public createdAt!: Date;
   public updatedAt!: Date;
 
-  static associate(model: Models) {
-    Exercise.belongsTo(model.Workout, {
-      foreignKey: "workoutId",
-      as: "workout",
+  static associate(model: ExerciseAssociate) {
+    Exercise.belongsToMany(model.Workout, {
+      through: model.Workout_exercises,
+      foreignKey: "exerciseId",
+      otherKey: "workoutId",
+      as: "workouts",
     });
   }
 }

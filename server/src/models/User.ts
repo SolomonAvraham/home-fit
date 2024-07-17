@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/database";
-import Models from "../types/models";
+import { UserAssociate } from "../types/models";
 
 export interface UserAttributes {
   id: string;
@@ -26,7 +26,7 @@ class User
   public createdAt!: Date;
   public updatedAt!: Date;
 
-  static associate(models: Models) {
+  static associate(models: UserAssociate) {
     User.hasMany(models.Workout, { foreignKey: "userId", as: "workouts" });
     User.hasMany(models.Progress, { foreignKey: "userId", as: "progress" });
     User.hasMany(models.Notification, {
