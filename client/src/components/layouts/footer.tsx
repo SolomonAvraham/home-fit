@@ -1,13 +1,14 @@
 import Link from "next/link";
 import {
-  HomeIcon,
-  InformationCircleIcon,
-  WrenchScrewdriverIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  MapPinIcon,
-  AtSymbolIcon,
-} from "@heroicons/react/24/solid";
+  FaHome,
+  FaInfoCircle,
+  FaTools,
+  FaEnvelope,
+  FaPhone,
+  FaMapMarkerAlt,
+  FaAt,
+} from "react-icons/fa";
+
 
 const Footer = () => {
   return (
@@ -15,38 +16,38 @@ const Footer = () => {
       <div>
         <span className="footer-title">Quick Links</span>
         <Link href="/" className="link link-hover flex items-center">
-          <HomeIcon className="h-4 w-4 mr-2" />
+          <FaHome className="h-4 w-4 mr-2" />
           Home
         </Link>
         <Link href="/about" className="link link-hover flex items-center">
-          <InformationCircleIcon className="h-4 w-4 mr-2" />
+          <FaInfoCircle className="h-4 w-4 mr-2" />
           About
         </Link>
         <Link href="/services" className="link link-hover flex items-center">
-          <WrenchScrewdriverIcon className="h-4 w-4 mr-2" />
+          <FaTools className="h-4 w-4 mr-2" />
           Services
         </Link>
         <Link href="/contact" className="link link-hover flex items-center">
-          <EnvelopeIcon className="h-4 w-4 mr-2" />
+          <FaEnvelope className="h-4 w-4 mr-2" />
           Contact
         </Link>
       </div>
       <div>
         <span className="footer-title">Contact Us</span>
         <p className="flex items-center">
-          <MapPinIcon className="h-4 w-4 mr-2" />
+          <FaMapMarkerAlt className="h-4 w-4 mr-2" />
           123 Main Street
         </p>
         <p className="flex items-center">
-          <MapPinIcon className="h-4 w-4 mr-2" />
+          <FaMapMarkerAlt className="h-4 w-4 mr-2" />
           City, State 12345
         </p>
         <p className="flex items-center">
-          <PhoneIcon className="h-4 w-4 mr-2" />
+          <FaPhone className="h-4 w-4 mr-2" />
           (123) 456-7890
         </p>
         <p className="flex items-center">
-          <AtSymbolIcon className="h-4 w-4 mr-2" />
+          <FaAt className="h-4 w-4 mr-2" />
           info@example.com
         </p>
       </div>

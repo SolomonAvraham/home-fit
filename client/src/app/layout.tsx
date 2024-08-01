@@ -1,7 +1,7 @@
 import "./globals.css";
 import Providers from "@/QueryClientProvider";
 import Footer from "@/components/layouts/footer";
-import Header from "@/components/layouts/header";
+import Header from "@/components/layouts/header/header";
 
 export const metadata = {
   title: "HomeWorkout",
@@ -16,15 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link
-          rel="icon"
-          href="/logo/logo.png"
-          type="image/png"
-          sizes="50*50"
-          
-        />
+        <link rel="icon" href="/logo/logo.png" type="image/png" sizes="50*50" />
       </head>
-      <body className=" bg-gray-300">
+      <body className=" bg-gray-300  ">
         <Providers>
           {" "}
           <Header />

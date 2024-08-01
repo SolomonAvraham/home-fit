@@ -1,21 +1,147 @@
-import { Exercise, User } from "../models/index";
-import Workout from "../models/Workout";
+import { Exercise, User, Workout } from "../models/index";
 import { v4 as uuidv4 } from "uuid";
+import { ExerciseAttributes, WorkoutAttributes } from "../types/models";
+import formatMinutesToHours from "../utils/formatMinutesToHours";
+
+type CreatedByType = {
+  creatorId: string;
+  creatorName: string;
+  originalWorkoutId?: string;
+};
 
 class WorkoutService {
-  async createWorkout(data: {
-    date: Date;
-    duration: number;
-    userId: string;
-    description: string;
-    name: string;
-  }) {
+  async addWorkout(workoutId: string, userId: string) {
     try {
-      const workoutData = {
+      const workout = await Workout.findByPk(workoutId, {
+        include: [
+          {
+            model: User,
+            as: "user",
+            attributes: ["id", "name"],
+          },
+          {
+            model: Exercise,
+            as: "exercises",
+            through: { attributes: [] },
+            attributes: [
+              "id",
+              "name",
+              "sets",
+              "reps",
+              "duration",
+              "description",
+              "media",
+            ],
+          },
+        ],
+        limit: 10,
+        order: [["createdAt", "DESC"]],
+      });
+
+      if (!workout) {
+        throw new Error("Workout not found");
+      }
+
+      const newWorkout = await Workout.create({
+        ...workout.toJSON(),
         id: uuidv4(),
-        ...data,
-      };
-      const workout = await Workout.create(workoutData);
+        userId,
+      });
+
+      return newWorkout;
+    } catch (error) {
+      console.error("Create Workout Service Error:", error);
+      throw new Error("Failed to create workout");
+    }
+  }
+
+  async getWorkoutsByUserId(userId: string) {
+    try {
+      const workouts = await Workout.findAll({
+        where: { userId },
+        include: [
+          {
+            model: User,
+            as: "user",
+            attributes: ["id", "name"],
+          },
+          {
+            model: Exercise,
+            as: "exercises",
+            through: { attributes: [] },
+            attributes: [
+              "id",
+              "name",
+              "sets",
+              "reps",
+              "duration",
+              "description",
+              "media",
+            ],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+      });
+
+      const formattedWorkouts = workouts.map((workout) => {
+        const workoutJSON = workout.toJSON();
+
+        const totalDuration =
+          workoutJSON.exercises?.reduce(
+            (total, exercise) => total + (exercise.duration || 0),
+            0
+          ) ?? 0;
+
+        const formattedTime = formatMinutesToHours(totalDuration);
+
+        return {
+          id: workoutJSON.id,
+          duration: formattedTime,
+          userId: workoutJSON.userId,
+          userName: workoutJSON.user?.name,
+          description: workoutJSON.description,
+          name: workoutJSON.name,
+          createdBy: workoutJSON.createdBy.map((creator) => ({
+            creatorId: creator.creatorId,
+            creatorName: creator.creatorName,
+          })),
+          exercises:
+            workoutJSON.exercises?.map((exercise: Exercise) => ({
+              id: exercise.id,
+              name: exercise.name,
+              sets: exercise.sets,
+              reps: exercise.reps,
+              duration: exercise.duration,
+              media: exercise.media,
+              description: exercise.description,
+            })) || [],
+          createdAt: workoutJSON.createdAt,
+          updatedAt: workoutJSON.updatedAt,
+        };
+      });
+
+      return formattedWorkouts;
+    } catch (error) {
+      console.error("Get Workouts By User ID Service Error:", error);
+      throw new Error("Failed to fetch workouts");
+    }
+  }
+
+  async createWorkout(workoutData: WorkoutAttributes) {
+    try {
+      const id = uuidv4();
+
+      const workout = await Workout.create({
+        ...workoutData,
+        id,
+        createdBy: [
+          {
+            creatorName: workoutData.createdBy[0]?.creatorName,
+            creatorId: workoutData.userId,
+            originalWorkoutId: id,
+          },
+        ],
+      });
       return workout;
     } catch (error) {
       console.error("Create Workout Service Error:", error);
@@ -47,22 +173,48 @@ class WorkoutService {
             ],
           },
         ],
-        limit: 10,
         order: [["createdAt", "DESC"]],
       });
 
-      const formattedWorkouts = workouts.map((workout) => {
-        const workoutJSON = workout.toJSON();
+      const workoutMap = new Map<string, boolean>();
+      const uniqueWorkouts: Workout[] = [];
+
+      workouts.forEach((workout: Workout) => {
+        const workoutJSON = workout.toJSON() as WorkoutAttributes;
+        const key =
+          workoutJSON.createdBy[0]?.originalWorkoutId || workoutJSON.id;
+        if (!workoutMap.has(key)) {
+          workoutMap.set(key, true);
+          uniqueWorkouts.push(workout);
+        }
+      });
+
+      const formattedWorkouts = uniqueWorkouts.map((workout: Workout) => {
+        const workoutJSON = workout.toJSON() as WorkoutAttributes;
+
+        const totalDuration =
+          workoutJSON.exercises?.reduce(
+            (total: number, exercise: ExerciseAttributes) =>
+              total + (exercise.duration || 0),
+            0
+          ) ?? 0;
+
+        const formattedTime = formatMinutesToHours(totalDuration);
+
         return {
           id: workoutJSON.id,
-          date: workoutJSON.date,
-          duration: workoutJSON.duration,
+          duration: formattedTime,
           userId: workoutJSON.userId,
           userName: workoutJSON.user?.name,
           description: workoutJSON.description,
           name: workoutJSON.name,
+          createdBy: workoutJSON.createdBy.map((user: CreatedByType) => ({
+            creatorId: user.creatorId,
+            creatorName: user.creatorName,
+            originalWorkoutId: user.originalWorkoutId,
+          })),
           exercises:
-            workoutJSON.exercises?.map((exercise: Exercise) => ({
+            workoutJSON.exercises?.map((exercise: ExerciseAttributes) => ({
               id: exercise.id,
               name: exercise.name,
               sets: exercise.sets,
@@ -85,7 +237,6 @@ class WorkoutService {
 
   async getWorkoutById(id: string) {
     try {
-      console.log("Service: Fetching workout by ID:", id);
       const workout = await Workout.findByPk(id, {
         include: [
           {
@@ -100,9 +251,22 @@ class WorkoutService {
           },
         ],
       });
+
       if (!workout) {
         throw new Error("Workout not found");
       }
+      const workoutJSON = workout.toJSON();
+
+      const totalDuration =
+        workoutJSON.exercises?.reduce(
+          (total, exercise) => total + (exercise.duration || 0),
+          0
+        ) ?? 0;
+
+      const formattedTime = formatMinutesToHours(totalDuration);
+
+      workout.duration = formattedTime;
+
       return workout;
     } catch (error) {
       console.error("Get Workout By ID Service Error:", error);
@@ -110,24 +274,20 @@ class WorkoutService {
     }
   }
 
-  async updateWorkout(
-    id: string,
-    data: Partial<{
-      date: Date;
-      duration: number;
-      userId: string;
-      description: string;
-      name: string;
-      exercises: string[];
-    }>
-  ) {
+  async updateWorkout(id: string, data: Partial<WorkoutAttributes>) {
+    console.log(id, data);
+
     try {
       console.log("Service: Updating workout with ID:", id, "with data:", data);
+
       const workout = await Workout.findByPk(id);
+
       if (!workout) {
         throw new Error("Workout not found");
       }
+
       await workout.update(data);
+
       return workout;
     } catch (error) {
       console.error("Update Workout Service Error:", error);

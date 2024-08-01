@@ -1,9 +1,13 @@
-export interface ExerciseAttributes {
-  id: string;
+export type ExerciseAttributes = {
+  id?: string;
   name: string;
+  description: string;
+  duration?: number;
   sets?: number;
   reps?: number;
-  duration?: string;
-  description: string;
-  media: string;
-}
+  media?: string;
+  userId: string;
+  workoutId?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+};

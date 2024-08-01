@@ -1,12 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
-import { register } from "@/services/authService";
-import { RegisterCredentials, User, APIError } from "@/types/auth";
+import { UseRegisterMutation } from "@/lib/queries";
 import Link from "next/link";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { FaUserCircle } from "react-icons/fa";
 
 const RegisterPage: React.FC = () => {
   const [name, setName] = useState<string>("");
@@ -16,19 +13,8 @@ const RegisterPage: React.FC = () => {
   const [nameError, setNameError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const router = useRouter();
 
-  const mutation = useMutation<User, APIError, RegisterCredentials>({
-    mutationKey: ["register"],
-    mutationFn: register,
-    onSuccess: () => {
-      router.push("/auth/login");
-    },
-    onError: (error) => {
-      setError(error.message);
-    },
-  });
-
+  const registerMutation = UseRegisterMutation(setError);
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -71,7 +57,7 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
-    mutation.mutate({ name, email, password });
+    registerMutation.mutate({ name, email, password });
   };
 
   return (
@@ -81,7 +67,7 @@ const RegisterPage: React.FC = () => {
           <div className="flex justify-center mb-4">
             <div className="avatar">
               <div className="w-24  rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                <UserCircleIcon className="text-black " />
+                <FaUserCircle className="text-8xl text-black" />
               </div>
             </div>
           </div>
@@ -129,7 +115,7 @@ const RegisterPage: React.FC = () => {
             </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <button type="submit" className="btn btn-primary w-full">
-              {mutation.isPending ? "Signing up..." : "Sign Up"}
+              {registerMutation.isPending ? "Signing up..." : "Sign Up"}
             </button>
             <div className="flex justify-between mt-4">
               <Link href="/auth/login" className="link link-primary">

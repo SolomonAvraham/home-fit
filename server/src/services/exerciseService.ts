@@ -6,10 +6,13 @@ class ExerciseService {
   static async createExercise(data: ExerciseAttributes) {
     try {
       const exercise = await Exercise.create(data);
-      await Workout_exercises.create({
-        workoutId: data.workoutId,
-        exerciseId: exercise.id,
-      });
+
+      if (data.workoutId) {
+        await Workout_exercises.create({
+          workoutId: data.workoutId,
+          exerciseId: exercise.id,
+        });
+      }
 
       return exercise;
     } catch (error) {

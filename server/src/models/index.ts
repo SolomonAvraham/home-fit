@@ -1,46 +1,39 @@
 import User from "./User";
 import Workout from "./Workout";
 import Exercise from "./Exercise";
-import Progress from "./Progress";
-import Notification from "./Notification";
 import sequelize from "../config/database";
 import Workout_exercises from "./Workout_exercises";
+import ScheduledWorkout from "./ScheduledWorkout";
 
 User.associate({
   Workout,
-  Progress,
-  Notification,
+  Exercise,
+  ScheduledWorkout,
 });
 
 Workout.associate({
   User,
-  Notification,
   Exercise,
   Workout_exercises,
+  ScheduledWorkout,
 });
 
 Exercise.associate({
+  User,
   Workout,
   Workout_exercises,
 });
 
-Progress.associate({
+ScheduledWorkout.associate({
   User,
   Workout,
 });
-
-Notification.associate({
-  User,
-});
-
- 
 
 export {
   sequelize,
   User,
   Workout,
   Exercise,
-  Progress,
-  Notification,
   Workout_exercises,
+  ScheduledWorkout,
 };

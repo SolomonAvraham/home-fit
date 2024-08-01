@@ -1,37 +1,28 @@
 import {
   User,
   Workout,
-  Progress,
-  Notification,
   Exercise,
   Workout_exercises,
+  ScheduledWorkout,
 } from "../../models";
 
 export type UserAssociate = {
-  Progress: typeof Progress;
   Workout: typeof Workout;
-  Notification: typeof Notification;
+  Exercise: typeof Exercise;
+  ScheduledWorkout: typeof ScheduledWorkout;
 };
 
 export type WorkoutAssociate = {
   User: typeof User;
   Exercise: typeof Exercise;
-  Notification: typeof Notification;
   Workout_exercises: typeof Workout_exercises;
+  ScheduledWorkout: typeof ScheduledWorkout;
 };
 
 export type ExerciseAssociate = {
+  User: typeof User;
   Workout: typeof Workout;
   Workout_exercises: typeof Workout_exercises;
-};
-
-export type ProgressAssociate = {
-  Workout: typeof Workout;
-  User: typeof User;
-};
-
-export type NotificationAssociate = {
-  User: typeof User;
 };
 
 export type WorkoutExercisesAssociate = {
@@ -39,15 +30,59 @@ export type WorkoutExercisesAssociate = {
   Exercise: typeof Exercise;
 };
 
+export type ScheduledWorkoutAssociate = {
+  Workout: typeof Workout;
+  User: typeof User;
+};
+
 export type ExerciseAttributes = {
-  id?: string;
+  id: string;
+  name: string;
+  description: string;
+  duration?: number;
+  sets?: number;
+  reps?: number;
+  media?: string;
+  userId: string;
+  workoutId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type WorkoutAttributes = {
+  id: string;
   name: string;
   description: string;
   duration?: string;
-  sets: string;
-  reps: string;
-  media?: string;
-  createdAt: Date;
+  userId: string;
+  user?: User;
+  exercises?: Exercise[];
+  createdBy: {
+    creatorId: string;
+    creatorName: string;
+    originalWorkoutId?: string;
+  }[];
+  createdAt?: Date;
   updatedAt?: Date;
+};
+
+export type UserAttributes = {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role?: string;
+  token?: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type ScheduledWorkoutAttributes = {
+  id: string;
+  userId: string;
   workoutId: string;
+  scheduledDate: Date;
+  isDone: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 };
