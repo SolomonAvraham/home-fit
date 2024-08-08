@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ExerciseAttributes } from "@/types/exercise";
 import { WorkoutProps } from "@/types/workout";
-import { UseAddWorkoutMutation, UseDeleteWorkoutMutation } from "@/lib/queries";
-import useUserStore from "@/store/useUserStore";
+import { UseDeleteWorkoutMutation } from "@/lib/queries";
+import useUserStore from "@/store/userStore";
+import AddWorkoutButton from "../buttons/addWorkout";
+import useConfirmStore from "@/store/confirmStore";
 
 export default function WorkoutCard({
   workout,
@@ -16,9 +18,10 @@ export default function WorkoutCard({
 }) {
   const router = useRouter();
   const { user } = useUserStore();
+  const { triggerConfirm, confirm, message, setConfirm, data } =
+    useConfirmStore();
 
   const deleteWorkoutMutation = UseDeleteWorkoutMutation();
-  const addWorkoutMutation = UseAddWorkoutMutation();
 
   const [showDetails, setShowDetails] = useState(false);
 
@@ -48,12 +51,6 @@ export default function WorkoutCard({
       className: "btn btn-success",
       action: "addExercise",
     },
-    {
-      name: "viewUnsigned",
-      label: "Add Workout",
-      className: "btn btn-success",
-      action: "addWorkout",
-    },
   ];
 
   const getYoutubeEmbedUrl = (url: string) => {
@@ -68,7 +65,13 @@ export default function WorkoutCard({
   const handleOperation = async (id: string, action: string) => {
     switch (action) {
       case "delete":
-        await deleteWorkoutMutation.mutateAsync(id);
+        triggerConfirm(
+          "Are you sure you want to delete this workout?",
+          { id },
+          async () => {
+            await deleteWorkoutMutation.mutateAsync(id);
+          }
+        );
         break;
       case "edit":
         router.push(`/dashboard/workouts/edit/${id}`);
@@ -82,14 +85,10 @@ export default function WorkoutCard({
       case "addExercise":
         router.push(`/dashboard/workouts/addExercise/${id}`);
         break;
-      case "addWorkout":
-        await addWorkoutMutation.mutateAsync({
-          workoutId: id,
-          userId: user?.id || "",
-        });
 
       default:
-        console.error("Unknown operation:", action);
+        console.log("Unknown operation:", action);
+        break;
     }
   };
 
@@ -106,7 +105,7 @@ export default function WorkoutCard({
                 onClick={() =>
                   handleOperation(workout.id as string, option.action)
                 }
-                className={option.className}
+                className={`${option.className} disabled:text-gray-400 disabled:bg-gray-700 disabled:cursor-not-allowed`}
               >
                 {option.label}
               </button>
@@ -171,13 +170,25 @@ export default function WorkoutCard({
   return (
     <div className="card w-96 bg-base-100 shadow-xl m-4">
       <div className="card-body items-center justify-center text-center">
-        <>Created by: {workout.createdBy?.[0]?.creatorName}</>
+        <h4 className="font-semibold text-gray-300 capitalize  ">
+          Created By:{" "}
+          {workout.createdBy?.[0]?.creatorId !== user?.id
+            ? workout.createdBy?.[0]?.creatorName
+            : "You"}
+        </h4>
+
         <h2 className="card-title">{workout.name}</h2>
         <p>Duration: {workout.duration}</p>
 
         <p className="text-sm">Description: {workout.description}</p>
         <div className="card-actions justify-center">
-          {renderButtons()}
+          {renderButtons()}{" "}
+          {user && operation !== "view" && (
+            <AddWorkoutButton
+              workoutId={workout.id as string}
+              userId={user.id}
+            />
+          )}
           <button
             onClick={() => setShowDetails(!showDetails)}
             className="btn btn-primary"

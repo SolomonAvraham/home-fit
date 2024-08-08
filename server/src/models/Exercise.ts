@@ -18,6 +18,11 @@ class Exercise
   public reps?: number;
   public media?: string;
   public userId!: string;
+  public createdBy?: {
+    creatorId: string;
+    creatorName: string;
+    originalExerciseId?: string;
+  }[];
   public createdAt!: Date;
   public updatedAt!: Date;
 
@@ -73,6 +78,10 @@ Exercise.init(
         model: "users",
         key: "id",
       },
+    },
+    createdBy: {
+      type: DataTypes.JSONB,
+      allowNull: false,
     },
     createdAt: {
       type: DataTypes.DATE,

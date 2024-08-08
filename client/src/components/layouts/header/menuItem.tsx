@@ -15,6 +15,7 @@ import {
   FaEdit,
   FaTrash,
   FaRunning,
+ 
 } from "react-icons/fa";
 import { GiWeightLiftingUp } from "react-icons/gi";
 
@@ -66,22 +67,24 @@ export const signedMenuItems = [
         icon: <FaBolt className="h-5 w-5" />,
       },
       {
+        text: "Create Workout",
+        path: "/dashboard/workouts/create",
+        icon: <FaPlus className="h-5 w-5" />,
+      },
+      {
         text: "Exercises",
         path: "/dashboard/exercises",
         icon: <FaRunning className="h-5 w-5" />,
-        dropdown: true,
-        dropdownMenu: [
-          {
-            text: "Exercises",
-            path: "/dashboard/exercises",
-            icon: <FaRunning className="h-5 w-5" />,
-          },
-          {
-            text: "My Exercises",
-            path: "/dashboard/exercises",
-            icon: <FaRunning className="h-5 w-5" />,
-          },
-        ],
+      },
+      {
+        text: "My Exercises",
+        path: "/dashboard/exercises/myExercises",
+        icon: <FaBolt className="h-5 w-5" />,
+      },
+      {
+        text: "Create Exercise",
+        path: "/dashboard/exercises/create",
+        icon: <FaPlus className="h-5 w-5" />,
       },
     ],
   },

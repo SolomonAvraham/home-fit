@@ -15,7 +15,7 @@ class Workout
   public description!: string;
   public duration?: string;
   public userId!: string;
-  public createdBy!: {
+  public createdBy?: {
     creatorId: string;
     creatorName: string;
     originalWorkoutId?: string;

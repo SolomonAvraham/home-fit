@@ -1,6 +1,13 @@
 import { WorkoutProps } from "@/types/workout";
 import axiosInstance from "../utils/axiosInstance";
 
+export const isWorkoutExist = async (workoutId: string, userId: string) => {
+  const response = await axiosInstance.get(
+    `/api/workouts/isWorkoutExist/?workoutId=${workoutId}&userId=${userId}`
+  );
+  return response.data;
+};
+
 export const getWorkouts = async () => {
   const response = await axiosInstance.get("/api/workouts/all");
   return response.data;
@@ -36,7 +43,6 @@ export const addWorkout = async ({
   const response = await axiosInstance.post(
     `/api/workouts/addWorkout/${workoutId}/user/${userId}`
   );
-
   return response.data;
 };
 

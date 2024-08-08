@@ -3,10 +3,23 @@ import WorkoutService from "../services/workoutService";
 import { v4 as uuidv4, validate as uuidValidate } from "uuid";
 
 class WorkoutController {
-  public addWorkout = async (
-    req: Request,
-    res: Response
-  ): Promise<Response> => {
+  public async isWorkoutExist(req: Request, res: Response): Promise<Response> {
+    const { workoutId, userId } = req.query;
+
+    try {
+      const exists = await WorkoutService.isWorkoutExist(
+        workoutId as string,
+        userId as string
+      );
+
+      return res.json(exists);
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ error: "Failed to check workout existence" });
+    }
+  }
+  public async addWorkout(req: Request, res: Response): Promise<Response> {
     try {
       const { id, userId } = req.params;
 
@@ -19,11 +32,9 @@ class WorkoutController {
       return res.status(200).json(workout);
     } catch (error: any) {
       console.error("Error in addWorkout:", error.message);
-      return res
-        .status(400)
-        .json({ message: "Failed to create workout", error: error.message });
+      return res.status(400).json({ message: error.message });
     }
-  };
+  }
 
   public async getWorkoutsByUserId(
     req: Request,

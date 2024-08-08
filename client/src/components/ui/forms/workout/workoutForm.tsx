@@ -1,7 +1,7 @@
 "use client";
 
 import { UseCreateWorkoutMutation } from "@/lib/queries";
-import useUserStore from "@/store/useUserStore";
+import useUserStore from "@/store/userStore";
 import { useEffect, useState } from "react";
 
 const WorkoutForm = () => {

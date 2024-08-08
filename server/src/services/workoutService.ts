@@ -1,24 +1,43 @@
-import { Exercise, User, Workout } from "../models/index";
+import { Workout_exercises, Exercise, User, Workout } from "../models/index";
 import { v4 as uuidv4 } from "uuid";
+import { validate as isValidUUID } from "uuid";
 import { ExerciseAttributes, WorkoutAttributes } from "../types/models";
 import formatMinutesToHours from "../utils/formatMinutesToHours";
-
-type CreatedByType = {
-  creatorId: string;
-  creatorName: string;
-  originalWorkoutId?: string;
-};
+import { CreatedByType } from "../types/services/index";
+import { Op } from "sequelize";
 
 class WorkoutService {
+  async isWorkoutExist(workoutId: string, userId: string): Promise<boolean> {
+    try {
+      const workout = await Workout.findByPk(workoutId);
+
+      if (!workout) {
+        throw new Error("Workout not found");
+      }
+
+      const originalWorkoutId =
+        workout.createdBy?.[0]?.originalWorkoutId || workoutId;
+
+      const existingEntry = await Workout.findOne({
+        where: {
+          userId: userId,
+          createdBy: {
+            [Op.contains]: [{ originalWorkoutId: originalWorkoutId }],
+          },
+        },
+      });
+
+      return !!existingEntry;
+    } catch (error) {
+      console.error("Check Workout Existence Error:", error);
+      throw new Error("Failed to check workout existence");
+    }
+  }
+
   async addWorkout(workoutId: string, userId: string) {
     try {
       const workout = await Workout.findByPk(workoutId, {
         include: [
-          {
-            model: User,
-            as: "user",
-            attributes: ["id", "name"],
-          },
           {
             model: Exercise,
             as: "exercises",
@@ -31,10 +50,10 @@ class WorkoutService {
               "duration",
               "description",
               "media",
+              "createdBy",
             ],
           },
         ],
-        limit: 10,
         order: [["createdAt", "DESC"]],
       });
 
@@ -42,16 +61,58 @@ class WorkoutService {
         throw new Error("Workout not found");
       }
 
+      const originalWorkoutId =
+        workout.createdBy?.[0]?.originalWorkoutId || workoutId;
+
+      const existingEntry = await Workout.findOne({
+        where: {
+          userId: userId,
+          createdBy: {
+            [Op.contains]: [{ originalWorkoutId: originalWorkoutId }],
+          },
+        },
+      });
+
+      if (existingEntry) {
+        throw new Error("Workout already added to your workouts");
+      }
+
       const newWorkout = await Workout.create({
         ...workout.toJSON(),
         id: uuidv4(),
         userId,
+        createdBy: workout.createdBy,
       });
 
+      const checkExercise = await Workout_exercises.findOne({
+        where: { workoutId },
+      });
+
+      const exercises = workout.toJSON().exercises;
+
+      if (checkExercise && exercises) {
+        for (const exercise of exercises) {
+          const { id, ...exerciseData } = exercise;
+
+          const newExercise = await Exercise.create({
+            ...exerciseData,
+            id: uuidv4(),
+            workoutId: newWorkout.id,
+            userId: userId,
+            createdBy: exerciseData.createdBy,
+          });
+
+          await Workout_exercises.create({
+            workoutId: newWorkout.id,
+            exerciseId: newExercise.id,
+          });
+        }
+      }
+
       return newWorkout;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Create Workout Service Error:", error);
-      throw new Error("Failed to create workout");
+      throw new Error(error.message);
     }
   }
 
@@ -101,7 +162,7 @@ class WorkoutService {
           userName: workoutJSON.user?.name,
           description: workoutJSON.description,
           name: workoutJSON.name,
-          createdBy: workoutJSON.createdBy.map((creator) => ({
+          createdBy: workoutJSON.createdBy?.map((creator) => ({
             creatorId: creator.creatorId,
             creatorName: creator.creatorName,
           })),
@@ -131,21 +192,26 @@ class WorkoutService {
     try {
       const id = uuidv4();
 
+      if (!isValidUUID(id)) {
+        throw new Error("Invalid UUID format");
+      }
+
       const workout = await Workout.create({
         ...workoutData,
         id,
         createdBy: [
           {
-            creatorName: workoutData.createdBy[0]?.creatorName,
+            creatorName: workoutData.createdBy?.[0].creatorName as string,
             creatorId: workoutData.userId,
             originalWorkoutId: id,
           },
         ],
       });
+
       return workout;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Create Workout Service Error:", error);
-      throw new Error("Failed to create workout");
+      throw new Error(error.message);
     }
   }
 
@@ -182,7 +248,8 @@ class WorkoutService {
       workouts.forEach((workout: Workout) => {
         const workoutJSON = workout.toJSON() as WorkoutAttributes;
         const key =
-          workoutJSON.createdBy[0]?.originalWorkoutId || workoutJSON.id;
+          workoutJSON.createdBy?.[0].originalWorkoutId || workoutJSON.id;
+
         if (!workoutMap.has(key)) {
           workoutMap.set(key, true);
           uniqueWorkouts.push(workout);
@@ -208,7 +275,7 @@ class WorkoutService {
           userName: workoutJSON.user?.name,
           description: workoutJSON.description,
           name: workoutJSON.name,
-          createdBy: workoutJSON.createdBy.map((user: CreatedByType) => ({
+          createdBy: workoutJSON.createdBy?.map((user: CreatedByType) => ({
             creatorId: user.creatorId,
             creatorName: user.creatorName,
             originalWorkoutId: user.originalWorkoutId,

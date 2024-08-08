@@ -8,6 +8,11 @@ export type ExerciseAttributes = {
   media?: string;
   userId: string;
   workoutId?: string;
+  createdBy?: {
+    creatorId: string;
+    creatorName: string;
+    originalExerciseId?: string;
+  }[];
   createdAt?: Date;
   updatedAt?: Date;
 };

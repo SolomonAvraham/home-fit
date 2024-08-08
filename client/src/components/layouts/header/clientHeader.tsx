@@ -10,13 +10,13 @@ import { ClientHeaderProps } from "@/types/header";
 import MenuItem, { signedMenuItems, unsignedMenuItems } from "./menuItem";
 import Logo from "@/components/ui/logo/logo";
 import { UseLogoutMutation } from "@/lib/queries";
-import useUserStore from "@/store/useUserStore";
+import useUserStore from "@/store/userStore";
 
 const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
   const logoutMutation = UseLogoutMutation();
 
   const { setUser, user } = useUserStore();
-  console.log("🚀 ~ user:", user)
+  console.log("🚀 ~ user:", user);
 
   const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
   const [drawerOpen, setDrawerOpen] = useState(false);

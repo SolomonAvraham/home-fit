@@ -8,9 +8,11 @@ import {
   deleteWorkout,
   getWorkouts,
   getWorkoutsByUserId,
+  isWorkoutExist,
   updateWorkout,
 } from "@/services/workoutService";
-import useUserStore from "@/store/useUserStore";
+import useErrorsStore from "@/store/ErrorsStore";
+import useUserStore from "@/store/userStore";
 import {
   APIError,
   LoginCredentials,
@@ -116,11 +118,13 @@ export function UseDeleteWorkoutMutation() {
 
 export function UseCreateWorkoutMutation() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: ["create Workout"],
     mutationFn: createWorkout,
     onSuccess: (data) => {
+      queryClient.invalidateQueries();
       router.push(`/dashboard/workouts/addExercise/${data.id}`);
     },
     onError: (error: unknown) => {
@@ -131,11 +135,13 @@ export function UseCreateWorkoutMutation() {
 
 export function UseUpdateWorkoutMutation() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: ["create Workout"],
     mutationFn: updateWorkout,
     onSuccess: (data) => {
+      queryClient.invalidateQueries();
       router.push(`/dashboard/workouts/myWorkouts/${data.id}`);
     },
     onError: (error: unknown) => {
@@ -149,6 +155,8 @@ export function UseCreateExerciseMutation(
   setExercise: React.Dispatch<React.SetStateAction<ExerciseAttributes>>,
   workoutId: string
 ) {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationKey: ["create Exercise"],
     mutationFn: createExercise,
@@ -166,6 +174,8 @@ export function UseCreateExerciseMutation(
         workoutId,
         userId: "",
       });
+
+      queryClient.invalidateQueries();
     },
     onError: (error: unknown) => {
       console.log(error);
@@ -174,14 +184,28 @@ export function UseCreateExerciseMutation(
 }
 
 export function UseAddWorkoutMutation() {
+  const queryClient = useQueryClient();
+  const { setErrorAlert } = useErrorsStore();
+
   return useMutation({
     mutationKey: ["add Workout"],
     mutationFn: addWorkout,
     onSuccess: (data) => {
       console.log("addWorkout data", data);
+      queryClient.invalidateQueries({ queryKey: ["isWorkoutExist"] });
     },
-    onError: (error: unknown) => {
-      console.log(error);
+    onError: (error: any) => {
+      setErrorAlert(error.response.data.message);
     },
+  });
+}
+
+export function UseIsWorkoutExistQuery(workoutId: string, userId: string) {
+  return useQuery({
+    queryKey: ["isWorkoutExist", workoutId, userId],
+    queryFn: async () => {
+      return await isWorkoutExist(workoutId, userId);
+    },
+    enabled: !!workoutId && !!userId,
   });
 }

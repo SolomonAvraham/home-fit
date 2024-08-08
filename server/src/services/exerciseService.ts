@@ -1,20 +1,41 @@
 import { validate as isValidUUID } from "uuid";
 import { Exercise, Workout_exercises } from "../models/index";
 import { ExerciseAttributes } from "../types/models";
+import { v4 as uuidv4 } from "uuid";
 
 class ExerciseService {
-  static async createExercise(data: ExerciseAttributes) {
+  static async createExercise(exercise: ExerciseAttributes) {
     try {
-      const exercise = await Exercise.create(data);
+      const id = uuidv4();
 
-      if (data.workoutId) {
+      if (!isValidUUID(id)) {
+        throw new Error("Invalid UUID format");
+      }
+
+      const newExercise = await Exercise.create({
+        ...exercise,
+        id,
+        createdBy: [
+          {
+            creatorName: exercise.createdBy?.[0].creatorName as string,
+            creatorId: exercise.userId,
+            originalExerciseId: id,
+          },
+        ],
+      });
+
+      if (!newExercise) {
+        throw new Error("Failed to create exercise");
+      }
+
+      if (exercise.workoutId) {
         await Workout_exercises.create({
-          workoutId: data.workoutId,
-          exerciseId: exercise.id,
+          workoutId: exercise.workoutId,
+          exerciseId: newExercise.id,
         });
       }
 
-      return exercise;
+      return newExercise;
     } catch (error) {
       console.error("Create Exercise Service Error:", error);
       throw new Error("Failed to create exercise");

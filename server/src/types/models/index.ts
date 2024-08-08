@@ -5,6 +5,7 @@ import {
   Workout_exercises,
   ScheduledWorkout,
 } from "../../models";
+import { CreatedByType } from "../services";
 
 export type UserAssociate = {
   Workout: typeof Workout;
@@ -45,6 +46,11 @@ export type ExerciseAttributes = {
   media?: string;
   userId: string;
   workoutId?: string;
+  createdBy?: {
+    creatorId?: string;
+    creatorName?: string;
+    originalExerciseId?: string;
+  }[];
   createdAt: Date;
   updatedAt: Date;
 };
@@ -57,11 +63,7 @@ export type WorkoutAttributes = {
   userId: string;
   user?: User;
   exercises?: Exercise[];
-  createdBy: {
-    creatorId: string;
-    creatorName: string;
-    originalWorkoutId?: string;
-  }[];
+  createdBy?: CreatedByType[];
   createdAt?: Date;
   updatedAt?: Date;
 };

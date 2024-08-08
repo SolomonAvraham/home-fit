@@ -2,13 +2,15 @@
 
 import { getWorkoutByIdAction } from "@/actions/workoutActions";
 import { UseCreateExerciseMutation } from "@/lib/queries";
+import useUserStore from "@/store/userStore";
 import { ExerciseAttributes } from "@/types/exercise";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const ExerciseForm = ({ workoutId }: { workoutId: string }) => {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
+  const { user } = useUserStore();
 
   const [exercise, setExercise] = useState<ExerciseAttributes>({
     name: "",
@@ -19,7 +21,24 @@ const ExerciseForm = ({ workoutId }: { workoutId: string }) => {
     media: "",
     workoutId,
     userId: "",
+    createdBy: [{ creatorId: "", creatorName: "", originalExerciseId: "" }],
   });
+
+  useEffect(() => {
+    if (user) {
+      setExercise({
+        ...exercise,
+        userId: user.id,
+        createdBy: [
+          {
+            creatorId: user.id,
+            creatorName: user.name,
+            originalExerciseId: "",
+          },
+        ],
+      });
+    }
+  }, [user]);
 
   const createExerciseMutation = UseCreateExerciseMutation(
     formRef,
@@ -36,15 +55,12 @@ const ExerciseForm = ({ workoutId }: { workoutId: string }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const userId =
-      (window !== undefined && localStorage.getItem("userId")) || "";
-
     const formData = new FormData();
-    Object.entries({ ...exercise, userId }).forEach(([key, value]) => {
+    Object.entries({ ...exercise }).forEach(([key, value]) => {
       formData.append(key, value.toString());
     });
 
-    await createExerciseMutation.mutateAsync({ ...exercise, userId });
+    await createExerciseMutation.mutateAsync(exercise);
 
     await getWorkoutByIdAction(workoutId);
     router.refresh();
