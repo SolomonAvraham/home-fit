@@ -1,8 +1,8 @@
 import { getWorkoutByIdAction } from "@/actions/workoutActions";
 import WorkoutCard from "@/components/ui/cards/workoutCard";
-import { WorkoutIdProps } from "@/types/workout";
+import { PropsParams } from "@/types/params";
 
-export default async function WorkoutId(props: WorkoutIdProps) {
+export default async function WorkoutId(props: PropsParams) {
   const { id } = props.params;
 
   const workout = await getWorkoutByIdAction(id);

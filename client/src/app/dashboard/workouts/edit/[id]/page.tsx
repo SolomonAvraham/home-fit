@@ -1,8 +1,8 @@
 import { getWorkoutByIdAction } from "@/actions/workoutActions";
 import EditWorkoutForm from "@/components/ui/forms/workout/editWorkoutForm";
-import { WorkoutIdProps } from "@/types/workout";
+import { PropsParams } from "@/types/params";
 
-export default async function EditWorkout({ params }: WorkoutIdProps) {
+export default async function EditWorkout({ params }: PropsParams) {
   const { id } = params;
   const workout = await getWorkoutByIdAction(id);
 

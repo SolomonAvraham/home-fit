@@ -16,3 +16,10 @@ export type ExerciseAttributes = {
   createdAt?: Date;
   updatedAt?: Date;
 };
+
+export type PaginatedExercises = {
+  total: number;
+  page: number;
+  limit: number;
+  exercises: ExerciseAttributes[];
+};

@@ -116,9 +116,15 @@ class WorkoutService {
     }
   }
 
-  async getWorkoutsByUserId(userId: string) {
+  async getWorkoutsByUserId(
+    userId: string,
+    page: number = 1,
+    limit: number = 10
+  ) {
     try {
-      const workouts = await Workout.findAll({
+      const offset = (page - 1) * limit;
+
+      const { rows: workouts, count } = await Workout.findAndCountAll({
         where: { userId },
         include: [
           {
@@ -142,6 +148,8 @@ class WorkoutService {
           },
         ],
         order: [["createdAt", "DESC"]],
+        limit,
+        offset,
       });
 
       const formattedWorkouts = workouts.map((workout) => {
@@ -181,7 +189,12 @@ class WorkoutService {
         };
       });
 
-      return formattedWorkouts;
+      return {
+        total: count,
+        page,
+        limit,
+        workouts: formattedWorkouts,
+      };
     } catch (error) {
       console.error("Get Workouts By User ID Service Error:", error);
       throw new Error("Failed to fetch workouts");
@@ -215,9 +228,11 @@ class WorkoutService {
     }
   }
 
-  async getAllWorkouts() {
+  async getAllWorkouts(page: number = 1, limit: number = 10) {
     try {
-      const workouts = await Workout.findAll({
+      const offset = (page - 1) * limit;
+
+      const { rows: workouts, count } = await Workout.findAndCountAll({
         include: [
           {
             model: User,
@@ -240,6 +255,8 @@ class WorkoutService {
           },
         ],
         order: [["createdAt", "DESC"]],
+        limit,
+        offset,
       });
 
       const workoutMap = new Map<string, boolean>();
@@ -295,7 +312,12 @@ class WorkoutService {
         };
       });
 
-      return formattedWorkouts;
+      return {
+        total: count,
+        page,
+        limit,
+        workouts: formattedWorkouts,
+      };
     } catch (error) {
       console.error("Get All Workouts Service Error:", error);
       throw new Error("Failed to fetch workouts");

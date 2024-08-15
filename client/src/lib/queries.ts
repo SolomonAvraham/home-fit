@@ -1,7 +1,15 @@
 "use client";
 
 import { login, logout, register } from "@/services/authService";
-import { createExercise } from "@/services/exerciseService";
+import {
+  addExerciseToWorkout,
+  createExercise,
+  deleteExercise,
+  getAllExercises,
+  getExercisesByUserId,
+  isExerciseInWorkout,
+  updateExercise,
+} from "@/services/exerciseService";
 import {
   addWorkout,
   createWorkout,
@@ -11,7 +19,7 @@ import {
   isWorkoutExist,
   updateWorkout,
 } from "@/services/workoutService";
-import useErrorsStore from "@/store/ErrorsStore";
+import useAlertStore from "@/store/alertStore";
 import useUserStore from "@/store/userStore";
 import {
   APIError,
@@ -20,29 +28,15 @@ import {
   User,
 } from "@/types/auth";
 import { ExerciseAttributes } from "@/types/exercise";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
-export function UseAllWorkoutsQuery() {
-  return useQuery({
-    queryKey: ["get all workouts"],
-    queryFn: async () => {
-      return await getWorkouts();
-    },
-    staleTime: Infinity,
-  });
-}
-
-export function UseWorkoutsByUserIdQuery(userId: string) {
-  return useQuery({
-    queryKey: ["workouts by user id"],
-    queryFn: async () => {
-      return await getWorkoutsByUserId(userId);
-    },
-
-    enabled: !!userId,
-  });
-}
+//////USER QUERIES//////
 
 export function UseLogoutMutation() {
   const router = useRouter();
@@ -101,14 +95,44 @@ export function UseRegisterMutation(
   });
 }
 
+//////WORKOUTS QUERIES//////
+
+export function UseAllWorkoutsQuery(page: number, limit: number) {
+  return useQuery({
+    queryKey: ["get all workouts", page, limit],
+    queryFn: async () => {
+      return await getWorkouts(page, limit);
+    },
+    staleTime: Infinity,
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function UseWorkoutsByUserIdQuery(
+  userId: string,
+  page: number,
+  limit: number
+) {
+  return useQuery({
+    queryKey: ["get workouts by user id", userId, page, limit],
+    queryFn: async () => await getWorkoutsByUserId(userId, page, limit),
+    staleTime: Infinity,
+    enabled: !!userId,
+    placeholderData: keepPreviousData,
+  });
+}
 export function UseDeleteWorkoutMutation() {
   const queryClient = useQueryClient();
+  const { setAlert } = useAlertStore();
+  const router = useRouter();
 
   return useMutation({
     mutationKey: ["delete Workout"],
     mutationFn: deleteWorkout,
-    onSuccess: (data) => {
+    onSuccess: () => {
+      setAlert("Deleted Successfully");
       queryClient.invalidateQueries();
+      router.push(`/dashboard/workouts/myWorkouts`);
     },
     onError: (error: unknown) => {
       console.log(error);
@@ -150,12 +174,42 @@ export function UseUpdateWorkoutMutation() {
   });
 }
 
+export function UseAddWorkoutMutation() {
+  const queryClient = useQueryClient();
+  const { setAlert } = useAlertStore();
+
+  return useMutation({
+    mutationKey: ["add Workout"],
+    mutationFn: addWorkout,
+    onSuccess: () => {
+      setAlert("Added Successfully");
+      queryClient.invalidateQueries();
+    },
+    onError: (error: any) => {
+      setAlert(error.response.data.message);
+    },
+  });
+}
+
+export function UseIsWorkoutExistQuery(workoutId: string, userId: string) {
+  return useQuery({
+    queryKey: ["isWorkoutExist", workoutId, userId],
+    queryFn: async () => {
+      return await isWorkoutExist(workoutId, userId);
+    },
+    enabled: !!workoutId && !!userId,
+  });
+}
+
+//////EXERCISES QUERIES//////
+
 export function UseCreateExerciseMutation(
   formRef: React.RefObject<HTMLFormElement> | null,
-  setExercise: React.Dispatch<React.SetStateAction<ExerciseAttributes>>,
-  workoutId: string
+  setExercise: React.Dispatch<React.SetStateAction<ExerciseAttributes>>
 ) {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const { setAlert } = useAlertStore();
 
   return useMutation({
     mutationKey: ["create Exercise"],
@@ -171,10 +225,79 @@ export function UseCreateExerciseMutation(
         sets: 0,
         reps: 0,
         media: "",
-        workoutId,
         userId: "",
       });
 
+      queryClient.invalidateQueries();
+
+      if (data.workoutId) {
+        alert("Exercise added successfully to the workout!");
+      } else {
+        router.push(`/dashboard/exercises/myExercises/${data.id}`);
+      }
+    },
+    onError: (error: APIError) => {
+      console.log(error);
+      setAlert(error.response?.data.message);
+    },
+  });
+}
+
+export function UseAllExercisesQuery(page: number, limit: number) {
+  return useQuery({
+    queryKey: ["get all exercises", page, limit],
+    queryFn: async () => {
+      return await getAllExercises(page, limit);
+    },
+    staleTime: Infinity,
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function UseExercisesByUserIdQuery(
+  userId: string,
+  page: number,
+  limit: number
+) {
+  return useQuery({
+    queryKey: ["get exercises by user id", userId, page, limit],
+    queryFn: async () => await getExercisesByUserId(userId, page, limit),
+    staleTime: Infinity,
+    placeholderData: keepPreviousData,
+    enabled: !!userId,
+  });
+}
+
+export function UseDeleteExerciseMutation() {
+  const { setAlert } = useAlertStore();
+  const router = useRouter();
+
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["delete exercise"],
+    mutationFn: deleteExercise,
+    onSuccess: () => {
+      setAlert("Deleted Successfully");
+      queryClient.invalidateQueries();
+      router.push(`/dashboard/exercises/myExercises`);
+    },
+    onError: (error: unknown) => {
+      console.log(error);
+    },
+  });
+}
+
+export function UseUpdateExerciseMutation() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const { setAlert } = useAlertStore();
+
+  return useMutation({
+    mutationKey: ["update exercise"],
+    mutationFn: updateExercise,
+    onSuccess: (data) => {
+      setAlert("Updated Successfully");
+      router.push(`/dashboard/exercises/myExercises/${data.id}`);
       queryClient.invalidateQueries();
     },
     onError: (error: unknown) => {
@@ -183,29 +306,34 @@ export function UseCreateExerciseMutation(
   });
 }
 
-export function UseAddWorkoutMutation() {
+export function UseAddExerciseToWorkoutMutation() {
+  const { setAlert } = useAlertStore();
   const queryClient = useQueryClient();
-  const { setErrorAlert } = useErrorsStore();
 
   return useMutation({
-    mutationKey: ["add Workout"],
-    mutationFn: addWorkout,
-    onSuccess: (data) => {
-      console.log("addWorkout data", data);
-      queryClient.invalidateQueries({ queryKey: ["isWorkoutExist"] });
+    mutationKey: ["add exercise to workout"],
+    mutationFn: addExerciseToWorkout,
+    onSuccess: () => {
+      setAlert("Added Successfully");
+      queryClient.invalidateQueries();
     },
-    onError: (error: any) => {
-      setErrorAlert(error.response.data.message);
+    onError: (error: APIError) => {
+      console.log(error);
+      setAlert(error.response?.data.message);
     },
   });
 }
 
-export function UseIsWorkoutExistQuery(workoutId: string, userId: string) {
+export function UseIsExerciseInWorkoutQuery(
+  data: {
+    exerciseId: string;
+    userId: string;
+  },
+  enabled: boolean
+) {
   return useQuery({
-    queryKey: ["isWorkoutExist", workoutId, userId],
-    queryFn: async () => {
-      return await isWorkoutExist(workoutId, userId);
-    },
-    enabled: !!workoutId && !!userId,
+    queryKey: ["is Exercise In Workout"],
+    queryFn: async () => await isExerciseInWorkout(data),
+    enabled,
   });
 }

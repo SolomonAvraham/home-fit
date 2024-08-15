@@ -22,6 +22,7 @@ class Workout
   }[];
   public createdAt!: Date;
   public updatedAt!: Date;
+  public exercises?: Exercise[];
 
   static associate(models: WorkoutAssociate) {
     Workout.belongsTo(models.User, {

@@ -19,15 +19,15 @@ const ExerciseForm = ({ workoutId }: { workoutId: string }) => {
     sets: 0,
     reps: 0,
     media: "",
-    workoutId,
+    workoutId: workoutId !== "" ? workoutId : undefined,
     userId: "",
     createdBy: [{ creatorId: "", creatorName: "", originalExerciseId: "" }],
   });
 
   useEffect(() => {
     if (user) {
-      setExercise({
-        ...exercise,
+      setExercise((prevExercise) => ({
+        ...prevExercise,
         userId: user.id,
         createdBy: [
           {
@@ -36,14 +36,13 @@ const ExerciseForm = ({ workoutId }: { workoutId: string }) => {
             originalExerciseId: "",
           },
         ],
-      });
+      }));
     }
   }, [user]);
 
   const createExerciseMutation = UseCreateExerciseMutation(
     formRef,
-    setExercise,
-    workoutId
+    setExercise
   );
 
   const handleChange = (
@@ -55,21 +54,31 @@ const ExerciseForm = ({ workoutId }: { workoutId: string }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (workoutId !== "") {
+      exercise.workoutId = workoutId;
+    }
+
     const formData = new FormData();
-    Object.entries({ ...exercise }).forEach(([key, value]) => {
-      formData.append(key, value.toString());
+    Object.entries(exercise).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value.toString());
+      }
     });
 
     await createExerciseMutation.mutateAsync(exercise);
 
-    await getWorkoutByIdAction(workoutId);
     router.refresh();
   };
 
   return (
     <div className="max-w-md   mx-auto mt-8 p-6 bg-base-200 rounded-box shadow-lg">
       <h2 className="text-2xl font-bold mb-6 text-center">Create Exercise</h2>
-      <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+      <form
+        action={() => getWorkoutByIdAction}
+        ref={formRef}
+        onSubmit={handleSubmit}
+        className="space-y-4"
+      >
         <div className="form-control">
           <label className="label" htmlFor="name">
             <span className="label-text">Exercise Name</span>
@@ -160,7 +169,6 @@ const ExerciseForm = ({ workoutId }: { workoutId: string }) => {
             value={exercise.media}
             onChange={handleChange}
             placeholder="Media URL"
-            required
             className="input input-bordered w-full"
           />
         </div>

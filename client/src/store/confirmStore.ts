@@ -1,43 +1,25 @@
 import { create } from "zustand";
 
 interface ConfirmStore<T = any> {
-  confirm: boolean | null;
   message: string;
   data: T | null;
-  onConfirm: (() => void) | null;
-  triggerConfirm: (
-    message: string,
-    data?: T,
-    onConfirm?: (() => void) | null
-  ) => void;
-  setConfirm: (confirm: boolean | null) => void;
+  resolveConfirm: ((result: boolean) => void) | null;
+  triggerConfirm: (message: string, data?: T) => Promise<boolean>;
 }
 
 const useConfirmStore = create<ConfirmStore>((set) => ({
-  confirm: null,
   message: "",
   data: null,
-  onConfirm: null,
+  resolveConfirm: null,
 
-  setConfirm: (confirm) =>
-    set((state) => ({
-      confirm,
-      message: "",
-      data: confirm === true ? state.data : null,
-      onConfirm: null,
-    })),
-
-  triggerConfirm: (message, data = null, onConfirm = null) => {
-    set({ message, data, onConfirm });
-    const confirm = window.confirm(message);
-    set({ confirm });
-
-    if (confirm && onConfirm) {
-      onConfirm();
-    }
-
-    // Reset confirm and message
-    set({ confirm: null, message: "", data: null, onConfirm: null });
+  triggerConfirm: (message, data = null) => {
+    return new Promise<boolean>((resolve) => {
+      set({
+        message,
+        data,
+        resolveConfirm: resolve,  
+      });
+    });
   },
 }));
 

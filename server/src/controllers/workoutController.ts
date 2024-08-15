@@ -42,6 +42,9 @@ class WorkoutController {
   ): Promise<Response> {
     const { id: userId } = req.params;
 
+    const page = parseInt(req.query.page as string, 10) || 1;
+    const limit = parseInt(req.query.limit as string, 10) || 10;
+
     if (!uuidValidate(userId)) {
       return res
         .status(400)
@@ -49,13 +52,17 @@ class WorkoutController {
     }
 
     try {
-      const workouts = await WorkoutService.getWorkoutsByUserId(userId);
-      return res.status(200).json(workouts);
+      const result = await WorkoutService.getWorkoutsByUserId(
+        userId,
+        page,
+        limit
+      );
+      return res.status(200).json(result);
     } catch (error: any) {
-      console.error("Error in getAllWorkouts:", error.message);
+      console.error("Error in getWorkoutsByUserId:", error.message);
       return res
         .status(400)
-        .json({ message: "Failed to get all workouts", error: error.message });
+        .json({ message: "Failed to get workouts", error: error.message });
     }
   }
 
@@ -69,14 +76,6 @@ class WorkoutController {
         name,
         createdBy,
       } = req.body;
-
-      console.log("Creating workout with data:", {
-        userId,
-        duration,
-        description,
-        name,
-        createdBy,
-      });
 
       const workout = await WorkoutService.createWorkout({
         userId,
@@ -116,8 +115,11 @@ class WorkoutController {
 
   public async getAllWorkouts(req: Request, res: Response): Promise<Response> {
     try {
-      const workouts = await WorkoutService.getAllWorkouts();
-      return res.status(200).json(workouts);
+      const page = parseInt(req.query.page as string, 10) || 1;
+      const limit = parseInt(req.query.limit as string, 10) || 10;
+
+      const result = await WorkoutService.getAllWorkouts(page, limit);
+      return res.status(200).json(result);
     } catch (error: any) {
       console.error("Error in getAllWorkouts:", error.message);
       return res

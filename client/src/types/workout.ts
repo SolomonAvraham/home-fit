@@ -1,8 +1,6 @@
 import { ExerciseAttributes } from "./exercise";
 
-export type WorkoutIdProps = {
-  params: { id: string };
-};
+
 
 export type WorkoutProps = {
   name?: string;

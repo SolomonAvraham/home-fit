@@ -8,8 +8,10 @@ export const isWorkoutExist = async (workoutId: string, userId: string) => {
   return response.data;
 };
 
-export const getWorkouts = async () => {
-  const response = await axiosInstance.get("/api/workouts/all");
+export const getWorkouts = async (page: number = 1, limit: number = 10) => {
+  const response = await axiosInstance.get(
+    `/api/workouts/all?page=${page}&limit=${limit}`
+  );
   return response.data;
 };
 
@@ -18,9 +20,13 @@ export const getWorkoutById = async (id: string) => {
   return response.data;
 };
 
-export const getWorkoutsByUserId = async (userId: string) => {
+export const getWorkoutsByUserId = async (
+  userId: string,
+  page: number = 1,
+  limit: number = 10
+) => {
   const response = await axiosInstance.get(
-    `/api/workouts/workoutsByUserId/${userId}`
+    `/api/workouts/WorkoutsByUserId/${userId}?page=${page}&limit=${limit}`
   );
   return response.data;
 };

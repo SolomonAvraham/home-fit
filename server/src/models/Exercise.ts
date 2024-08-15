@@ -25,6 +25,7 @@ class Exercise
   }[];
   public createdAt!: Date;
   public updatedAt!: Date;
+  public workoutId?: string;
 
   static associate(models: ExerciseAssociate) {
     Exercise.belongsTo(models.User, {

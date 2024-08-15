@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ExerciseAttributes } from "@/types/exercise";
 import { WorkoutProps } from "@/types/workout";
@@ -8,6 +8,8 @@ import { UseDeleteWorkoutMutation } from "@/lib/queries";
 import useUserStore from "@/store/userStore";
 import AddWorkoutButton from "../buttons/addWorkout";
 import useConfirmStore from "@/store/confirmStore";
+import Confirm from "../confirm/confirm";
+import Alert from "../alert/alert";
 
 export default function WorkoutCard({
   workout,
@@ -18,8 +20,6 @@ export default function WorkoutCard({
 }) {
   const router = useRouter();
   const { user } = useUserStore();
-  const { triggerConfirm, confirm, message, setConfirm, data } =
-    useConfirmStore();
 
   const deleteWorkoutMutation = UseDeleteWorkoutMutation();
 
@@ -53,26 +53,21 @@ export default function WorkoutCard({
     },
   ];
 
-  const getYoutubeEmbedUrl = (url: string) => {
-    const regExp =
-      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return match && match[2].length === 11
-      ? `https://www.youtube.com/embed/${match[2]}`
-      : null;
-  };
-
   const handleOperation = async (id: string, action: string) => {
     switch (action) {
-      case "delete":
-        triggerConfirm(
-          "Are you sure you want to delete this workout?",
-          { id },
-          async () => {
-            await deleteWorkoutMutation.mutateAsync(id);
-          }
+      case "delete": {
+        const { triggerConfirm } = useConfirmStore.getState();
+
+        const userConfirmed = await triggerConfirm(
+          "Are you sure you want to delete this workout?"
         );
+
+        if (userConfirmed) {
+          await deleteWorkoutMutation.mutateAsync(id);
+        }
+
         break;
+      }
       case "edit":
         router.push(`/dashboard/workouts/edit/${id}`);
         break;
@@ -168,7 +163,9 @@ export default function WorkoutCard({
   };
 
   return (
-    <div className="card w-96 bg-base-100 shadow-xl m-4">
+    <div className="card w-fit bg-base-100 shadow-xl m-4">
+      <Alert />
+      <Confirm />
       <div className="card-body items-center justify-center text-center">
         <h4 className="font-semibold text-gray-300 capitalize  ">
           Created By:{" "}
@@ -214,15 +211,13 @@ export default function WorkoutCard({
                         ? `${exercise.reps} reps`
                         : exercise.duration}
                     </p>
-                    {exercise.media && getYoutubeEmbedUrl(exercise.media) && (
+                    {exercise.media && (
                       <div className="mt-2">
-                        {" "}
                         <iframe
                           width="100%"
                           height="200"
-                          src={getYoutubeEmbedUrl(exercise.media) || ""}
+                          src={exercise.media}
                           title={`YouTube video player for ${exercise.name}`}
-                          frameBorder="0"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
                         ></iframe>

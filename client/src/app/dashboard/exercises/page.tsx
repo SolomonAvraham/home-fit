@@ -1,5 +1,5 @@
-import React from 'react'
+import Exercises from "@/components/pages/exercises/exercises";
 
-export default function Exercises() {
-  return <div>Exercises</div>;
+export default function ExercisesList() {
+  return <Exercises operation="view" />;
 }

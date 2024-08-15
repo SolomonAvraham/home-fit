@@ -23,5 +23,6 @@ export interface RegisterCredentials {
 
 export interface APIError {
   message: string;
-  statusCode: number;
+  statusCode?: number;
+  response: { data: { message: string } };
 }
