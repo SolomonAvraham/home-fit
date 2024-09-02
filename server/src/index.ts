@@ -2,13 +2,7 @@ import express, { Application, Request, Response } from "express";
 import sequelize from "./config/database";
 import bodyParser from "body-parser";
 import errorMiddleware from "./middleware/errorMiddleware";
-import {
-  userRoute,
-  workoutRoute,
-  progressRoutes,
-  notificationRoutes,
-   exerciseRoutes,
-} from "./routes/index";
+import { userRoute, workoutRoute, exerciseRoutes } from "./routes/index";
 import "../src/models/index";
 import cors from "cors";
 import testRoutes from "./routes/testRoutes";
@@ -40,16 +34,14 @@ app.use("/api/users", userRoute);
 
 app.use("/api/test", testRoutes);
 app.use(errorMiddleware);
-  
+
 app.use("/api/workouts", workoutRoute);
-app.use("/api/progress", progressRoutes);
-app.use("/api/notifications", notificationRoutes);
- app.use("/api/exercises", exerciseRoutes);
+app.use("/api/exercises", exerciseRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, world!");
 });
-
+ 
 const startServer = async () => {
   try {
     await sequelize.authenticate();

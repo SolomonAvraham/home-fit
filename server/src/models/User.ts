@@ -1,18 +1,10 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/database";
-import Models from "../types/models";
+import { UserAssociate, UserAttributes } from "../types/models";
+import { Workout, ScheduledWorkout } from ".";
 
-export interface UserAttributes {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  role?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
+export interface UserCreationAttributes
+  extends Optional<UserAttributes, "id"> {}
 
 class User
   extends Model<UserAttributes, UserCreationAttributes>
@@ -26,12 +18,22 @@ class User
   public createdAt!: Date;
   public updatedAt!: Date;
 
-  static associate(models: Models) {
-    User.hasMany(models.Workout, { foreignKey: "userId", as: "workouts" });
-    User.hasMany(models.Progress, { foreignKey: "userId", as: "progress" });
-    User.hasMany(models.Notification, {
+  static associate(models: UserAssociate) {
+    User.hasMany(models.Exercise, {
       foreignKey: "userId",
-      as: "notifications",
+      as: "exercises",
+    });
+
+
+    User.hasMany(models.Workout, {
+      foreignKey: "userId",
+      as: "workouts",
+    });
+
+
+    User.hasMany(models.ScheduledWorkout, {
+      foreignKey: "userId",
+      as: "scheduledWorkouts",
     });
   }
 }
@@ -77,6 +79,7 @@ User.init(
   {
     sequelize,
     tableName: "users",
+    timestamps: true,
   }
 );
 

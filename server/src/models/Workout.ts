@@ -1,23 +1,43 @@
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/database";
-import {  User } from ".";
-import Models from "../types/models";
+import { WorkoutAssociate, WorkoutAttributes } from "../types/models";
+import { Exercise, User } from ".";
 
-class Workout extends Model {
+export interface WorkoutCreationAttributes
+  extends Optional<WorkoutAttributes, "id"> {}
+
+class Workout
+  extends Model<WorkoutAttributes, WorkoutCreationAttributes>
+  implements WorkoutAttributes
+{
   public id!: string;
-  public date!: Date;
-  public duration!: number;
-  public userId!: string;
-  public description!: string;
   public name!: string;
+  public description!: string;
+  public duration?: string;
+  public userId!: string;
+  public createdBy?: {
+    creatorId: string;
+    creatorName: string;
+    originalWorkoutId?: string;
+  }[];
   public createdAt!: Date;
   public updatedAt!: Date;
+  public exercises?: Exercise[];
 
-  static associate(model: Models) {
-    Workout.belongsTo(model.User, { foreignKey: "userId", as: "user" });
-    Workout.hasMany(model.Exercise, {
+  static associate(models: WorkoutAssociate) {
+    Workout.belongsTo(models.User, {
+      foreignKey: "userId",
+      as: "user",
+    });
+    Workout.belongsToMany(models.Exercise, {
+      through: models.Workout_exercises,
       foreignKey: "workoutId",
+      otherKey: "exerciseId",
       as: "exercises",
+    });
+    Workout.hasMany(models.ScheduledWorkout, {
+      foreignKey: "workoutId",
+      as: "scheduledWorkouts",
     });
   }
 }
@@ -29,28 +49,29 @@ Workout.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    date: {
-      type: DataTypes.DATE,
+    name: {
+      type: DataTypes.STRING(255),
       allowNull: false,
-    },
-    duration: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    userId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: User,
-        key: "id",
-      },
     },
     description: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    name: {
-      type: DataTypes.STRING(255),
+
+    duration: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: "users",
+        key: "id",
+      },
+    },
+    createdBy: {
+      type: DataTypes.JSONB,
       allowNull: false,
     },
     createdAt: {

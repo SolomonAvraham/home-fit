@@ -1,20 +1,7 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/database";
-import { Workout } from ".";
-import Models from "../types/models";
-
-export interface ExerciseAttributes {
-  id?: string;
-  name: string;
-  description: string;
-  duration?: string;
-  sets: string;
-  reps: string;
-  media?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  workoutId?: string;
-}
+import { Workout, Workout_exercises, User } from ".";
+import { ExerciseAssociate, ExerciseAttributes } from "../types/models";
 
 export interface ExerciseCreationAttributes
   extends Optional<ExerciseAttributes, "id"> {}
@@ -26,18 +13,30 @@ class Exercise
   public id!: string;
   public name!: string;
   public description!: string;
-  public duration?: string;
-  public sets!: string;
-  public reps!: string;
+  public duration?: number;
+  public sets?: number;
+  public reps?: number;
   public media?: string;
-  public workoutId!: string;
+  public userId!: string;
+  public createdBy?: {
+    creatorId: string;
+    creatorName: string;
+    originalExerciseId?: string;
+  }[];
   public createdAt!: Date;
   public updatedAt!: Date;
+  public workoutId?: string;
 
-  static associate(model: Models) {
-    Exercise.belongsTo(model.Workout, {
-      foreignKey: "workoutId",
-      as: "workout",
+  static associate(models: ExerciseAssociate) {
+    Exercise.belongsTo(models.User, {
+      foreignKey: "userId",
+      as: "user",
+    });
+    Exercise.belongsToMany(models.Workout, {
+      through: models.Workout_exercises,
+      foreignKey: "exerciseId",
+      otherKey: "workoutId",
+      as: "workouts",
     });
   }
 }
@@ -58,27 +57,32 @@ Exercise.init(
       allowNull: false,
     },
     duration: {
-      type: DataTypes.TEXT,
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     sets: {
-      type: DataTypes.TEXT,
-      allowNull: false,
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
     reps: {
-      type: DataTypes.TEXT,
-      allowNull: false,
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
     media: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
     },
-    workoutId: {
+    userId: {
       type: DataTypes.UUID,
+      allowNull: false,
       references: {
-        model: Workout,
+        model: "users",
         key: "id",
       },
+    },
+    createdBy: {
+      type: DataTypes.JSONB,
+      allowNull: false,
     },
     createdAt: {
       type: DataTypes.DATE,

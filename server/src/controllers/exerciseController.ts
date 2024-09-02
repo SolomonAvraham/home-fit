@@ -3,27 +3,103 @@ import ExerciseService from "../services/exerciseService";
 import { validate as isValidUUID } from "uuid";
 
 class ExerciseController {
+  static async isExerciseInWorkout(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    const { exerciseId, userId } = req.params;
+
+    if (!isValidUUID(exerciseId) || !isValidUUID(userId)) {
+      return res.status(400).json({ message: "Invalid exercise or user ID" });
+    }
+
+    try {
+      const exerciseExists = await ExerciseService.isExerciseInWorkout({
+        exerciseId,
+        userId,
+      });
+
+      return res.status(200).json(exerciseExists);
+    } catch (error: any) {
+      console.error("Error in addExerciseToWorkout:", error.message);
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+  }
+
+  static async addExerciseToWorkout(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    const { exerciseId, workoutId } = req.params;
+
+    if (!isValidUUID(exerciseId) || !isValidUUID(workoutId)) {
+      return res
+        .status(400)
+        .json({ message: "Invalid exercise or workout ID" });
+    }
+
+    try {
+      const updatedExercise = await ExerciseService.addExerciseToWorkout({
+        exerciseId,
+        workoutId,
+      });
+      return res.status(200).json(updatedExercise);
+    } catch (error: any) {
+      console.error("Error in addExerciseToWorkout:", error.message);
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+  }
+
   static async createExercise(req: Request, res: Response) {
     try {
       const exercise = await ExerciseService.createExercise(req.body);
       return res.status(201).json(exercise);
     } catch (error: any) {
       console.error("Error in createExercise:", error.message);
-      return res
-        .status(400)
-        .json({ message: "Failed to create exercise", error: error.message });
+      return res.status(400).json({ message: error.message });
     }
   }
 
   static async getAllExercises(req: Request, res: Response) {
+    const page = parseInt(req.query.page as string, 10) || 1;
+    const limit = parseInt(req.query.limit as string, 10) || 10;
+
     try {
-      const exercises = await ExerciseService.getAllExercises();
-      return res.status(200).json(exercises);
+      const result = await ExerciseService.getAllExercises(page, limit);
+      return res.status(200).json(result);
     } catch (error: any) {
       console.error("Error in getAllExercises:", error.message);
       return res
         .status(500)
         .json({ message: "Failed to get exercises", error: error.message });
+    }
+  }
+
+  static async getExercisesByUserId(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    const { userId } = req.params;
+
+    const page = parseInt(req.query.page as string, 10) || 1;
+    const limit = parseInt(req.query.limit as string, 10) || 10;
+
+    try {
+      const result = await ExerciseService.getExercisesByUserId(
+        userId,
+        page,
+        limit
+      );
+
+      return res.status(200).json(result);
+    } catch (error: any) {
+      console.error("Error in getExercisesByUserId:", error.message);
+
+      return res.status(500).json({ message: error.message });
     }
   }
 

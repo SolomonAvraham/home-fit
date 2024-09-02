@@ -1,7 +1,6 @@
+import React from "react";
 import Workouts from "@/components/pages/workouts/workouts";
 
-const WorkoutsPage = () => {
+export default function WorkoutsList() {
   return <Workouts />;
-};
-
-export default WorkoutsPage;
+}

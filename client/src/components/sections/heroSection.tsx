@@ -1,10 +1,6 @@
 import Link from "next/link";
-import {
-  FireIcon,
-  ChartBarIcon,
-  UserGroupIcon,
-  CalendarIcon,
-} from "@heroicons/react/24/solid";
+import { FaFire, FaChartBar, FaUsers, FaCalendarAlt } from "react-icons/fa";
+
 
 export default function HeroSection() {
   return (
@@ -37,28 +33,28 @@ export default function HeroSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 px-4">
           <div className="card bg-base-100 shadow-xl">
             <div className="card-body items-center text-center">
-              <FireIcon className="h-12 w-12 text-primary" />
+              <FaFire className="h-12 w-12 text-primary" />
               <h3 className="card-title">Personalized Workouts</h3>
               <p>Tailored exercise plans to meet your fitness goals</p>
             </div>
           </div>
           <div className="card bg-base-100 shadow-xl">
             <div className="card-body items-center text-center">
-              <ChartBarIcon className="h-12 w-12 text-primary" />
+              <FaChartBar className="h-12 w-12 text-primary" />
               <h3 className="card-title">Track Progress</h3>
               <p>Monitor your fitness journey with detailed analytics</p>
             </div>
           </div>
           <div className="card bg-base-100 shadow-xl">
             <div className="card-body items-center text-center">
-              <UserGroupIcon className="h-12 w-12 text-primary" />
+              <FaUsers className="h-12 w-12 text-primary" />
               <h3 className="card-title">Community Support</h3>
               <p>Join a community of fitness enthusiasts</p>
             </div>
           </div>
           <div className="card bg-base-100 shadow-xl">
             <div className="card-body items-center text-center">
-              <CalendarIcon className="h-12 w-12 text-primary" />
+              <FaCalendarAlt className="h-12 w-12 text-primary" />
               <h3 className="card-title">Flexible Scheduling</h3>
               <p>Work out on your own time, at your own pace</p>
             </div>

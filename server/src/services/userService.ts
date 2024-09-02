@@ -1,19 +1,11 @@
-import User from "../models/User";
+import User, { UserCreationAttributes } from "../models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { validate as validateUUID } from "uuid";
-import { Progress, Workout, sequelize, Notification } from "../models/index";
-
-interface UserData {
-  name: string;
-  email: string;
-  password: string;
-  role?: "user" | "admin";
-  token?: string;
-}
+import { Workout, sequelize } from "../models/index";
 
 class UserService {
-  public static async createUser(data: UserData) {
+  public static async createUser(data: UserCreationAttributes) {
     if (!data.email || !data.password || !data.name) {
       throw new Error("All fields are required");
     }
@@ -23,12 +15,12 @@ class UserService {
       throw new Error("Invalid email format");
     }
 
-   const passwordRegex = /^(?=.*[A-Za-z]).{8,}$/;  
-   if (!passwordRegex.test(data.password)) {
-     throw new Error(
-       "Password must be at least 8 characters long and include at least one letter"
-     );
-   }
+    const passwordRegex = /^(?=.*[A-Za-z]).{8,}$/;
+    if (!passwordRegex.test(data.password)) {
+      throw new Error(
+        "Password must be at least 8 characters long and include at least one letter"
+      );
+    }
 
     const nameRegex = /^[a-zA-Z ]{2,30}$/;
     if (!nameRegex.test(data.name)) {
@@ -38,12 +30,16 @@ class UserService {
     }
 
     const existingUser = await User.findOne({ where: { email: data.email } });
+
     if (existingUser) {
       throw new Error("Email already exists");
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    const user = await User.create({ ...data, password: hashedPassword });
+    const user = await User.create({
+      ...data,
+      password: hashedPassword,
+    });
     const token = jwt.sign(
       { id: user.id, email: user.email, name: user.name, role: user.role },
       process.env.JWT_SECRET as string,
@@ -98,8 +94,6 @@ class UserService {
       }
       // Delete related records
       await Workout.destroy({ where: { userId: id }, transaction });
-      await Progress.destroy({ where: { userId: id }, transaction });
-      await Notification.destroy({ where: { userId: id }, transaction });
 
       await user.destroy({ transaction });
       await transaction.commit();
@@ -124,13 +118,13 @@ class UserService {
     if (!emailRegex.test(email)) {
       throw new Error("Invalid email format");
     }
- const passwordRegex = /^(?=.*[A-Za-z]).{8,}$/;  
- if (!passwordRegex.test( password)) {
-   throw new Error(
-     "Password must be at least 8 characters long and include at least one letter"
-   );
- }
-
+    const passwordRegex = /^(?=.*[A-Za-z]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+      throw new Error(
+        "Password must be at least 8 characters long and include at least one letter"
+      );
+    }
+ 
     const user = await User.findOne({ where: { email } });
     if (!user) throw new Error("User not found");
 

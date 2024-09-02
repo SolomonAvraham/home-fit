@@ -3,25 +3,89 @@ import WorkoutService from "../services/workoutService";
 import { v4 as uuidv4, validate as uuidValidate } from "uuid";
 
 class WorkoutController {
+  public async isWorkoutExist(req: Request, res: Response): Promise<Response> {
+    const { workoutId, userId } = req.query;
+
+    try {
+      const exists = await WorkoutService.isWorkoutExist(
+        workoutId as string,
+        userId as string
+      );
+
+      return res.json(exists);
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ error: "Failed to check workout existence" });
+    }
+  }
+  public async addWorkout(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id, userId } = req.params;
+
+      if (!uuidValidate(id) || !uuidValidate(userId)) {
+        return res.status(400).json({ message: "Invalid UUID format" });
+      }
+
+      const workout = await WorkoutService.addWorkout(id, userId);
+
+      return res.status(200).json(workout);
+    } catch (error: any) {
+      console.error("Error in addWorkout:", error.message);
+      return res.status(400).json({ message: error.message });
+    }
+  }
+
+  public async getWorkoutsByUserId(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    const { id: userId } = req.params;
+
+    const page = parseInt(req.query.page as string, 10) || 1;
+    const limit = parseInt(req.query.limit as string, 10) || 10;
+
+    if (!uuidValidate(userId)) {
+      return res
+        .status(400)
+        .json({ message: "Invalid user ID", error: "Invalid user ID" });
+    }
+
+    try {
+      const result = await WorkoutService.getWorkoutsByUserId(
+        userId,
+        page,
+        limit
+      );
+      return res.status(200).json(result);
+    } catch (error: any) {
+      console.error("Error in getWorkoutsByUserId:", error.message);
+      return res
+        .status(400)
+        .json({ message: "Failed to get workouts", error: error.message });
+    }
+  }
+
   public async createWorkout(req: Request, res: Response): Promise<Response> {
     try {
-      const { userId, date, duration, description, name, exercises } = req.body;
-      console.log("Creating workout with data:", {
+      const {
         userId,
-        date,
+        id = uuidv4(),
         duration,
         description,
         name,
-        exercises,
-      });
+        createdBy,
+      } = req.body;
+
       const workout = await WorkoutService.createWorkout({
         userId,
-        date,
+        id,
         duration,
         description,
         name,
-        exercises,
+        createdBy,
       });
+
       return res.status(201).json(workout);
     } catch (error: any) {
       console.error("Error in createWorkout:", error.message);
@@ -51,8 +115,11 @@ class WorkoutController {
 
   public async getAllWorkouts(req: Request, res: Response): Promise<Response> {
     try {
-      const workouts = await WorkoutService.getAllWorkouts();
-      return res.status(200).json(workouts);
+      const page = parseInt(req.query.page as string, 10) || 1;
+      const limit = parseInt(req.query.limit as string, 10) || 10;
+
+      const result = await WorkoutService.getAllWorkouts(page, limit);
+      return res.status(200).json(result);
     } catch (error: any) {
       console.error("Error in getAllWorkouts:", error.message);
       return res
@@ -64,12 +131,14 @@ class WorkoutController {
   public async updateWorkout(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
+
       if (!uuidValidate(id)) {
         return res.status(400).json({ message: "Invalid UUID format" });
       }
-      const { date, duration, description, name, exercises } = req.body;
+
+      const { duration, description, name, exercises } = req.body;
+
       const workout = await WorkoutService.updateWorkout(id, {
-        date,
         duration,
         description,
         name,

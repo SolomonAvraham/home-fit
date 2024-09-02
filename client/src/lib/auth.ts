@@ -17,7 +17,9 @@ export async function getAuthStatus() {
 
     return true;
   } catch (error: unknown) {
-    console.error("JWT Verification Error:", error);
+    console.error("JWT Verification Error auth:", error);
     return false;
   }
 }
+
+
