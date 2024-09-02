@@ -2,13 +2,15 @@ import { create } from "zustand";
 
 interface AlertStore {
   alert: null | string;
-  setAlert: (alert: null | string) => void;
+  isError: boolean;
+  setAlert: (alert: null | string, isError?: boolean) => void;
 }
 
 const useAlertStore = create<AlertStore>((set) => ({
   alert: null,
-  setAlert: (alert) => {
-    set({ alert });
+  isError: false,
+  setAlert: (alert, isError = false) => {
+    set({ alert, isError });
   },
 }));
 

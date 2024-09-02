@@ -9,10 +9,14 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        BebasNeue: ["Bebas Neue", "sans-serif"],
+        Acme: ["Acme", "sans-serif"],
+        ProtestGuerrilla: ["Protest Guerrilla", "sans-serif"],
+        Dosis: ["Dosis", "sans-serif"],
+      },
       backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+        bgOne: "url('/bg/bg-3.jpg')",
       },
     },
   },

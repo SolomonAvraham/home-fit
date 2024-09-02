@@ -2,11 +2,13 @@
 
 import { login, logout, register } from "@/services/authService";
 import {
+  addExercise,
   addExerciseToWorkout,
   createExercise,
   deleteExercise,
   getAllExercises,
   getExercisesByUserId,
+  isExerciseExist,
   isExerciseInWorkout,
   updateExercise,
 } from "@/services/exerciseService";
@@ -34,12 +36,15 @@ import {
   useQueryClient,
   keepPreviousData,
 } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import { deleteUser, updateUser } from "@/services/userService";
 
 //////USER QUERIES//////
 
 export function UseLogoutMutation() {
   const router = useRouter();
+  const { setAlert } = useAlertStore();
 
   return useMutation({
     mutationKey: ["logout"],
@@ -49,8 +54,9 @@ export function UseLogoutMutation() {
       localStorage.removeItem("userName");
       router.refresh();
     },
-    onError: (error) => {
-      console.error("Logout failed:", error);
+    onError: (error: APIError) => {
+      console.log(error);
+      setAlert(error.response.data.message, true);
     },
   });
 }
@@ -69,11 +75,20 @@ export function UseLoginMutation(
       localStorage.setItem("userName", data.name);
       setUser(data);
 
-      router.push("/dashboard");
+      const lastVisitedPath = Cookies.get("lastVisitedPath")?.toString();
+
+      router.refresh();
+
+      if (lastVisitedPath !== undefined) {
+        router.push(lastVisitedPath);
+        Cookies.remove("lastVisitedPath");
+      } else {
+        router.push("/");
+      }
     },
     onError: (error: APIError) => {
-      console.log("error:", error);
-      setError(error.message);
+      console.log(error);
+      setError(error.response.data.message);
     },
   });
 }
@@ -89,8 +104,53 @@ export function UseRegisterMutation(
     onSuccess: () => {
       router.push("/auth/login");
     },
-    onError: (error) => {
-      setError(error.message);
+    onError: (error: APIError) => {
+      console.log(error);
+      setError(error.response.data.message);
+    },
+  });
+}
+
+export function UseUpdateUserMutation() {
+  const queryClient = useQueryClient();
+  const { setAlert } = useAlertStore();
+  const router = useRouter();
+
+  return useMutation({
+    mutationKey: ["update user"],
+    mutationFn: updateUser,
+    onSuccess: () => {
+      setAlert("Edited Successfully");
+      router.refresh();
+      queryClient.invalidateQueries();
+    },
+    onError: (error: APIError) => {
+      console.log(error);
+      setAlert(error.response.data.message, true);
+    },
+  });
+}
+
+export function UseDeleteUserMutation() {
+  const queryClient = useQueryClient();
+  const { setAlert } = useAlertStore();
+  const { setUser } = useUserStore();
+  const router = useRouter();
+
+  return useMutation({
+    mutationKey: ["delete user"],
+    mutationFn: deleteUser,
+    onSuccess: () => {
+      setAlert("Deleted Successfully");
+      setUser(null);
+      localStorage.removeItem("userId");
+      localStorage.removeItem("userName");
+      queryClient.invalidateQueries();
+      router.push(`/`);
+    },
+    onError: (error: APIError) => {
+      console.log(error);
+      setAlert(error.response.data.message, true);
     },
   });
 }
@@ -103,7 +163,6 @@ export function UseAllWorkoutsQuery(page: number, limit: number) {
     queryFn: async () => {
       return await getWorkouts(page, limit);
     },
-    staleTime: Infinity,
     placeholderData: keepPreviousData,
   });
 }
@@ -116,7 +175,6 @@ export function UseWorkoutsByUserIdQuery(
   return useQuery({
     queryKey: ["get workouts by user id", userId, page, limit],
     queryFn: async () => await getWorkoutsByUserId(userId, page, limit),
-    staleTime: Infinity,
     enabled: !!userId,
     placeholderData: keepPreviousData,
   });
@@ -134,8 +192,9 @@ export function UseDeleteWorkoutMutation() {
       queryClient.invalidateQueries();
       router.push(`/dashboard/workouts/myWorkouts`);
     },
-    onError: (error: unknown) => {
+    onError: (error: APIError) => {
       console.log(error);
+      setAlert(error.response.data.message, true);
     },
   });
 }
@@ -143,6 +202,7 @@ export function UseDeleteWorkoutMutation() {
 export function UseCreateWorkoutMutation() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { setAlert } = useAlertStore();
 
   return useMutation({
     mutationKey: ["create Workout"],
@@ -151,8 +211,9 @@ export function UseCreateWorkoutMutation() {
       queryClient.invalidateQueries();
       router.push(`/dashboard/workouts/addExercise/${data.id}`);
     },
-    onError: (error: unknown) => {
+    onError: (error: APIError) => {
       console.log(error);
+      setAlert(error.response.data.message, true);
     },
   });
 }
@@ -160,16 +221,19 @@ export function UseCreateWorkoutMutation() {
 export function UseUpdateWorkoutMutation() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { setAlert } = useAlertStore();
 
   return useMutation({
     mutationKey: ["create Workout"],
     mutationFn: updateWorkout,
     onSuccess: (data) => {
+      setAlert("Updated Successfully");
       queryClient.invalidateQueries();
       router.push(`/dashboard/workouts/myWorkouts/${data.id}`);
     },
-    onError: (error: unknown) => {
+    onError: (error: APIError) => {
       console.log(error);
+      setAlert(error.response.data.message, true);
     },
   });
 }
@@ -185,8 +249,8 @@ export function UseAddWorkoutMutation() {
       setAlert("Added Successfully");
       queryClient.invalidateQueries();
     },
-    onError: (error: any) => {
-      setAlert(error.response.data.message);
+    onError: (error: APIError) => {
+      setAlert(error.response.data.message, true);
     },
   });
 }
@@ -210,6 +274,7 @@ export function UseCreateExerciseMutation(
   const queryClient = useQueryClient();
   const router = useRouter();
   const { setAlert } = useAlertStore();
+  const showCreatedBy = usePathname().includes("addExercise");
 
   return useMutation({
     mutationKey: ["create Exercise"],
@@ -229,10 +294,13 @@ export function UseCreateExerciseMutation(
       });
 
       queryClient.invalidateQueries();
+      router.refresh();
 
-      if (data.workoutId) {
-        alert("Exercise added successfully to the workout!");
-      } else {
+      if (showCreatedBy || data.workoutId) {
+        setAlert("Added successfully");
+      }
+
+      if (!showCreatedBy) {
         router.push(`/dashboard/exercises/myExercises/${data.id}`);
       }
     },
@@ -249,7 +317,6 @@ export function UseAllExercisesQuery(page: number, limit: number) {
     queryFn: async () => {
       return await getAllExercises(page, limit);
     },
-    staleTime: Infinity,
     placeholderData: keepPreviousData,
   });
 }
@@ -262,7 +329,6 @@ export function UseExercisesByUserIdQuery(
   return useQuery({
     queryKey: ["get exercises by user id", userId, page, limit],
     queryFn: async () => await getExercisesByUserId(userId, page, limit),
-    staleTime: Infinity,
     placeholderData: keepPreviousData,
     enabled: !!userId,
   });
@@ -271,18 +337,23 @@ export function UseExercisesByUserIdQuery(
 export function UseDeleteExerciseMutation() {
   const { setAlert } = useAlertStore();
   const router = useRouter();
-
+  const pathName = usePathname().includes("workouts/edit");
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationKey: ["delete exercise"],
     mutationFn: deleteExercise,
     onSuccess: () => {
       setAlert("Deleted Successfully");
       queryClient.invalidateQueries();
-      router.push(`/dashboard/exercises/myExercises`);
+
+      if (!pathName) {
+        router.push(`/dashboard/exercises/myExercises`);
+      }
     },
-    onError: (error: unknown) => {
+    onError: (error: APIError) => {
       console.log(error);
+      setAlert(error.response.data.message, true);
     },
   });
 }
@@ -300,8 +371,27 @@ export function UseUpdateExerciseMutation() {
       router.push(`/dashboard/exercises/myExercises/${data.id}`);
       queryClient.invalidateQueries();
     },
-    onError: (error: unknown) => {
+    onError: (error: APIError) => {
       console.log(error);
+      setAlert(error.response.data.message, true);
+    },
+  });
+}
+
+export function UseAddExerciseMutation() {
+  const { setAlert } = useAlertStore();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["add exercise"],
+    mutationFn: addExercise,
+    onSuccess: () => {
+      setAlert("Added Successfully");
+      queryClient.invalidateQueries();
+    },
+    onError: (error: APIError) => {
+      console.log(error);
+      setAlert(error.response?.data.message);
     },
   });
 }
@@ -335,5 +425,15 @@ export function UseIsExerciseInWorkoutQuery(
     queryKey: ["is Exercise In Workout"],
     queryFn: async () => await isExerciseInWorkout(data),
     enabled,
+  });
+}
+
+export function UseIsExerciseExistQuery(exerciseId: string, userId: string) {
+  return useQuery({
+    queryKey: ["is Exercise Exist", exerciseId, userId],
+    queryFn: async () => {
+      return await isExerciseExist({ exerciseId, userId });
+    },
+    enabled: !!exerciseId && !!userId,
   });
 }

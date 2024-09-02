@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import UserService from "../services/userService";
+import { validate as validateUUID } from "uuid";
 
 class UserController {
   public async createUser(req: Request, res: Response): Promise<void> {
@@ -15,9 +16,9 @@ class UserController {
       const { token, ...userData } = user;
 
       res.status(201).json(userData);
-    } catch (error: unknown) {
+    } catch (error: any) {
       if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ message: error.message });
       }
       console.error(error);
     }
@@ -39,9 +40,9 @@ class UserController {
       });
 
       res.status(200).json({ id, name, role });
-    } catch (error: unknown) {
+    } catch (error: any) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        res.status(401).json({ message: error.message });
       }
       console.error(error);
     }
@@ -57,9 +58,9 @@ class UserController {
       });
 
       res.status(200).json({ message: "Logout successful" });
-    } catch (error: unknown) {
+    } catch (error: any) {
       if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ message: error.message });
       }
       console.error(error);
     }
@@ -67,9 +68,8 @@ class UserController {
 
   public async getUserById(req: Request, res: Response): Promise<void> {
     const userId = req.params.id;
-    const uuidRegex =
-      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-    if (!uuidRegex.test(userId)) {
+
+    if (!validateUUID(userId)) {
       res.status(400).json({ message: "Invalid UUID format" });
       return;
     }
@@ -80,9 +80,9 @@ class UserController {
       } else {
         res.status(404).json({ message: "User not found" });
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ message: error.message });
       }
       console.error(error);
     }
@@ -92,29 +92,28 @@ class UserController {
     try {
       const users = await UserService.getAllUsers();
       res.status(200).json(users);
-    } catch (error: unknown) {
+    } catch (error: any) {
       if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ message: error.message });
       }
       console.error(error);
     }
   }
 
   public async updateUser(req: Request, res: Response): Promise<void> {
-    const userId = req.params.id;
     const data = req.body;
-    const uuidRegex =
-      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-    if (!uuidRegex.test(userId)) {
+
+    if (!validateUUID(data.id)) {
       res.status(400).json({ message: "Invalid UUID format" });
       return;
     }
+
     try {
-      const updatedUser = await UserService.updateUser(userId, data);
+      const updatedUser = await UserService.updateUser(data.id, data);
       res.json(updatedUser);
-    } catch (error: unknown) {
+    } catch (error: any) {
       if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ message: error.message });
       }
       console.error(error);
     }
@@ -122,9 +121,7 @@ class UserController {
 
   public async deleteUser(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
-    const uuidRegex =
-      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-    if (!uuidRegex.test(id)) {
+    if (!validateUUID(id)) {
       res.status(400).json({ message: "Invalid UUID format" });
       return;
     }
@@ -134,11 +131,16 @@ class UserController {
         res.status(404).json({ message: "User not found" });
         return;
       }
+
+      if (res) {
+        res.clearCookie("token");
+      }
+
       res.status(204).json();
-    } catch (error: unknown) {
+    } catch (error: any) {
       if (error instanceof Error) {
         console.error("Delete user error:", error.message, error.stack); // Added logging
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ message: error.message });
       }
       console.error(error);
     }

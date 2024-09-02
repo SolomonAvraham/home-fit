@@ -3,6 +3,28 @@ import ExerciseService from "../services/exerciseService";
 import { validate as isValidUUID } from "uuid";
 
 class ExerciseController {
+  static async isExerciseExist(req: Request, res: Response): Promise<Response> {
+    const { exerciseId, userId } = req.params;
+
+    if (!isValidUUID(exerciseId) || !isValidUUID(userId)) {
+      return res.status(400).json({ message: "Invalid exercise or user ID" });
+    }
+
+    try {
+      const exerciseExists = await ExerciseService.isExerciseExist({
+        exerciseId,
+        userId,
+      });
+
+      return res.status(200).json(exerciseExists);
+    } catch (error: any) {
+      console.error("Error in addExerciseToWorkout:", error.message);
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+  }
+
   static async isExerciseInWorkout(
     req: Request,
     res: Response
@@ -20,6 +42,28 @@ class ExerciseController {
       });
 
       return res.status(200).json(exerciseExists);
+    } catch (error: any) {
+      console.error("Error in addExerciseToWorkout:", error.message);
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+  }
+
+  static async addExercise(req: Request, res: Response): Promise<Response> {
+    const { exerciseId, userId } = req.params;
+
+    if (!isValidUUID(exerciseId)) {
+      return res.status(400).json({ message: "Invalid exercise ID" });
+    }
+
+    try {
+      const updatedExercise = await ExerciseService.addExercise({
+        exerciseId,
+        userId,
+      });
+
+      return res.status(200).json(updatedExercise);
     } catch (error: any) {
       console.error("Error in addExerciseToWorkout:", error.message);
       return res.status(500).json({
@@ -73,9 +117,7 @@ class ExerciseController {
       return res.status(200).json(result);
     } catch (error: any) {
       console.error("Error in getAllExercises:", error.message);
-      return res
-        .status(500)
-        .json({ message: "Failed to get exercises", error: error.message });
+      return res.status(500).json({ message: error.message, error });
     }
   }
 
@@ -106,20 +148,21 @@ class ExerciseController {
   static async getExerciseById(req: Request, res: Response) {
     try {
       const { id } = req.params;
+
       if (!isValidUUID(id)) {
         return res.status(400).json({ message: "Invalid UUID format" });
       }
 
       const exercise = await ExerciseService.getExerciseById(id);
+
       if (!exercise) {
         return res.status(404).json({ message: "Exercise not found" });
       }
+
       return res.status(200).json(exercise);
     } catch (error: any) {
       console.error("Error in getExerciseById:", error.message);
-      return res
-        .status(400)
-        .json({ message: "Failed to get exercise", error: error.message });
+      return res.status(400).json({ message: error.message, error });
     }
   }
 
@@ -137,9 +180,7 @@ class ExerciseController {
       return res.status(200).json(exercise);
     } catch (error: any) {
       console.error("Error in updateExercise:", error.message);
-      return res
-        .status(400)
-        .json({ message: "Failed to update exercise", error: error.message });
+      return res.status(400).json({ message: error.message, error });
     }
   }
 
@@ -157,9 +198,7 @@ class ExerciseController {
       return res.status(204).send();
     } catch (error: any) {
       console.error("Error in deleteExercise:", error.message);
-      return res
-        .status(400)
-        .json({ message: "Failed to delete exercise", error: error.message });
+      return res.status(400).json({ message: error.message, error });
     }
   }
 }

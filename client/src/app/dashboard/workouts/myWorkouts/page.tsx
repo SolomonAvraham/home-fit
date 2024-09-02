@@ -1,5 +1,6 @@
 "use client";
 
+import Breadcrumb from "@/components/ui/breadcrumb/breadcrumb";
 import WorkoutCard from "@/components/ui/cards/workoutCard";
 import Pagination from "@/components/ui/pagination/pagination";
 import { UseWorkoutsByUserIdQuery } from "@/lib/queries";
@@ -36,51 +37,56 @@ export default function UserWorkouts({ operation }: { operation: string }) {
     setCurrentPage(page);
   };
 
-  return (
-    <div className="container mx-auto p-4 min-h-screen">
-      <h1 className="text-2xl font-bold">{renderButton(operation)}</h1>
+  const currentPath = `/workouts/My Workouts`;
 
-      {data?.workouts[0] ? (
-        <div className="flex flex-col">
-          <div className="flex flex-wrap items-center justify-center gap-4 min-h-screen">
-            {data.workouts.map((workout: WorkoutProps) => (
-              <WorkoutCard
-                key={workout.id}
-                workout={workout}
-                operation="view"
-              />
-            ))}
+  return (
+    <div className="container mx-auto p-4 min-h-screen py-10">
+      <div className=" -mt-10">
+        <Breadcrumb currentPath={currentPath} excludePaths={[]} />
+      </div>
+      <div className="text-center">
+        <h1 className="text-6xl drop-shadow-lg cursor-default font-bold font-Acme text-center text-slate-100">
+          {renderButton(operation)}
+        </h1>
+        <hr className="border-gray-700 w-2/4 mx-auto opacity-30 mt-5" />
+      </div>
+
+      <div className="flex flex-wrap items-center justify-center gap-4 min-h-screen py-10">
+        {data?.workouts[0] ? (
+          data.workouts.map((workout: WorkoutProps) => (
+            <WorkoutCard key={workout.id} workout={workout} operation="view" />
+          ))
+        ) : (
+          <div className="grid place-items-center">
+            {" "}
+            <h2 className="text-6xl font-bold "> No Workouts</h2>
+            <div className="flex md:flex-row flex-col mt-10 items-center justify-center gap-3 text-center">
+              <Link
+                href={"/workouts"}
+                className="text-3xl font-bold hover:text-black"
+              >
+                {" "}
+                Add Workouts
+              </Link>
+              <span className="text-3xl font-bold text-black">OR</span>
+              <Link
+                href={"/dashboard/workouts/create"}
+                className="text-3xl font-bold hover:text-black"
+              >
+                {" "}
+                Create Workouts
+              </Link>
+            </div>
           </div>
-          {data.workouts.length > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={Math.ceil(data?.total / limit)}
-              onPageChange={handlePageChange}
-            />
-          )}
-        </div>
-      ) : (
-        <div className="grid place-items-center">
-          {" "}
-          <h2 className="text-6xl font-bold "> No Workouts</h2>
-          <div className="flex items-center justify-center gap-3">
-            <Link
-              href={"/workouts"}
-              className="text-3xl font-bold hover:text-black"
-            >
-              {" "}
-              Add Workouts
-            </Link>
-            <span className="text-3xl font-bold">OR</span>
-            <Link
-              href={"/dashboard/workouts/create"}
-              className="text-3xl font-bold hover:text-black"
-            >
-              {" "}
-              Create Workouts
-            </Link>
-          </div>
-        </div>
+        )}
+      </div>
+
+      {data && data.workouts.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={Math.ceil((data?.total || 0) / limit)}
+          onPageChange={handlePageChange}
+        />
       )}
     </div>
   );

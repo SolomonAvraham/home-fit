@@ -12,11 +12,15 @@ class WorkoutController {
         userId as string
       );
 
+      if (!exists) {
+        return res.status(404).json({ message: "Workout not found" });
+      }
+
       return res.json(exists);
-    } catch (error) {
+    } catch (error: unknown) {
       return res
         .status(500)
-        .json({ error: "Failed to check workout existence" });
+        .json({ message: "Failed to check workout existence", error: error });
     }
   }
   public async addWorkout(req: Request, res: Response): Promise<Response> {
@@ -46,9 +50,7 @@ class WorkoutController {
     const limit = parseInt(req.query.limit as string, 10) || 10;
 
     if (!uuidValidate(userId)) {
-      return res
-        .status(400)
-        .json({ message: "Invalid user ID", error: "Invalid user ID" });
+      return res.status(400).json({ message: "Invalid user ID" });
     }
 
     try {
@@ -89,9 +91,7 @@ class WorkoutController {
       return res.status(201).json(workout);
     } catch (error: any) {
       console.error("Error in createWorkout:", error.message);
-      return res
-        .status(400)
-        .json({ message: "Failed to create workout", error: error.message });
+      return res.status(400).json({ message: error.message });
     }
   }
 
@@ -107,9 +107,7 @@ class WorkoutController {
       }
       return res.status(200).json(workout);
     } catch (error: any) {
-      return res
-        .status(400)
-        .json({ message: "Failed to get workout", error: error.message });
+      return res.status(400).json({ message: error.message, error });
     }
   }
 

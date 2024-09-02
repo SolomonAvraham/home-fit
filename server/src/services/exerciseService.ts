@@ -3,8 +3,87 @@ import { Exercise, User, Workout, Workout_exercises } from "../models/index";
 import { ExerciseAttributes } from "../types/models";
 import { v4 as uuidv4 } from "uuid";
 import formatMinutesToHours from "../utils/formatMinutesToHours";
+import { Op } from "sequelize";
+import { CreatedByType } from "../types/services";
 
 class ExerciseService {
+  static async isExerciseExist(data: {
+    exerciseId: string;
+    userId: string;
+  }): Promise<boolean> {
+    try {
+      const { exerciseId, userId } = data;
+
+      const exercise = await Exercise.findByPk(exerciseId);
+
+      if (!exercise) {
+        throw new Error("Exercise not found");
+      }
+
+      const originalExerciseId =
+        exercise.createdBy?.[0]?.originalExerciseId || exerciseId;
+
+      const userHasExercise = await Exercise.findOne({
+        where: {
+          userId,
+          createdBy: {
+            [Op.contains]: [{ originalExerciseId }],
+          },
+        },
+      });
+
+      if (!userHasExercise) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error("Check Exercise Existence Error:", error);
+      throw new Error("Failed to check exercise existence");
+    }
+  }
+
+  static async addExercise(data: { exerciseId: string; userId: string }) {
+    try {
+      const { exerciseId, userId } = data;
+
+      const exercise = await Exercise.findByPk(exerciseId);
+
+      if (!exercise) {
+        throw new Error("Exercise not found");
+      }
+
+      const originalExerciseId = exercise.createdBy?.[0]?.originalExerciseId;
+
+      const userHasExercise = await Exercise.findOne({
+        where: {
+          userId,
+          createdBy: {
+            [Op.contains]: [{ originalExerciseId }],
+          },
+        },
+      });
+
+      if (userHasExercise) {
+        throw new Error("Exercise already added for this user");
+      }
+
+      const newExercise = await Exercise.create({
+        ...exercise.toJSON(),
+        id: uuidv4(),
+        userId,
+      });
+
+      if (!newExercise) {
+        throw new Error("Failed to create exercise");
+      }
+
+      return newExercise;
+    } catch (error: any) {
+      console.error("Add Exercise to Workout Service Error:", error);
+      throw new Error(error.message);
+    }
+  }
+
   static async isExerciseInWorkout(data: {
     exerciseId: string;
     userId: string;
@@ -169,11 +248,46 @@ class ExerciseService {
         order: [["createdAt", "DESC"]],
       });
 
+      const exerciseMap = new Map<string, boolean>();
+      const uniqueExercises: Exercise[] = [];
+
+      exercises.forEach((exercise: Exercise) => {
+        const exerciseJSON = exercise.toJSON() as ExerciseAttributes;
+        const key =
+          exerciseJSON.createdBy?.[0].originalExerciseId || exerciseJSON.id;
+
+        if (!exerciseMap.has(key)) {
+          exerciseMap.set(key, true);
+          uniqueExercises.push(exercise);
+        }
+      });
+
+      const formattedExercises = uniqueExercises.map((exercise: Exercise) => {
+        const exerciseJSON = exercise.toJSON() as ExerciseAttributes;
+        return {
+          id: exerciseJSON.id,
+          name: exerciseJSON.name,
+          description: exerciseJSON.description,
+          duration: exerciseJSON.duration,
+          sets: exerciseJSON.sets,
+          reps: exerciseJSON.reps,
+          media: exerciseJSON.media,
+          userId: exerciseJSON.userId,
+          createdBy: exerciseJSON.createdBy?.map((user: CreatedByType) => ({
+            creatorId: user.creatorId,
+            creatorName: user.creatorName,
+            originalExerciseId: user.originalExerciseId,
+          })),
+          createdAt: exerciseJSON.createdAt,
+          updatedAt: exerciseJSON.updatedAt,
+        };
+      });
+
       return {
         total: count,
         page,
         limit,
-        exercises,
+        exercises: formattedExercises,
       };
     } catch (error) {
       console.error("Get All Exercises Service Error:", error);
@@ -207,9 +321,9 @@ class ExerciseService {
         const exerciseJSON = exercise.toJSON() as ExerciseAttributes;
 
         const formattedTime = exerciseJSON.duration
-          ? formatMinutesToHours(exerciseJSON.duration)
-          : undefined;
-
+        ? formatMinutesToHours(exerciseJSON.duration)
+        : null;
+ 
         return {
           id: exerciseJSON.id,
           name: exerciseJSON.name,
@@ -242,14 +356,19 @@ class ExerciseService {
   }
 
   static async getExerciseById(id: string) {
+    console.log("🚀 ~ ExerciseService ~ getExerciseById ~ id:", id);
+
     try {
       if (!isValidUUID(id)) {
         throw new Error("Invalid UUID format");
       }
+
       const exercise = await Exercise.findByPk(id);
+
       if (!exercise) {
         throw new Error("Exercise not found");
       }
+
       return exercise;
     } catch (error) {
       console.error("Get Exercise By ID Service Error:", error);
@@ -279,11 +398,28 @@ class ExerciseService {
       if (!isValidUUID(id)) {
         throw new Error("Invalid UUID format");
       }
+
       const exercise = await Exercise.findByPk(id);
+
       if (!exercise) {
         throw new Error("Exercise not found");
       }
+
+      const WorkoutExercise = await Workout_exercises.destroy({
+        where: { exerciseId: id },
+      });
+      console.log(
+        "🚀 ~ ExerciseService ~ deleteExercise ~ WorkoutExercise:",
+        WorkoutExercise
+      );
+
       await exercise.destroy();
+
+      const a = await Workout_exercises.findAll({
+        where: { exerciseId: id },
+      });
+      console.log("🚀 ~ ExerciseService ~ deleteExercise ~ a:", a);
+
       return exercise;
     } catch (error) {
       console.error("Delete Exercise Service Error:", error);

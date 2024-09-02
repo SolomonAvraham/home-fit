@@ -1,15 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ExerciseAttributes } from "@/types/exercise";
+import { usePathname, useRouter } from "next/navigation";
 import { WorkoutProps } from "@/types/workout";
 import { UseDeleteWorkoutMutation } from "@/lib/queries";
 import useUserStore from "@/store/userStore";
-import AddWorkoutButton from "../buttons/addWorkout";
+import AddWorkoutButton from "../buttons/addWorkoutButton";
 import useConfirmStore from "@/store/confirmStore";
-import Confirm from "../confirm/confirm";
-import Alert from "../alert/alert";
+import { GiWeightLiftingUp } from "react-icons/gi";
+import ExerciseCard from "./exerciseCard";
 
 export default function WorkoutCard({
   workout,
@@ -20,6 +19,7 @@ export default function WorkoutCard({
 }) {
   const router = useRouter();
   const { user } = useUserStore();
+  const showCreatedBy = usePathname().includes("addExercise");
 
   const deleteWorkoutMutation = UseDeleteWorkoutMutation();
 
@@ -32,16 +32,21 @@ export default function WorkoutCard({
       className: "btn btn-info",
       action: "viewUnsigned",
     },
-    { name: "view", label: "View", className: "btn btn-info", action: "view" },
+    {
+      name: "view",
+      label: "View Workout",
+      className: "btn btn-info",
+      action: "view",
+    },
     {
       name: "edit",
-      label: "Edit",
+      label: "Edit Workout",
       className: "btn btn-warning",
       action: "edit",
     },
     {
       name: "delete",
-      label: "Delete",
+      label: "Delete Workout",
       className: "btn btn-error",
       action: "delete",
     },
@@ -100,7 +105,7 @@ export default function WorkoutCard({
                 onClick={() =>
                   handleOperation(workout.id as string, option.action)
                 }
-                className={`${option.className} disabled:text-gray-400 disabled:bg-gray-700 disabled:cursor-not-allowed`}
+                className={`${option.className}  disabled:text-gray-400 disabled:bg-gray-700 disabled:cursor-not-allowed`}
               >
                 {option.label}
               </button>
@@ -163,32 +168,52 @@ export default function WorkoutCard({
   };
 
   return (
-    <div className="card w-fit bg-base-100 shadow-xl m-4">
-      <Alert />
-      <Confirm />
-      <div className="card-body items-center justify-center text-center">
-        <h4 className="font-semibold text-gray-300 capitalize  ">
-          Created By:{" "}
-          {workout.createdBy?.[0]?.creatorId !== user?.id
-            ? workout.createdBy?.[0]?.creatorName
-            : "You"}
-        </h4>
+    <div className="card text-center w-80 bg-gray-800 shadow-md m-2 p-4 rounded-lg">
+      {" "}
+      {!showCreatedBy && (
+        <div className="flex justify-start gap-[0.11rem] text-sm mb-10 font-BebasNeue items-center  font-semibold ">
+          <span>Created by:</span>
+          <span>
+            {" "}
+            {workout.createdBy?.[0]?.creatorId !== user?.id
+              ? workout.createdBy?.[0]?.creatorName
+              : "You"}
+          </span>
+        </div>
+      )}
+      <div className="mx-auto">
+        <GiWeightLiftingUp className="h-12 w-12" />
+      </div>
+      <div className="card-body text-center">
+        <h2 className=" tracking-wide font-Acme text-2xl font-bold">
+          {workout.name}
+        </h2>
+        <hr className="border-gray-400 w-3/4 mx-auto opacity-30" />
+        <p className="text-gray-400 text-sm">{workout.description}</p>
+        <p className="text-gray-400 font-bold">
+          {" "}
+          <span className="font-semibold">Duration:</span> {workout.duration}{" "}
+ 
+        </p>
 
-        <h2 className="card-title">{workout.name}</h2>
-        <p>Duration: {workout.duration}</p>
-
-        <p className="text-sm">Description: {workout.description}</p>
-        <div className="card-actions justify-center">
+        <div
+          className={`card-actions grid ${
+            operation === "view" && "grid-cols-2 "
+          } mx-auto py-10 gap-4`}
+        >
           {renderButtons()}{" "}
           {user && operation !== "view" && (
-            <AddWorkoutButton
-              workoutId={workout.id as string}
-              userId={user.id}
-            />
+            <span className={`${!operation && "col-span-full"} `}>
+              <AddWorkoutButton
+                workoutId={workout.id as string}
+                userId={user.id}
+              />
+            </span>
           )}
           <button
             onClick={() => setShowDetails(!showDetails)}
-            className="btn btn-primary"
+            disabled={!workout.exercises?.[0]}
+            className="btn btn-primary col-span-full"
           >
             {showDetails
               ? "Hide Exercises"
@@ -196,38 +221,14 @@ export default function WorkoutCard({
           </button>{" "}
         </div>
         {showDetails && (
-          <div className="mt-4">
-            <hr />
-            <h3 className="font-bold mt-4 mb-2">Exercises:</h3>
-            <ul className="space-y-4">
-              {workout.exercises?.map(
-                (exercise: ExerciseAttributes, index: number) => (
-                  <li key={index} className="border-b pb-2 font-extrabold">
-                    <h4 className="font-semibold"> Name: {exercise.name}</h4>
-                    <p>Description: {exercise.description}</p>
-                    <p>
-                      {exercise.sets} sets,{" "}
-                      {exercise.reps
-                        ? `${exercise.reps} reps`
-                        : exercise.duration}
-                    </p>
-                    {exercise.media && (
-                      <div className="mt-2">
-                        <iframe
-                          width="100%"
-                          height="200"
-                          src={exercise.media}
-                          title={`YouTube video player for ${exercise.name}`}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        ></iframe>
-                        <hr />
-                      </div>
-                    )}
-                  </li>
-                )
-              )}
-            </ul>
+          <div className="mt-5  ">
+            <hr className="border-gray-400 w-3/4 mx-auto opacity-30" />
+            <div className="py-3 flex flex-col items-center justify-center p-1  ">
+              {workout.exercises?.map((exercise, i: number) => (
+                <ExerciseCard key={i} exercise={exercise} operation="view" />
+              ))}
+            </div>
+            <hr className="border-gray-400 w-3/4 mx-auto opacity-30" />
           </div>
         )}
       </div>
