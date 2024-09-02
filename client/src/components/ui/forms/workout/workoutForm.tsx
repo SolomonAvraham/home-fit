@@ -45,11 +45,11 @@ const WorkoutForm = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-8 p-6 bg-base-200 rounded-box shadow-lg">
-      <h2 className="text-2xl font-bold mb-6 text-center">Create Workout</h2>
+    <div className="max-w-md md:max-w-lg  mx-auto mt-8 p-6 bg-gray-800 rounded-box shadow-lg">
+      <h2 className="text-5xl font-bold mb-6 text-center">Create Workout</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="form-control">
-          <label className="label" htmlFor="name">
+          <label className="label  mx-auto font-bold" htmlFor="name">
             <span className="label-text">Workout Name</span>
           </label>
           <input
@@ -59,14 +59,15 @@ const WorkoutForm = () => {
             value={workout.name}
             onChange={handleChange}
             placeholder="Workout Name"
+            minLength={2}
             required
-            className="input input-bordered w-full"
+            className="input input-bordered w-full text-center"
           />
         </div>
 
         <div className="form-control">
           <label className="label" htmlFor="description">
-            <span className="label-text">Description</span>
+            <span className="label-text  mx-auto font-bold">Description</span>
           </label>
           <textarea
             id="description"
@@ -74,13 +75,17 @@ const WorkoutForm = () => {
             value={workout.description}
             onChange={handleChange}
             placeholder="Description"
+            minLength={10}
             required
             className="textarea textarea-bordered h-24"
           />
         </div>
 
         <div className="form-control mt-6">
-          <button type="submit" className="btn btn-primary">
+          <button
+            type="submit"
+            className="btn btn-success text-white font-Acme text-2xl"
+          >
             Create Workout
           </button>
         </div>

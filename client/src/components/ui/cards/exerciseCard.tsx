@@ -1,17 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ExerciseAttributes } from "@/types/exercise";
 import {
   UseAddExerciseToWorkoutMutation,
   UseDeleteExerciseMutation,
   UseIsExerciseInWorkoutQuery,
+  UseWorkoutsByUserIdQuery,
 } from "@/lib/queries";
 import useUserStore from "@/store/userStore";
 import useConfirmStore from "@/store/confirmStore";
-import Alert from "../alert/alert";
-import Confirm from "../confirm/confirm";
+import AddExerciseButton from "../buttons/addExerciseButton";
+import { FaRunning } from "react-icons/fa";
 
 interface ExerciseCardProps {
   exercise: ExerciseAttributes;
@@ -20,6 +21,8 @@ interface ExerciseCardProps {
 
 const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, operation }) => {
   const router = useRouter();
+  const pathName = usePathname();
+
   const [openCardId, setOpenCardId] = useState<string | null>(null);
   const [selectedWorkout, setSelectedWorkout] = useState<string>("");
 
@@ -27,36 +30,44 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, operation }) => {
 
   const deleteExerciseMutation = UseDeleteExerciseMutation();
   const addExerciseToWorkoutMutation = UseAddExerciseToWorkoutMutation();
-  const { data: workouts } = UseIsExerciseInWorkoutQuery(
+  const { data: isWorkoutsExist } = UseIsExerciseInWorkoutQuery(
     {
       exerciseId: exercise.id as string,
       userId: user?.id as string,
     },
-    openCardId === exercise.id && !!exercise.id
+    openCardId === exercise.id
   );
+  const { data: userWorkouts } = UseWorkoutsByUserIdQuery(
+    user?.id as string,
+    0,
+    0
+  );
+
+  const userHasExercise = exercise.userId === user?.id;
+  const disabledViewButton = pathName.includes(`/myExercises/${exercise.id}`);
 
   const options = [
     {
       name: "view",
-      label: "View",
+      label: "View Exercise",
       className: "btn btn-info",
       action: "view",
     },
     {
       name: "user",
-      label: "View",
-      className: "btn btn-info",
+      label: "View Exercise",
+      className: `btn btn-info ${disabledViewButton && "hidden"}`,
       action: "view",
     },
     {
       name: "user",
-      label: "Edit",
+      label: "Edit Exercise",
       className: "btn btn-warning",
       action: "edit",
     },
     {
       name: "user",
-      label: "Delete",
+      label: "Delete Exercise",
       className: "btn btn-error",
       action: "delete",
     },
@@ -81,7 +92,9 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, operation }) => {
         router.push(`/dashboard/exercises/edit/${id}`);
         break;
       case "view":
-        router.push(`/dashboard/exercises/myExercises/${id}`);
+        userHasExercise
+          ? router.push(`/dashboard/exercises/myExercises/${id}`)
+          : router.push(`/dashboard/exercises/${id}`);
         break;
       default:
         console.log("Unknown operation:", action);
@@ -102,7 +115,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, operation }) => {
                 onClick={() =>
                   handleOperation(exercise.id as string, option.action)
                 }
-                className={option.className}
+                className={`${option.className} `}
               >
                 {option.label}
               </button>
@@ -118,7 +131,9 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, operation }) => {
                 onClick={() =>
                   handleOperation(exercise.id as string, option.action)
                 }
-                className={option.className}
+                className={`${option.className} ${
+                  !userHasExercise && "hidden"
+                }  `}
               >
                 {deleteExerciseMutation.isPending
                   ? "Deleting..."
@@ -144,32 +159,54 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, operation }) => {
         exerciseId,
         workoutId,
       });
+
+      setOpenCardId(null);
     }
   };
 
   return (
-    <div className="card w-96 bg-base-100 shadow-xl m-4">
-      <Alert />
-      <Confirm />
-      <div className="card-body">
-        <h2 className="card-title text-lg font-bold">{exercise.name}</h2>
-        <p className="text-gray-600">{exercise.description}</p>
+    <div className="card text-center w-80 bg-gray-800 shadow-md m-2 p-4 rounded-lg">
+      <div className="flex justify-start gap-[0.11rem] text-sm mb-10 font-BebasNeue items-center  font-semibold ">
+        <span>Created by:</span>
+        <span>
+          {" "}
+          {exercise.createdBy?.[0]?.creatorId !== user?.id
+            ? exercise.createdBy?.[0]?.creatorName
+            : "You"}
+        </span>
+      </div>
+
+      <div className="mx-auto">
+        <FaRunning className="h-12 w-12" />
+      </div>
+
+      <div className="card-body text-center">
+        <h2 className=" tracking-wide font-Acme text-2xl font-bold">
+          {exercise.name}
+        </h2>
+        <hr className="border-gray-400 w-3/4 mx-auto opacity-30" />
+        <p className="text-gray-400 text-sm">{exercise.description}</p>
+
         {exercise.duration && (
-          <p className="text-gray-700">
+          <p className="text-gray-400 font-bold">
             <span className="font-semibold">Duration:</span> {exercise.duration}{" "}
             minutes
           </p>
         )}
-        {exercise.sets && (
-          <p className="text-gray-700">
-            <span className="font-semibold">Sets:</span> {exercise.sets}
-          </p>
-        )}
-        {exercise.reps && (
-          <p className="text-gray-700">
-            <span className="font-semibold">Reps:</span> {exercise.reps}
-          </p>
-        )}
+
+        <div className="flex text-gray-400 font-bold">
+          {exercise.sets && (
+            <p>
+              <span className="font-semibold">Sets:</span> {exercise.sets}
+            </p>
+          )}
+          {exercise.reps && (
+            <p>
+              <span className="font-semibold">Reps:</span> {exercise.reps}
+            </p>
+          )}
+        </div>
+
         {exercise.media && (
           <div className="mt-2">
             <iframe
@@ -183,68 +220,70 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, operation }) => {
             <hr />
           </div>
         )}
-        <div className="mt-4">
-          <span className="font-semibold">Created By:</span>
-          {exercise.createdBy?.map((creator) => (
-            <p key={creator.creatorId} className="text-gray-700">
-              {creator.creatorName}
-            </p>
-          ))}
-        </div>
-        {exercise.createdAt && (
-          <p className="text-sm text-gray-500 mt-2">
-            Created on: {new Date(exercise.createdAt).toLocaleDateString()}
-          </p>
-        )}
-        {exercise.updatedAt && (
-          <p className="text-sm text-gray-500">
-            Updated on: {new Date(exercise.updatedAt).toLocaleDateString()}
-          </p>
-        )}
-        <div className="card-actions justify-center mt-4">
+
+        <div className="card-actions grid grid-cols-2 place-items-center gap-8 py-10 sm:gap-4">
           {renderButtons()}
-        </div>
-        <div className="card-actions flex flex-col items-center justify-center mt-4">
+
+          <div
+            className={`${disabledViewButton && "col-span-full"} ${
+              !userHasExercise && operation !== "view" && "col-span-full"
+            }`}
+          >
+            <AddExerciseButton
+              exerciseId={exercise.id as string}
+              userId={user?.id as string}
+            />
+          </div>
+
           <button
-            className="btn btn-success mb-2"
+            className=" btn btn-success mb-2  col-span-full mt-5"
             onClick={() =>
               setOpenCardId(
                 openCardId === exercise.id ? null : (exercise.id as string)
               )
             }
           >
-            {openCardId === exercise.id ? "Close" : "Add to Workout"}
+            {openCardId === exercise.id ? "Close" : "Add Exercise to Workout"}
           </button>
-          {openCardId === exercise.id &&
-            Array.isArray(workouts) &&
-            workouts.length > 0 && (
-              <div className="w-full flex flex-col items-center space-y-2">
-                <select
-                  className="select select-bordered w-full max-w-xs text-center"
-                  value={selectedWorkout}
-                  onChange={(e) => setSelectedWorkout(e.target.value)}
-                >
+          {openCardId === exercise.id && (
+            <div className="w-full flex flex-col items-center space-y-2 col-span-full gap-5">
+              <select
+                className="select select-bordered w-full max-w-xs text-center"
+                value={selectedWorkout}
+                onChange={(e) => setSelectedWorkout(e.target.value)}
+              >
+                {!isWorkoutsExist && userWorkouts?.workouts.length > 0 ? (
                   <option disabled value="">
-                    Select a workout
+                    Already Added to Workouts
                   </option>
-                  {workouts.map((workout) => (
-                    <option key={workout.id} value={workout.id}>
+                ) : (
+                  <option disabled value="">
+                    Select a Workout
+                  </option>
+                )}
+                {Array.isArray(isWorkoutsExist) &&
+                  isWorkoutsExist.map((workout) => (
+                    <option
+                      key={workout.id}
+                      value={workout.id}
+                      disabled={!isWorkoutsExist}
+                    >
                       {workout.name}
                     </option>
                   ))}
-                </select>
-                <button
-                  className="btn btn-primary w-full max-w-xs"
-                  onClick={() =>
-                    handleAddToWorkout(exercise.id as string, selectedWorkout)
-                  }
-                  disabled={!selectedWorkout}
-                >
-                  Add
-                </button>
-              </div>
-            )}
-        </div>{" "}
+              </select>
+              <button
+                className="btn btn-primary w-full max-w-xs"
+                onClick={() =>
+                  handleAddToWorkout(exercise.id as string, selectedWorkout)
+                }
+                disabled={!selectedWorkout || !isWorkoutsExist}
+              >
+                Add
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

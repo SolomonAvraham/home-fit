@@ -17,10 +17,24 @@ const Exercises = ({ operation }: { operation: string | null }) => {
   };
 
   return (
-    <div className="container mx-auto p-4 min-h-screen">
-      <h1 className="text-2xl font-bold">Exercises</h1>
+    <div className="container mx-auto p-4 min-h-screen py-10">
 
-      <div className="flex flex-wrap items-center justify-center gap-4 min-h-screen">
+      
+      <div className="text-center">
+     
+        <h1 className="text-6xl drop-shadow-lg cursor-default font-bold font-Acme text-center text-slate-100">
+          Exercises
+        </h1>
+
+        <hr className="border-gray-700 w-2/4 mx-auto opacity-30 mt-2" />
+        <h2 className="text-sm font-bold font-Acme text-center text-slate-600 py-1">
+          Manage and track your workouts with personalized exercises to stay on
+          top of your fitness goals.
+        </h2>{" "}
+      </div>
+
+
+      <div className="flex flex-wrap items-center justify-center gap-4 min-h-screen py-10">
         {data?.exercises.length ? (
           data.exercises.map((exercise) => (
             <ExerciseCard

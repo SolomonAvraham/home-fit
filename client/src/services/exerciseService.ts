@@ -33,11 +33,18 @@ export const getExercisesByUserId = async (
 };
 
 export const getExerciseById = async (
-  id: string
+  id: string,
+  token: string | undefined
 ): Promise<ExerciseAttributes> => {
+  const config = {
+    headers: { Authorization: token ? `Bearer ${token}` : "" },
+  };
+
   const response = await axiosInstance.get<ExerciseAttributes>(
-    `/api/exercises/getExerciseById/${id}`
+    `/api/exercises/getExerciseById/${id}`,
+    config
   );
+
   return response.data;
 };
 
@@ -54,6 +61,18 @@ export const updateExercise = async (
 export const deleteExercise = async (id: string): Promise<void> => {
   const response = await axiosInstance.delete(
     `/api/exercises/deleteExercise/${id}`
+  );
+  return response.data;
+};
+
+export const addExercise = async (data: {
+  exerciseId: string;
+  userId: string;
+}) => {
+  const { exerciseId, userId } = data;
+
+  const response = await axiosInstance.post(
+    `/api/exercises/${exerciseId}/user/${userId}/add`
   );
   return response.data;
 };
@@ -77,6 +96,17 @@ export const isExerciseInWorkout = async (data: {
   const { exerciseId, userId } = data;
   const response = await axiosInstance.get<ExerciseAttributes>(
     `/api/exercises/isExerciseInWorkout/${exerciseId}/user/${userId}`
+  );
+  return response.data;
+};
+
+export const isExerciseExist = async (data: {
+  exerciseId: string;
+  userId: string;
+}): Promise<ExerciseAttributes> => {
+  const { exerciseId, userId } = data;
+  const response = await axiosInstance.get<ExerciseAttributes>(
+    `/api/exercises/isExerciseExist/${exerciseId}/user/${userId}`
   );
   return response.data;
 };

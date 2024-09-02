@@ -11,15 +11,34 @@ const Pagination: React.FC<PaginationProps> = ({
   totalPages,
   onPageChange,
 }) => {
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-
   const handlePageChange = (page: number) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     onPageChange(page);
   };
 
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 4;
+
+    let startPage = Math.max(currentPage - Math.floor(maxPagesToShow / 2), 1);
+    let endPage = startPage + maxPagesToShow - 1;
+
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(endPage - maxPagesToShow + 1, 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+
+    return pageNumbers;
+  };
+
+  const pages = getPageNumbers();
+
   return (
-    <div className="flex justify-center mt-4">
+    <div className="flex items-center justify-center mt-4">
       <button
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
@@ -32,7 +51,7 @@ const Pagination: React.FC<PaginationProps> = ({
           key={page}
           onClick={() => handlePageChange(page)}
           className={`px-4 py-2 mx-1 rounded ${
-            page === currentPage ? "bg-blue-500 text-white" : "bg-gray-200"
+            page === currentPage ? "bg-gray-500 text-white" : "bg-gray-200"
           }`}
         >
           {page}

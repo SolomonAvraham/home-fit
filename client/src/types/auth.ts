@@ -5,6 +5,16 @@ export interface User {
   role: string;
 }
 
+export interface GetUser {
+  name?: string;
+  email?: string;
+  workoutCount?: number;
+  exercisesCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  id?: string;
+}
+
 export interface AuthResponse {
   user: User;
   token: string;

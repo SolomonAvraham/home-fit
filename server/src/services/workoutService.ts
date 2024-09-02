@@ -5,6 +5,7 @@ import { ExerciseAttributes, WorkoutAttributes } from "../types/models";
 import formatMinutesToHours from "../utils/formatMinutesToHours";
 import { CreatedByType } from "../types/services/index";
 import { Op } from "sequelize";
+import { create } from "domain";
 
 class WorkoutService {
   async isWorkoutExist(workoutId: string, userId: string): Promise<boolean> {
@@ -22,7 +23,7 @@ class WorkoutService {
         where: {
           userId: userId,
           createdBy: {
-            [Op.contains]: [{ originalWorkoutId: originalWorkoutId }],
+            [Op.contains]: [{ originalWorkoutId }],
           },
         },
       });
@@ -50,7 +51,7 @@ class WorkoutService {
               "duration",
               "description",
               "media",
-              "createdBy",
+              "createdBy","userId"
             ],
           },
         ],
@@ -144,6 +145,8 @@ class WorkoutService {
               "duration",
               "description",
               "media",
+              "createdBy",
+              "userId",
             ],
           },
         ],
@@ -177,12 +180,14 @@ class WorkoutService {
           exercises:
             workoutJSON.exercises?.map((exercise: Exercise) => ({
               id: exercise.id,
+              userId: exercise.userId,
               name: exercise.name,
               sets: exercise.sets,
               reps: exercise.reps,
               duration: exercise.duration,
               media: exercise.media,
               description: exercise.description,
+              createBy: exercise.createdBy,
             })) || [],
           createdAt: workoutJSON.createdAt,
           updatedAt: workoutJSON.updatedAt,
@@ -251,6 +256,8 @@ class WorkoutService {
               "duration",
               "description",
               "media",
+              "createdBy",
+              "userId",
             ],
           },
         ],
@@ -300,12 +307,14 @@ class WorkoutService {
           exercises:
             workoutJSON.exercises?.map((exercise: ExerciseAttributes) => ({
               id: exercise.id,
+              userId: exercise.userId,
               name: exercise.name,
               sets: exercise.sets,
               reps: exercise.reps,
               duration: exercise.duration,
               media: exercise.media,
               description: exercise.description,
+              createdBy: exercise.createdBy,
             })) || [],
           createdAt: workoutJSON.createdAt,
           updatedAt: workoutJSON.updatedAt,
@@ -336,7 +345,7 @@ class WorkoutService {
           {
             model: Exercise,
             as: "exercises",
-            attributes: ["id", "name", "sets", "reps", "duration"],
+            attributes: ["id", "name", "sets", "reps", "duration", "userId"],
           },
         ],
       });

@@ -2,42 +2,52 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useMediaQuery } from "react-responsive";
-import { useMutationState } from "@tanstack/react-query";
-import { FaExpand, FaBars } from "react-icons/fa";
 import Loading from "@/app/loading";
 import { ClientHeaderProps } from "@/types/header";
-import MenuItem, { signedMenuItems, unsignedMenuItems } from "./menuItem";
 import Logo from "@/components/ui/logo/logo";
 import { UseLogoutMutation } from "@/lib/queries";
 import useUserStore from "@/store/userStore";
+import DesktopMenu from "./desktopMenu";
+import MobileMenu from "./mobileMenu";
+import {
+  FaHome,
+  FaExpand,
+  FaBolt,
+  FaBars,
+  FaUsers,
+  FaArrowCircleRight,
+  FaUserCircle,
+  FaCompress,
+  FaCalendarAlt,
+  FaInfoCircle,
+  FaCaretDown,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaRunning,
+} from "react-icons/fa";
+import { GiWeightLiftingUp } from "react-icons/gi";
 
 const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
   const logoutMutation = UseLogoutMutation();
 
   const { setUser, user } = useUserStore();
-  console.log("🚀 ~ user:", user);
 
   const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const isMobile = useMediaQuery({ maxWidth: 768 });
   const [isClient, setIsClient] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
-
-  const isUserLoggedIn = useMutationState({
-    filters: { mutationKey: ["login"] },
-    select: (mutation) => mutation.state.data,
-  });
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (isUserLoggedIn[0]) {
+    if (!user || user) {
       const checkAuthStatus = async () => {
         try {
           const response = await axios.get("/api/auth/status", {
             withCredentials: true,
           });
 
-          setIsLoggedIn(!!response.data);
+          if (response.data) {
+            setIsLoggedIn(true);
+          }
         } catch (error: any) {
           console.error(error.message);
           setUser(null);
@@ -46,7 +56,7 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
       };
       checkAuthStatus();
     }
-  }, [isUserLoggedIn[0]]);
+  }, [user, setUser]);
 
   useEffect(() => {
     setIsClient(true);
@@ -74,102 +84,168 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
     await logoutMutation.mutateAsync();
     setIsLoggedIn(false);
     setUser(null);
+    setMobileMenuOpen(false);
   };
 
-  const handleDrawerToggle = () => setDrawerOpen(!drawerOpen);
-
-  const handleDropdownToggle = (index: number) => {
-    setDropdownOpen(dropdownOpen === index ? null : index);
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
   };
+
+  const unsignedMenuItems = [
+    { text: "Home", path: "/", icon: <FaHome className="h-5 w-5" /> },
+    {
+      text: "Workouts",
+      path: "/workouts",
+      icon: <FaBolt className="h-5 w-5" />,
+    },
+    {
+      text: "Community",
+      path: "/community",
+      icon: <FaUsers className="h-5 w-5" />,
+    },
+    {
+      text: "About",
+      path: "/about",
+      icon: <FaInfoCircle className="h-5 w-5" />,
+    },
+    {
+      text: "Sign Up",
+      path: "/auth/register",
+      icon: <FaArrowCircleRight className="h-5 w-5" />,
+    },
+    {
+      text: "Login",
+      path: "/auth/login",
+      icon: <FaCompress className="h-5 w-5" />,
+    },
+  ];
+
+  const signedMenuItems = [
+    { text: "Home", path: "/", icon: <FaHome className="h-5 w-5" /> },
+    {
+      text: "Workouts",
+      path: "/dashboard/workouts",
+      icon: <GiWeightLiftingUp className="h-5 w-5" />,
+      dropdown: true,
+      dropdownMenu: [
+        {
+          text: "Workouts",
+          path: "/workouts",
+          icon: <GiWeightLiftingUp className="h-5 w-5" />,
+        },
+        {
+          text: "My Workouts",
+          path: "/dashboard/workouts/myWorkouts",
+          icon: <FaBolt className="h-5 w-5" />,
+        },
+        {
+          text: "Create Workout",
+          path: "/dashboard/workouts/create",
+          icon: <FaPlus className="h-5 w-5" />,
+        },
+      ],
+    },
+    {
+      text: "Exercises",
+      path: "/dashboard/exercises",
+      icon: <FaRunning className="h-5 w-5" />,
+      dropdown: true,
+      dropdownMenu: [
+        {
+          text: "Exercises",
+          path: "/dashboard/exercises",
+          icon: <FaRunning className="h-5 w-5" />,
+        },
+        {
+          text: "My Exercises",
+          path: "/dashboard/exercises/myExercises",
+          icon: <FaBolt className="h-5 w-5" />,
+        },
+        {
+          text: "Create Exercise",
+          path: "/dashboard/exercises/create",
+          icon: <FaPlus className="h-5 w-5" />,
+        },
+      ],
+    },
+    // {
+    //   text: "Schedule",
+    //   path: "/dashboard/schedule",
+    //   icon: <FaCalendarAlt className="h-5 w-5" />,
+    //   dropdown: true,
+    //   dropdownMenu: [
+    //     {
+    //       text: "Schedule",
+    //       path: "/dashboard/schedule",
+    //       icon: <FaCalendarAlt className="h-5 w-5" />,
+    //     },
+    //     {
+    //       text: "Create Schedule",
+    //       path: "/dashboard/schedule/create",
+    //       icon: <FaPlus className="mr-2" />,
+    //     },
+    //     {
+    //       text: "Edit Schedule",
+    //       path: "/dashboard/schedule/edit",
+    //       icon: <FaEdit className="mr-2" />,
+    //     },
+    //     {
+    //       text: "Delete Schedule",
+    //       path: "/dashboard/schedule/delete",
+    //       icon: <FaTrash className="mr-2" />,
+    //     },
+    //   ],
+    // },
+    {
+      text: "Community",
+      path: "/community",
+      icon: <FaUsers className="h-5 w-5" />,
+    },
+    {
+      text: "Profile",
+      path: `/dashboard/profile/${user?.id}`,
+      icon: <FaUserCircle className="h-5 w-5" />,
+    },
+  ];
 
   const menuItems = isLoggedIn ? signedMenuItems : unsignedMenuItems;
 
-  const renderMenuItems = (
-    <ul
-      className={
-        isMobile
-          ? "bg-slate-800 grid place-items-center gap-10 w-screen"
-          : "menu menu-horizontal p-0 gap-2"
-      }
-    >
-      {menuItems.map((item, index) => (
-        <MenuItem
-          key={index}
-          item={item}
-          index={index}
-          isMobile={isMobile}
-          drawerOpen={drawerOpen}
-          dropdownOpen={dropdownOpen}
-          handleDropdownToggle={handleDropdownToggle}
-          handleDrawerToggle={handleDrawerToggle}
-          setDropdownOpen={setDropdownOpen}
-        />
-      ))}
-      {isLoggedIn && (
-        <li
-          className={`${isMobile ? "w-full mx-auto" : ""} ${
-            drawerOpen
-              ? `menu-item menu-item-delay-${menuItems.length + 1} `
-              : ""
-          }`}
-        >
-          <button
-            onClick={handleLogout}
-            disabled={logoutMutation.isPending}
-            className={` flex flex-col font-semibold text-white justify-center items-center   ${
-              isMobile
-                ? "text-center font-semibold text-4xl bg-slate-700 bg-opacity-20 w-full p-1 tracking-[0.2rem] "
-                : ""
-            } `}
-          >
-            <FaExpand className="h-5 w-5" />
-            {logoutMutation.isPending ? "Logging out..." : "Logout"}
-          </button>
-        </li>
-      )}
-    </ul>
-  );
-
   return (
-    <header>
-      <div className="navbar bg-slate-800 tracking-[0.2rem] h-[5rem] z-10 relative">
-        <div className="flex-1">
+    <header className="relative z-50">
+      <div className="navbar bg-slate-800 tracking-[0.12rem] flex flex-row items-center font-BebasNeue">
+        <div className="flex-1 z-50 navbar-start">
           <Logo w={70} h={70} />
         </div>
-        <div className="flex-none">
-          {isMobile ? (
-            <div>
-              <button
-                className="text-5xl text-white"
-                aria-label="menu"
-                onClick={handleDrawerToggle}
-              >
-                <FaBars className="h-12 w-12" />
-              </button>
-              {drawerOpen && (
-                <div
-                  className={`fixed flex  flex-col items-center gap-10  inset-0 bg-slate-800 z-50 transition-opacity duration-300  ${
-                    drawerOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-                  }`}
-                >
-                  <button
-                    className={`text-white menu-button ${
-                      drawerOpen ? "menu-button-open" : "menu-button-closed"
-                    }`}
-                    aria-label="menu"
-                    onClick={handleDrawerToggle}
-                  >
-                    <FaBars className="h-20 w-20" />
-                  </button>
-                  {renderMenuItems}
-                  <Logo w={120} h={120} />
-                </div>
-              )}
-            </div>
-          ) : (
-            renderMenuItems
-          )}
+
+        <button
+          className="md:hidden text-white  w-auto p-1 relative z-50 mr-5 navbar-end"
+          onClick={toggleMobileMenu}
+        >
+          <FaBars
+            className={`h-10 w-10 transition-transform duration-300 ${
+              mobileMenuOpen ? "rotate-180" : "rotate-0"
+            }`}
+          />
+        </button>
+
+        <div className="hidden md:flex navbar-center">
+          <DesktopMenu
+            menuItems={menuItems}
+            isLoggedIn={isLoggedIn}
+            handleLogout={handleLogout}
+            isPending={logoutMutation.isPending}
+          />
         </div>
+      </div>
+      <div className="md:hidden navbar-center ">
+        <MobileMenu
+          menuItems={menuItems}
+          mobileMenuOpen={mobileMenuOpen}
+          setMobileMenuOpen={setMobileMenuOpen}
+          isLoggedIn={isLoggedIn}
+          handleLogout={handleLogout}
+          isPending={logoutMutation.isPending}
+        />
       </div>
     </header>
   );

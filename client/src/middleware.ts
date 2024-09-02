@@ -15,7 +15,6 @@ export async function middleware(req: NextRequest) {
         new TextEncoder().encode(JWT_SECRET)
       );
 
-      // Set auth_status cookie to authenticated
       response.cookies.set("auth_status", "authenticated", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -24,6 +23,7 @@ export async function middleware(req: NextRequest) {
       return response;
     } catch (error) {
       console.error("JWT Verification Error middleware:", error);
+      const currentPath = req.nextUrl.pathname;
 
       if ((error as any).code === "ERR_JWT_EXPIRED") {
         response = NextResponse.redirect(new URL("/auth/login", req.url));
@@ -31,6 +31,12 @@ export async function middleware(req: NextRequest) {
       } else {
         response = NextResponse.redirect(new URL("/auth/login", req.url));
       }
+
+      response.cookies.set("lastVisitedPath", currentPath, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60,
+      });
 
       response.cookies.set("auth_status", "unauthenticated", {
         httpOnly: true,
@@ -41,7 +47,16 @@ export async function middleware(req: NextRequest) {
     }
   } else {
     console.log("middleware No token found");
+
+    const currentPath = req.nextUrl.pathname;
+
     response = NextResponse.redirect(new URL("/auth/login", req.url));
+
+    response.cookies.set("lastVisitedPath", currentPath, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60,
+    });
 
     response.cookies.set("auth_status", "unauthenticated", {
       httpOnly: true,

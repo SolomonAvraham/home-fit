@@ -1,3 +1,5 @@
+"use client";
+
 import useConfirmStore from "@/store/confirmStore";
 import React from "react";
 

@@ -2,7 +2,7 @@ import User, { UserCreationAttributes } from "../models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { validate as validateUUID } from "uuid";
-import { Workout, sequelize } from "../models/index";
+import { Exercise, Workout, sequelize } from "../models/index";
 
 class UserService {
   public static async createUser(data: UserCreationAttributes) {
@@ -59,11 +59,30 @@ class UserService {
     if (!validateUUID(id)) {
       throw new Error("Invalid UUID format");
     }
+
     const user = await User.findByPk(id);
+
+    const exercisesCount = await Exercise.count({
+      where: { userId: id },
+    });
+
+    const workoutCount = await Workout.count({
+      where: { userId: id },
+    });
+
     if (!user) {
       throw new Error("User not found");
     }
-    return user;
+
+    return {
+      id,
+      name: user.name,
+      email: user.email,
+      exercisesCount,
+      workoutCount,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 
   public static async getAllUsers() {
@@ -74,10 +93,33 @@ class UserService {
     if (!validateUUID(id)) {
       throw new Error("Invalid UUID format");
     }
+
     const user = await User.findByPk(id);
+
     if (!user) {
       throw new Error("User not found");
     }
+
+    const isEmailExists = await User.findOne({ where: { email: data.email } });
+
+    if (isEmailExists && isEmailExists.id !== id) {
+      throw new Error("Email already exists");
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(data.email)) {
+      throw new Error("Invalid email format");
+    }
+
+    const nameRegex = /^[a-zA-Z ]{2,30}$/;
+
+    if (!nameRegex.test(data.name)) {
+      throw new Error(
+        "Name must be between 2 and 30 characters and contain only letters and spaces"
+      );
+    }
+
     return await user.update(data);
   }
 
@@ -88,24 +130,24 @@ class UserService {
     const transaction = await sequelize.transaction();
     try {
       const user = await User.findByPk(id, { transaction });
+
       if (!user) {
         await transaction.rollback();
-        return 0; // Returning 0 to indicate no user was found
+        return 0;
       }
-      // Delete related records
+
       await Workout.destroy({ where: { userId: id }, transaction });
+      await Exercise.destroy({ where: { userId: id }, transaction });
 
       await user.destroy({ transaction });
       await transaction.commit();
-      return 1; // Returning 1 to indicate user was deleted
+
+      
+      return 1;
     } catch (error: any) {
       await transaction.rollback();
-      console.error(
-        "Error in deleteUser service method:",
-        error.message,
-        error.stack
-      ); // Added logging
-      throw new Error("Failed to delete user");
+      console.error(error);
+      throw new Error(error.message);
     }
   }
 
@@ -124,7 +166,7 @@ class UserService {
         "Password must be at least 8 characters long and include at least one letter"
       );
     }
- 
+
     const user = await User.findOne({ where: { email } });
     if (!user) throw new Error("User not found");
 
@@ -136,6 +178,7 @@ class UserService {
       process.env.JWT_SECRET as string,
       { expiresIn: "1h" }
     );
+
     return {
       id: user.id,
       name: user.name,

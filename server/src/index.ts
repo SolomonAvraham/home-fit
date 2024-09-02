@@ -6,11 +6,13 @@ import { userRoute, workoutRoute, exerciseRoutes } from "./routes/index";
 import "../src/models/index";
 import cors from "cors";
 import testRoutes from "./routes/testRoutes";
+import cookieParser from "cookie-parser";
 
 const app: Application = express();
 const PORT = process.env.PORT || 9000;
 
 const allowedOrigins = ["http://localhost:3000"];
+
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -29,6 +31,7 @@ app.use(
 
 app.use(express.json());
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 app.use("/api/users", userRoute);
 
@@ -41,7 +44,7 @@ app.use("/api/exercises", exerciseRoutes);
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, world!");
 });
- 
+
 const startServer = async () => {
   try {
     await sequelize.authenticate();

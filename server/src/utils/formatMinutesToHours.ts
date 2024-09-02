@@ -3,7 +3,7 @@ export default function formatMinutesToHours(minutes: number) {
     return "0";
   }
   if (minutes < 10) {
-    return `${minutes} minute`;
+    return `${minutes} minutes`;
   }
   if (minutes < 60) {
     return `${minutes} minutes`;
