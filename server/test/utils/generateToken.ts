@@ -1,9 +1,12 @@
 import jwt from "jsonwebtoken";
-import { UserAttributes } from "../../src/models/User"; // Adjust the import based on your project structure
+interface TokenUser {
+  id: string;
+  email: string;
+}
 
-const generateToken = (user: UserAttributes) => {
+const generateToken = (user: TokenUser) => {
   const payload = { id: user.id, email: user.email };
-  const secret = process.env.JWT_SECRET || "your_jwt_secret"; // Ensure this matches your secret
+  const secret = process.env.JWT_SECRET || "your_jwt_secret";
   const options = { expiresIn: "1h" };
 
   return jwt.sign(payload, secret, options);

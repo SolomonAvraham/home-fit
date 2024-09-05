@@ -194,17 +194,14 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, operation }) => {
           </p>
         )}
 
-        <div className="flex text-gray-400 font-bold">
-          {exercise.sets && (
-            <p>
-              <span className="font-semibold">Sets:</span> {exercise.sets}
-            </p>
-          )}
-          {exercise.reps && (
-            <p>
-              <span className="font-semibold">Reps:</span> {exercise.reps}
-            </p>
-          )}
+        <div className="flex text-gray-400 font-bold items-center justify-center ">
+          <p>
+            <span className="font-semibold">Sets:</span> {exercise.sets}
+          </p>
+
+          <p>
+            <span className="font-semibold">Reps:</span> {exercise.reps}
+          </p>
         </div>
 
         {exercise.media && (

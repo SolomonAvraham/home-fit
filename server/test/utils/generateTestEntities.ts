@@ -1,23 +1,22 @@
 import { v4 as uuidv4 } from "uuid";
 import User from "../../src/models/User";
 import Workout from "../../src/models/Workout";
-import WorkoutPlan from "../../src/models/WorkoutPlan";
-import Progress from "../../src/models/Progress";
-import Notification from "../../src/models/Notification";
+import { Exercise } from "../../src/models";
 
 let testUserId: string;
-let testWorkoutPlanId: string;
+let testNewUserId: string;
 let testWorkoutId: string;
-let testProgressId: string;
-let testNotificationId: string;
+let testExerciseId: string;
+
 const testuidv4 = uuidv4();
+const testNewUseruidv4 = uuidv4();
+const testWorkoutUidv4 = uuidv4();
+const testExerciseUidv4 = uuidv4();
 
 export const createTestEntities = async () => {
   await User.sync({ force: true });
-  await WorkoutPlan.sync({ force: true });
   await Workout.sync({ force: true });
-  await Progress.sync({ force: true });
-  await Notification.sync({ force: true });
+  await Exercise.sync({ force: true });
 
   const user = await User.create({
     id: testuidv4,
@@ -25,56 +24,61 @@ export const createTestEntities = async () => {
     email: "testuser@example.com",
     password: "password123",
   });
+
   testUserId = user.id;
 
-  const workoutPlan = await WorkoutPlan.create({
-    id: uuidv4(),
-    userId: testUserId,
-    name: "Test Workout Plan",
-    description: "Test Description",
+  const newUser = await User.create({
+    id: testNewUseruidv4,
+    name: "Test User",
+    email: "testnewuser@example.com",
+    password: "password123",
   });
-  testWorkoutPlanId = workoutPlan.id;
+
+  testNewUserId = newUser.id;
 
   const workout = await Workout.create({
-    id: uuidv4(),
+    id: testWorkoutUidv4,
     userId: testUserId,
-    workoutPlanId: testWorkoutPlanId,
-    date: new Date(),
-    duration: 60,
+    name: "Test Workout",
+    description: "This is a test workout",
+    createdBy: [
+      {
+        creatorId: testUserId,
+        creatorName: user.name,
+        originalWorkoutId: testWorkoutUidv4,
+      },
+    ],
   });
+
   testWorkoutId = workout.id;
 
-  const progress = await Progress.create({
-    id: uuidv4(),
+  const exercise = await Exercise.create({
+    id: testExerciseUidv4,
     userId: testUserId,
-    workoutId: testWorkoutId,
-    date: new Date(),
-    performanceMetrics: {},
+    name: "Test Exercise",
+    description: "This is a test exercise",
+    sets: 3,
+    reps: 10,
+    duration: 30,
+    media: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    createdBy: [
+      {
+        creatorId: testUserId,
+        creatorName: "Test Exercise",
+        originalExerciseId: testExerciseUidv4,
+      },
+    ],
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
-  testProgressId = progress.id;
 
-  const notification = await Notification.create({
-    id: uuidv4(),
-    userId: testUserId,
-    message: "Test Notification",
-    read: false,
-  });
-  testNotificationId = notification.id;
+  testExerciseId = exercise.id;
 };
 
 export const cleanupTestEntities = async () => {
-  await Notification.destroy({ where: {} });
-  await Progress.destroy({ where: {} });
+  await Exercise.destroy({ where: {} });
   await Workout.destroy({ where: {} });
-  await WorkoutPlan.destroy({ where: {} });
   await User.destroy({ where: {} });
 };
 
-export {
-  testUserId,
-  testWorkoutPlanId,
-  testWorkoutId,
-  testProgressId,
-  testNotificationId,
-  testuidv4,
-};
+export { testUserId, testWorkoutId, testuidv4, testExerciseId, testNewUserId };

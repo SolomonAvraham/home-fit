@@ -5,6 +5,10 @@ import { validate as validateUUID } from "uuid";
 class UserController {
   public async createUser(req: Request, res: Response): Promise<void> {
     try {
+      if (!req.body.email || !req.body.password || !req.body.name) {
+        res.status(400).json({ message: "All fields are required" });
+      }
+
       const user = await UserService.createUser(req.body);
 
       res.cookie("token", user.token, {
@@ -71,15 +75,15 @@ class UserController {
 
     if (!validateUUID(userId)) {
       res.status(400).json({ message: "Invalid UUID format" });
-      return;
     }
     try {
       const user = await UserService.getUserById(userId);
-      if (user) {
-        res.status(200).json(user);
-      } else {
+
+      if (!user) {
         res.status(404).json({ message: "User not found" });
       }
+
+      res.status(200).json(user);
     } catch (error: any) {
       if (error instanceof Error) {
         res.status(400).json({ message: error.message });

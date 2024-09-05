@@ -5,7 +5,6 @@ import { ExerciseAttributes, WorkoutAttributes } from "../types/models";
 import formatMinutesToHours from "../utils/formatMinutesToHours";
 import { CreatedByType } from "../types/services/index";
 import { Op } from "sequelize";
-import { create } from "domain";
 
 class WorkoutService {
   async isWorkoutExist(workoutId: string, userId: string): Promise<boolean> {
@@ -29,9 +28,9 @@ class WorkoutService {
       });
 
       return !!existingEntry;
-    } catch (error) {
-      console.error("Check Workout Existence Error:", error);
-      throw new Error("Failed to check workout existence");
+    } catch (error: any) {
+      console.error("Check Workout Existence Error:", error.message);
+      throw error;
     }
   }
 
@@ -51,7 +50,8 @@ class WorkoutService {
               "duration",
               "description",
               "media",
-              "createdBy","userId"
+              "createdBy",
+              "userId",
             ],
           },
         ],
@@ -123,6 +123,10 @@ class WorkoutService {
     limit: number = 10
   ) {
     try {
+      if (!isValidUUID(userId)) {
+        return false;
+      }
+
       const offset = (page - 1) * limit;
 
       const { rows: workouts, count } = await Workout.findAndCountAll({
@@ -154,6 +158,10 @@ class WorkoutService {
         limit,
         offset,
       });
+
+      if (!workouts) {
+        throw new Error("Workouts not found");
+      }
 
       const formattedWorkouts = workouts.map((workout) => {
         const workoutJSON = workout.toJSON();
@@ -207,6 +215,10 @@ class WorkoutService {
   }
 
   async createWorkout(workoutData: WorkoutAttributes) {
+    if (!isValidUUID(workoutData.userId)) {
+      throw new Error("Invalid UUID format");
+    }
+
     try {
       const id = uuidv4();
 
@@ -351,7 +363,7 @@ class WorkoutService {
       });
 
       if (!workout) {
-        throw new Error("Workout not found");
+        return null;
       }
       const workoutJSON = workout.toJSON();
 
@@ -376,12 +388,16 @@ class WorkoutService {
     console.log(id, data);
 
     try {
+      if (!isValidUUID(id)) {
+        throw new Error("Invalid UUID format");
+      }
+
       console.log("Service: Updating workout with ID:", id, "with data:", data);
 
       const workout = await Workout.findByPk(id);
 
       if (!workout) {
-        throw new Error("Workout not found");
+        return false;
       }
 
       await workout.update(data);
@@ -389,19 +405,22 @@ class WorkoutService {
       return workout;
     } catch (error) {
       console.error("Update Workout Service Error:", error);
-      throw new Error("Failed to update workout");
+      throw error;
     }
   }
 
   async deleteWorkout(id: string) {
     try {
+      if (!isValidUUID(id)) {
+        throw new Error("Invalid UUID format");
+      }
       console.log("Service: Deleting workout with ID:", id);
       const workout = await Workout.findByPk(id);
       if (!workout) {
-        return 0; // Indicate workout not found
+        return 0;
       }
       await workout.destroy();
-      return 1; // Indicate workout was deleted
+      return 1;
     } catch (error) {
       console.error("Delete Workout Service Error:", error);
       throw new Error("Failed to delete workout");

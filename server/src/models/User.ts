@@ -4,8 +4,7 @@ import { UserAssociate, UserAttributes } from "../types/models";
 import { Workout, ScheduledWorkout } from ".";
 
 export interface UserCreationAttributes
-  extends Optional<UserAttributes, "id"> {}
-
+  extends Optional<UserAttributes, "id" | "createdAt" | "updatedAt"> {}
 class User
   extends Model<UserAttributes, UserCreationAttributes>
   implements UserAttributes
