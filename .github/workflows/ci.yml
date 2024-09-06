@@ -2,6 +2,8 @@ name: CI/CD Pipeline
 
 on:
   push:
+    branches:
+      - '**'   
   pull_request:
     branches:
       - main
@@ -20,7 +22,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }} -q"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -39,12 +41,19 @@ jobs:
           npm install
         working-directory: ./server
 
-      - name: Wait for PostgreSQL
+      - name: Wait for PostgreSQL to be ready
         run: |
-          until pg_isready -h localhost -p 5432; do
+          until pg_isready -h localhost -p 5432 -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }}; do
             echo "Waiting for PostgreSQL to be ready..."
-            sleep 1
+            sleep 5
           done
+
+      - name: Run Database Migrations
+        run: |
+          npm run migrate
+        working-directory: ./server
+        env:
+          DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
 
       - name: Build the project
         run: |
