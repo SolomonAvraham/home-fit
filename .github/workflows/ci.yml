@@ -2,8 +2,6 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - '**'
   pull_request:
     branches:
       - main
@@ -16,24 +14,16 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB || 'my_database' }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER || 'my_user' }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || 'my_password' }}
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }} -q"
+          --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
-    env:
-      DB_USERNAME: ${{ secrets.POSTGRES_USER }}
-      DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      DB_NAME: ${{ secrets.POSTGRES_DB }}
-      DB_HOST: localhost
-      TEST_DB_NAME: ${{ secrets.POSTGRES_DB }}
-      JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
     steps:
       - name: Checkout code
@@ -49,24 +39,29 @@ jobs:
           npm install
         working-directory: ./server
 
-      - name: Wait for PostgreSQL to be ready
+      - name: Wait for PostgreSQL
         run: |
-          until pg_isready -h localhost -p 5432 -U $DB_USERNAME -d $DB_NAME; do
+          until pg_isready -h localhost -p 5432; do
             echo "Waiting for PostgreSQL to be ready..."
-            sleep 5
+            sleep 1
           done
-
-      - name: Run Database Migrations
-        run: |
-          npx sequelize-cli db:migrate
-        working-directory: ./server
 
       - name: Build the project
         run: |
           npm run build
         working-directory: ./server
 
+      - name: Run migrations
+        env:
+          DATABASE_URL: postgres://${{ secrets.POSTGRES_USER || 'my_user' }}:${{ secrets.POSTGRES_PASSWORD || 'my_password' }}@localhost:5432/${{ secrets.POSTGRES_DB || 'my_database' }}
+        run: |
+          npm run migrate
+        working-directory: ./server
+
       - name: Run tests
+        env:
+          DATABASE_URL_TEST: postgres://${{ secrets.POSTGRES_USER || 'my_user' }}:${{ secrets.POSTGRES_PASSWORD || 'my_password' }}@localhost:5432/${{ secrets.POSTGRES_DB || 'my_database' }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET || 'my_jwt_secret' }}
         run: |
           npm test
         working-directory: ./server
