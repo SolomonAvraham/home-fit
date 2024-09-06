@@ -53,13 +53,15 @@ jobs:
 
       - name: Run migrations
         env:
+          NODE_ENV: test
           DATABASE_URL: postgres://${{ secrets.POSTGRES_USER || 'my_user' }}:${{ secrets.POSTGRES_PASSWORD || 'my_password' }}@localhost:5432/${{ secrets.POSTGRES_DB || 'my_database' }}
         run: |
           npm run migrate
         working-directory: ./server
 
       - name: Run tests
-        env:
+        env:        
+          NODE_ENV: test
           DATABASE_URL_TEST: postgres://${{ secrets.POSTGRES_USER || 'my_user' }}:${{ secrets.POSTGRES_PASSWORD || 'my_password' }}@localhost:5432/${{ secrets.POSTGRES_DB || 'my_database' }}
           JWT_SECRET: ${{ secrets.JWT_SECRET || 'my_jwt_secret' }}
         run: |
