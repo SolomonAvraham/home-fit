@@ -14,9 +14,9 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB || 'my_database' }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER || 'my_user' }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || 'my_password' }}
+          POSTGRES_DB: ${{ secrets.DB_NAME }}
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
           - 5432:5432
         options: >-
@@ -54,7 +54,7 @@ jobs:
       - name: Run migrations
         env:
           NODE_ENV: test
-          DATABASE_URL: postgres://${{ secrets.POSTGRES_USER || 'my_user' }}:${{ secrets.POSTGRES_PASSWORD || 'my_password' }}@localhost:5432/${{ secrets.POSTGRES_DB || 'my_database' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_TEST  }} 
         run: |
           npm run migrate
         working-directory: ./server
@@ -62,7 +62,7 @@ jobs:
       - name: Run tests
         env:        
           NODE_ENV: test
-          DATABASE_URL_TEST: postgres://${{ secrets.POSTGRES_USER || 'my_user' }}:${{ secrets.POSTGRES_PASSWORD || 'my_password' }}@localhost:5432/${{ secrets.POSTGRES_DB || 'my_database' }}
+          DATABASE_URL_TEST: ${{ secrets.DATABASE_URL_TEST  }} 
           JWT_SECRET: ${{ secrets.JWT_SECRET || 'my_jwt_secret' }}
         run: |
           npm test
