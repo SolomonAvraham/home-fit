@@ -14,11 +14,9 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_DB: ${{ secrets.DB_NAME }}
-          POSTGRES_USER: ${{ secrets.DB_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DATABASE_URL_TEST: ${{ secrets.DATABASE_URL_TEST }}
-
+          POSTGRES_DB: test_db
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
         ports:
           - 5432:5432
         options: >-
@@ -48,22 +46,26 @@ jobs:
             sleep 1
           done
 
-      - name: Log environment variables for debug
+      - name: Create test database
         run: |
-          echo "DB_USERNAME: $DB_USERNAME"
-          echo "DB_PASSWORD: $DB_PASSWORD"
-          echo "DB_NAME: $DB_NAME"
-          echo "DB_HOST: $DB_HOST"
+          PGPASSWORD=test_password psql -h localhost -U test_user -c "CREATE DATABASE test_db;"
+        env:
+          PGPASSWORD: test_password  # Must match the POSTGRES_PASSWORD set in services
 
       - name: Build the project
         run: |
           npm run build
         working-directory: ./server
 
+      - name: Run migrations
+        run: |
+          npx sequelize-cli db:migrate --env test
+        working-directory: ./server
+
       - name: Run tests
-        env:        
-          DATABASE_URL_TEST: ${{ secrets.DATABASE_URL_TEST  }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET  }}
+        env:
+          DATABASE_URL_TEST: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           npm test
         working-directory: ./server
