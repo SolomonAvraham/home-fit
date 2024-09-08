@@ -53,28 +53,11 @@ jobs:
           echo "DB_NAME: $DB_NAME"
           echo "DB_HOST: $DB_HOST"
 
-      - name: Create test database
-        env:
-          DB_USERNAME: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h localhost -U ${{ secrets.DB_USER }} -d postgres -c "CREATE DATABASE test_home_workout_app;"
-
       - name: Build the project
         run: |
           npm run build
         working-directory: ./server
 
-      - name: Run migrations
-        env:
-          NODE_ENV: test
-          DB_USERNAME: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_NAME: test_home_workout_app
-          DB_HOST: localhost
-        run: |
-          npm run migrate
-        working-directory: ./server
 
       - name: Run tests
         env:        
@@ -83,7 +66,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: test_home_workout_app
           DB_HOST: localhost
-          JWT_SECRET: ${{ secrets.JWT_SECRET || 'my_jwt_secret' }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET  }}
         run: |
           npm test
         working-directory: ./server
