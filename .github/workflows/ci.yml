@@ -48,7 +48,7 @@ jobs:
 
       - name: Create test database
         run: |
-          PGPASSWORD= ${{ secrets.DB_PASSWORD }} psql -h localhost -U test_user -c "CREATE DATABASE test_db;"
+          PGPASSWORD=$DB_PASSWORD psql -h localhost -U test_user -c "CREATE DATABASE test_db;"
         env:
           PGPASSWORD: test_password  # Must match the POSTGRES_PASSWORD set in services
 
