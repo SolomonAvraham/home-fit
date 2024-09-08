@@ -62,6 +62,7 @@ jobs:
       - name: Run tests
         env:        
           NODE_ENV: test
+          DATABASE_URL_TEST: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}
           DB_USERNAME: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: test_home_workout_app
