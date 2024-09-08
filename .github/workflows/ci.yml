@@ -48,9 +48,27 @@ jobs:
             sleep 1
           done
 
+      - name: Log environment variables for debug
+        run: |
+          echo "DB_USERNAME: $DB_USERNAME"
+          echo "DB_PASSWORD: $DB_PASSWORD"
+          echo "DB_NAME: $DB_NAME"
+          echo "DB_HOST: $DB_HOST"
+
       - name: Build the project
         run: |
           npm run build
+        working-directory: ./server
+
+      - name: Run migrations
+        env:
+          NODE_ENV: test
+          DB_USERNAME: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_HOST: localhost
+        run: |
+          npm run migrate
         working-directory: ./server
 
       - name: Run tests
