@@ -53,17 +53,6 @@ jobs:
           npm run build
         working-directory: ./server
 
-      - name: Run migrations
-        env:
-          NODE_ENV: test
-          DB_USERNAME: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_HOST: localhost
-        run: |
-          npm run migrate
-        working-directory: ./server
-
       - name: Run tests
         env:        
           NODE_ENV: test
