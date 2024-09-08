@@ -30,7 +30,7 @@ export default function HeroSection() {
   ];
   const testimonials = [
     {
-      text: "FitFlex has completely changed my workout routine. I've never been fitter!",
+      text: "HomeFit has completely changed my workout routine. I've never been fitter!",
       name: "Jane Doe",
       role: "Fitness Enthusiast",
     },
@@ -61,7 +61,7 @@ export default function HeroSection() {
         <div className="hero-content text-center text-neutral-content">
           <div className="max-w-md md:max-w-screen-xl">
             <h1 className="text-5xl md:text-8xl font-ProtestGuerrilla text-white drop-shadow-2xl">
-              Welcome to FitFlex
+              Welcome to HomeFit
             </h1>
             <p className="mb-5 text-lg md:text-xl font-semibold md:w-4/6 mx-auto drop-shadow-xl font-Dosis text-white">
               Your personal home workout companion is here to guide you on your
@@ -82,7 +82,7 @@ export default function HeroSection() {
       {/* Features Section */}
       <div className="py-20 border-t-[1px] border-gray-800 ">
         <h2 className="text-4xl md:text-5xl text-slate-800 tracking-wide font-Acme font-bold text-center py-5">
-          Why Choose FitFlex?
+          Why Choose HomeFit?
         </h2>
         <hr className="border-gray-700 w-2/4 mx-auto opacity-30 py-1 mb-10" />
 
@@ -107,7 +107,7 @@ export default function HeroSection() {
             Ready to Transform Your Body?
           </h2>
           <p className="mb-5 bg-black pb-1 rounded-b-2xl text-sm md:text-xl font-semibold w-5/6 md:w-4/6 mx-auto drop-shadow-2xl font-Dosis text-white">
-            Join FitFlex today and start your journey to a healthier you!
+            Join HomeFit today and start your journey to a healthier you!
           </p>
           <Link
             href="/auth/register"

@@ -10,7 +10,7 @@ import {
   testNewUserId,
 } from "../../utils/generateTestEntities";
 import generateToken from "../../utils/generateToken";
-import { Workout } from "../../../src/models";
+import { sequelize, Workout } from "../../../src/models";
 import { v4 as uuidv4 } from "uuid";
 
 const nonExistentWorkoutId = "00000000-0000-0000-0000-000000000000";
@@ -19,6 +19,7 @@ describe("Workout Controller", () => {
   let token: string;
 
   before(async () => {
+    await sequelize.sync({ force: true });
     await createTestEntities();
     const testUser = {
       id: testUserId,

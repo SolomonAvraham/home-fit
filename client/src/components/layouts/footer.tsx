@@ -43,7 +43,7 @@ const Footer = () => {
       text: "New York City, NY 3241",
     },
     { icon: <FaPhone className="h-4 w-4 mr-2" />, text: "(301) 456-0987" },
-    { icon: <FaAt className="h-4 w-4 mr-2" />, text: "info@fitflex.com" },
+    { icon: <FaAt className="h-4 w-4 mr-2" />, text: "info@HomeFit.com" },
   ];
 
   const socialLinks = [

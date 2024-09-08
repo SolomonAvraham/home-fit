@@ -9,13 +9,14 @@ import {
   testExerciseId,
 } from "../../utils/generateTestEntities";
 import generateToken from "../../utils/generateToken";
-import { Exercise } from "../../../src/models";
+import { Exercise, sequelize } from "../../../src/models";
 import { v4 as uuidv4 } from "uuid";
 
 describe("Exercise Controller", () => {
   let token: string;
 
   before(async () => {
+    await sequelize.sync({ force: true });
     await createTestEntities();
 
     const testUser = {

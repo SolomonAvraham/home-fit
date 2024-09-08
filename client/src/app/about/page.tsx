@@ -9,15 +9,15 @@ export default function About() {
     <div className="min-h-screen flex flex-col items-center py-10 px-4">
       <div className="w-full max-w-4xl  bg-gray-800 text-white shadow-lg rounded-lg p-8">
         <h1 className="text-4xl font-bold text-center  font-Acme mt-6">
-          About Our Home Workout App
+          About Our HomeFit App
         </h1>
         <hr className="border-gray-700 w-2/4 mx-auto opacity-30 mb-6 py-1" />
         <p className="text-base font-extralight mb-4">
-          Welcome to our Home Workout App, a platform designed to bring
-          personalized fitness plans and community engagement right to your
-          fingertips. Whether you're just starting your fitness journey or are a
-          seasoned athlete, our app provides the tools and resources you need to
-          stay on track and achieve your goals.
+          Welcome to our HomeFit, a platform designed to bring personalized
+          fitness plans and community engagement right to your fingertips.
+          Whether you're just starting your fitness journey or are a seasoned
+          athlete, our app provides the tools and resources you need to stay on
+          track and achieve your goals.
         </p>
         <div className="bg-blue-50 p-4 rounded-lg mb-4">
           <h2 className="text-2xl font-Acme font-semibold text-blue-500 mb-2">

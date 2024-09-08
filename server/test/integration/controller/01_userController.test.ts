@@ -8,12 +8,13 @@ import { describe, it, before, after } from "mocha";
 import request from "supertest";
 import app from "../../../src/index";
 import { expect } from "chai";
-import { User } from "../../../src/models";
+import { sequelize, User } from "../../../src/models";
 
 describe("User Controller", () => {
   let token: string;
 
   before(async () => {
+    await sequelize.sync({ force: true });
     await createTestEntities();
 
     const testUser = {
