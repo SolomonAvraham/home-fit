@@ -58,7 +58,6 @@ jobs:
           npm run build
         working-directory: ./server
 
-
       - name: Run tests
         env:        
           NODE_ENV: test
