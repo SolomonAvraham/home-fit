@@ -46,11 +46,14 @@ jobs:
             sleep 1
           done
 
-      - name: Create test database
+      - name: Create Test Database
         run: |
-          PGPASSWORD=$DB_PASSWORD psql -h localhost -U test_user -c "CREATE DATABASE test_db;"
+          PGPASSWORD=$DB_PASSWORD psql -h localhost -U $DB_USER -c "CREATE DATABASE test_db;"
         env:
-          PGPASSWORD: test_password  # Must match the POSTGRES_PASSWORD set in services
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}  
+          DB_USER: ${{ secrets.DB_USER }} 
+
+    
 
       - name: Build the project
         run: |
