@@ -14,9 +14,9 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_DB: test_db
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: ${{ secrets.DB_NAME }}
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
           - 5432:5432
         options: >-
@@ -48,7 +48,7 @@ jobs:
 
       - name: Create test database
         run: |
-          PGPASSWORD=test_password psql -h localhost -U test_user -c "CREATE DATABASE test_db;"
+          PGPASSWORD= ${{ secrets.DB_PASSWORD }} psql -h localhost -U test_user -c "CREATE DATABASE test_db;"
         env:
           PGPASSWORD: test_password  # Must match the POSTGRES_PASSWORD set in services
 
