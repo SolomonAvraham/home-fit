@@ -53,6 +53,14 @@ jobs:
           echo "DB_NAME: $DB_NAME"
           echo "DB_HOST: $DB_HOST"
 
+      - name: Create test database
+        env:
+          DB_USERNAME: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+        run: |
+          PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h localhost -U ${{ secrets.DB_USER }} -c "CREATE DATABASE test_home_workout_app;"
+
       - name: Build the project
         run: |
           npm run build
