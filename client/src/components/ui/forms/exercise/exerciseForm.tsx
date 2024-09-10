@@ -18,7 +18,7 @@ const ExerciseForm = ({ workoutId }: { workoutId: string }) => {
     reps: 0,
     media: "",
     workoutId: workoutId !== "" ? workoutId : undefined,
-    userId: "",
+    userId: user?.id as string,
     createdBy: [{ creatorId: "", creatorName: "", originalExerciseId: "" }],
   });
 

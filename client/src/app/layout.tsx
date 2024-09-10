@@ -7,8 +7,8 @@ import Confirm from "@/components/ui/confirm/confirm";
 import ScrollToTopButton from "@/components/ui/scrollToTopButton/scrollToTopButton";
 
 export const metadata = {
-  title: "HomeWorkout",
-  description: "HomeWorkout App",
+  title: "Home Fit",
+  description: "Home Fit App",
 };
 
 export default function RootLayout({
