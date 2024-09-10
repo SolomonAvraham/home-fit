@@ -5,12 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const authMiddleware = (req, res, next) => {
-    const authHeader = req.headers["authorization"];
-    if (!authHeader)
-        return res.status(401).json({ error: "No token provided" });
-    const token = authHeader.split(" ")[1];
-    if (!token)
-        return res.status(401).json({ error: "No token provided" });
+    var _a;
+    const cookieToken = req.cookies.token;
+    const headerToken = (_a = req.header("Authorization")) === null || _a === void 0 ? void 0 : _a.replace("Bearer ", "");
+    const token = cookieToken || headerToken;
+    if (!token) {
+        return res.status(401).json({ message: "Token not provided" });
+    }
     try {
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
         req.user = decoded;

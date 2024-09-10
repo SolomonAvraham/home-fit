@@ -5,10 +5,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const exerciseController_1 = __importDefault(require("../controllers/exerciseController"));
+const authMiddleware_1 = __importDefault(require("../middleware/authMiddleware"));
 const router = (0, express_1.Router)();
+router.use(authMiddleware_1.default);
+router.post("/:exerciseId/user/:userId/add", exerciseController_1.default.addExercise);
+router.post("/:exerciseId/workouts/:workoutId/add", exerciseController_1.default.addExerciseToWorkout);
 router.post("/createExercise", exerciseController_1.default.createExercise);
 router.get("/all", exerciseController_1.default.getAllExercises);
+router.get("/user/:userId", exerciseController_1.default.getExercisesByUserId);
 router.get("/getExerciseById/:id", exerciseController_1.default.getExerciseById);
+router.get("/isExerciseInWorkout/:exerciseId/user/:userId", exerciseController_1.default.isExerciseInWorkout);
+router.get("/isExerciseExist/:exerciseId/user/:userId", exerciseController_1.default.isExerciseExist);
 router.put("/updateExercise/:id", exerciseController_1.default.updateExercise);
 router.delete("/deleteExercise/:id", exerciseController_1.default.deleteExercise);
 exports.default = router;

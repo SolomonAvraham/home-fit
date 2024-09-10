@@ -7,11 +7,17 @@ const sequelize_1 = require("sequelize");
 const database_1 = __importDefault(require("../config/database"));
 class User extends sequelize_1.Model {
     static associate(models) {
-        User.hasMany(models.Workout, { foreignKey: "userId", as: "workouts" });
-        User.hasMany(models.Progress, { foreignKey: "userId", as: "progress" });
-        User.hasMany(models.Notification, {
+        User.hasMany(models.Exercise, {
             foreignKey: "userId",
-            as: "notifications",
+            as: "exercises",
+        });
+        User.hasMany(models.Workout, {
+            foreignKey: "userId",
+            as: "workouts",
+        });
+        User.hasMany(models.ScheduledWorkout, {
+            foreignKey: "userId",
+            as: "scheduledWorkouts",
         });
     }
 }
@@ -54,5 +60,6 @@ User.init({
 }, {
     sequelize: database_1.default,
     tableName: "users",
+    timestamps: true,
 });
 exports.default = User;

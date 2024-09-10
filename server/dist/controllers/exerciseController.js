@@ -15,6 +15,92 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const exerciseService_1 = __importDefault(require("../services/exerciseService"));
 const uuid_1 = require("uuid");
 class ExerciseController {
+    static isExerciseExist(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { exerciseId, userId } = req.params;
+            if (!(0, uuid_1.validate)(exerciseId) || !(0, uuid_1.validate)(userId)) {
+                return res.status(400).json({ message: "Invalid exercise or user ID" });
+            }
+            try {
+                const exerciseExists = yield exerciseService_1.default.isExerciseExist({
+                    exerciseId,
+                    userId,
+                });
+                return res.status(200).json(exerciseExists);
+            }
+            catch (error) {
+                console.error("Error in addExerciseToWorkout:", error.message);
+                return res.status(500).json({
+                    message: error.message,
+                });
+            }
+        });
+    }
+    static isExerciseInWorkout(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { exerciseId, userId } = req.params;
+            if (!(0, uuid_1.validate)(exerciseId) || !(0, uuid_1.validate)(userId)) {
+                return res.status(400).json({ message: "Invalid exercise or user ID" });
+            }
+            try {
+                const exerciseExists = yield exerciseService_1.default.isExerciseInWorkout({
+                    exerciseId,
+                    userId,
+                });
+                return res.status(200).json(exerciseExists);
+            }
+            catch (error) {
+                console.error("Error in addExerciseToWorkout:", error.message);
+                return res.status(500).json({
+                    message: error.message,
+                });
+            }
+        });
+    }
+    static addExercise(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { exerciseId, userId } = req.params;
+            if (!(0, uuid_1.validate)(exerciseId)) {
+                return res.status(400).json({ message: "Invalid exercise ID" });
+            }
+            try {
+                const updatedExercise = yield exerciseService_1.default.addExercise({
+                    exerciseId,
+                    userId,
+                });
+                return res.status(200).json(updatedExercise);
+            }
+            catch (error) {
+                console.error("Error in addExerciseToWorkout:", error.message);
+                return res.status(500).json({
+                    message: error.message,
+                });
+            }
+        });
+    }
+    static addExerciseToWorkout(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { exerciseId, workoutId } = req.params;
+            if (!(0, uuid_1.validate)(exerciseId) || !(0, uuid_1.validate)(workoutId)) {
+                return res
+                    .status(400)
+                    .json({ message: "Invalid exercise or workout ID" });
+            }
+            try {
+                const updatedExercise = yield exerciseService_1.default.addExerciseToWorkout({
+                    exerciseId,
+                    workoutId,
+                });
+                return res.status(200).json(updatedExercise);
+            }
+            catch (error) {
+                console.error("Error in addExerciseToWorkout:", error.message);
+                return res.status(500).json({
+                    message: error.message,
+                });
+            }
+        });
+    }
     static createExercise(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -23,23 +109,36 @@ class ExerciseController {
             }
             catch (error) {
                 console.error("Error in createExercise:", error.message);
-                return res
-                    .status(400)
-                    .json({ message: "Failed to create exercise", error: error.message });
+                return res.status(400).json({ message: error.message });
             }
         });
     }
     static getAllExercises(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            const page = parseInt(req.query.page, 10) || 1;
+            const limit = parseInt(req.query.limit, 10) || 10;
             try {
-                const exercises = yield exerciseService_1.default.getAllExercises();
-                return res.status(200).json(exercises);
+                const result = yield exerciseService_1.default.getAllExercises(page, limit);
+                return res.status(200).json(result);
             }
             catch (error) {
                 console.error("Error in getAllExercises:", error.message);
-                return res
-                    .status(500)
-                    .json({ message: "Failed to get exercises", error: error.message });
+                return res.status(500).json({ message: error.message, error });
+            }
+        });
+    }
+    static getExercisesByUserId(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { userId } = req.params;
+            const page = parseInt(req.query.page, 10) || 1;
+            const limit = parseInt(req.query.limit, 10) || 10;
+            try {
+                const result = yield exerciseService_1.default.getExercisesByUserId(userId, page, limit);
+                return res.status(200).json(result);
+            }
+            catch (error) {
+                console.error("Error in getExercisesByUserId:", error.message);
+                return res.status(500).json({ message: error.message });
             }
         });
     }
@@ -58,9 +157,7 @@ class ExerciseController {
             }
             catch (error) {
                 console.error("Error in getExerciseById:", error.message);
-                return res
-                    .status(400)
-                    .json({ message: "Failed to get exercise", error: error.message });
+                return res.status(400).json({ message: error.message, error });
             }
         });
     }
@@ -79,9 +176,7 @@ class ExerciseController {
             }
             catch (error) {
                 console.error("Error in updateExercise:", error.message);
-                return res
-                    .status(400)
-                    .json({ message: "Failed to update exercise", error: error.message });
+                return res.status(400).json({ message: error.message, error });
             }
         });
     }
@@ -100,9 +195,7 @@ class ExerciseController {
             }
             catch (error) {
                 console.error("Error in deleteExercise:", error.message);
-                return res
-                    .status(400)
-                    .json({ message: "Failed to delete exercise", error: error.message });
+                return res.status(400).json({ message: error.message, error });
             }
         });
     }

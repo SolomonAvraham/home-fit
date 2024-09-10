@@ -20,6 +20,7 @@ const index_1 = require("./routes/index");
 require("../src/models/index");
 const cors_1 = __importDefault(require("cors"));
 const testRoutes_1 = __importDefault(require("./routes/testRoutes"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 9000;
 const allowedOrigins = ["http://localhost:3000"];
@@ -38,12 +39,11 @@ app.use((0, cors_1.default)({
 }));
 app.use(express_1.default.json());
 app.use(body_parser_1.default.json());
+app.use((0, cookie_parser_1.default)());
 app.use("/api/users", index_1.userRoute);
 app.use("/api/test", testRoutes_1.default);
 app.use(errorMiddleware_1.default);
 app.use("/api/workouts", index_1.workoutRoute);
-app.use("/api/progress", index_1.progressRoutes);
-app.use("/api/notifications", index_1.notificationRoutes);
 app.use("/api/exercises", index_1.exerciseRoutes);
 app.get("/", (req, res) => {
     res.send("Hello, world!");

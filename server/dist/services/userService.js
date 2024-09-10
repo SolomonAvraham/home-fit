@@ -18,7 +18,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const uuid_1 = require("uuid");
 const index_1 = require("../models/index");
 class UserService {
-    static createUser(data) {
+    createUser(data) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!data.email || !data.password || !data.name) {
                 throw new Error("All fields are required");
@@ -51,24 +51,38 @@ class UserService {
             };
         });
     }
-    static getUserById(id) {
+    getUserById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!(0, uuid_1.validate)(id)) {
                 throw new Error("Invalid UUID format");
             }
             const user = yield User_1.default.findByPk(id);
+            const exercisesCount = yield index_1.Exercise.count({
+                where: { userId: id },
+            });
+            const workoutCount = yield index_1.Workout.count({
+                where: { userId: id },
+            });
             if (!user) {
                 throw new Error("User not found");
             }
-            return user;
+            return {
+                id,
+                name: user.name,
+                email: user.email,
+                exercisesCount,
+                workoutCount,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+            };
         });
     }
-    static getAllUsers() {
+    getAllUsers() {
         return __awaiter(this, void 0, void 0, function* () {
             return User_1.default.findAll();
         });
     }
-    static updateUser(id, data) {
+    updateUser(id, data) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!(0, uuid_1.validate)(id)) {
                 throw new Error("Invalid UUID format");
@@ -77,10 +91,28 @@ class UserService {
             if (!user) {
                 throw new Error("User not found");
             }
+            if (data.email !== undefined) {
+                const isEmailExists = yield User_1.default.findOne({
+                    where: { email: data.email },
+                });
+                if (isEmailExists && isEmailExists.id !== id) {
+                    throw new Error("Email already exists");
+                }
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(data.email)) {
+                    throw new Error("Invalid email format");
+                }
+            }
+            if (data.name !== undefined) {
+                const nameRegex = /^[a-zA-Z ]{2,30}$/;
+                if (!nameRegex.test(data.name)) {
+                    throw new Error("Name must be between 2 and 30 characters and contain only letters and spaces");
+                }
+            }
             return yield user.update(data);
         });
     }
-    static deleteUser(id) {
+    deleteUser(id) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!(0, uuid_1.validate)(id)) {
                 throw new Error("Invalid UUID format");
@@ -90,24 +122,22 @@ class UserService {
                 const user = yield User_1.default.findByPk(id, { transaction });
                 if (!user) {
                     yield transaction.rollback();
-                    return 0; // Returning 0 to indicate no user was found
+                    return 0;
                 }
-                // Delete related records
                 yield index_1.Workout.destroy({ where: { userId: id }, transaction });
-                yield index_1.Progress.destroy({ where: { userId: id }, transaction });
-                yield index_1.Notification.destroy({ where: { userId: id }, transaction });
+                yield index_1.Exercise.destroy({ where: { userId: id }, transaction });
                 yield user.destroy({ transaction });
                 yield transaction.commit();
-                return 1; // Returning 1 to indicate user was deleted
+                return 1;
             }
             catch (error) {
                 yield transaction.rollback();
-                console.error("Error in deleteUser service method:", error.message, error.stack); // Added logging
-                throw new Error("Failed to delete user");
+                console.error(error);
+                throw new Error(error.message);
             }
         });
     }
-    static authenticateUser(email, password) {
+    authenticateUser(email, password) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!email || !password) {
                 throw new Error("All fields are required");
@@ -137,4 +167,4 @@ class UserService {
         });
     }
 }
-exports.default = UserService;
+exports.default = new UserService();

@@ -5,12 +5,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
 const database_1 = __importDefault(require("../config/database"));
-const _1 = require(".");
 class Exercise extends sequelize_1.Model {
-    static associate(model) {
-        Exercise.belongsTo(model.Workout, {
-            foreignKey: "workoutId",
-            as: "workout",
+    static associate(models) {
+        Exercise.belongsTo(models.User, {
+            foreignKey: "userId",
+            as: "user",
+        });
+        Exercise.belongsToMany(models.Workout, {
+            through: models.Workout_exercises,
+            foreignKey: "exerciseId",
+            otherKey: "workoutId",
+            as: "workouts",
         });
     }
 }
@@ -29,27 +34,32 @@ Exercise.init({
         allowNull: false,
     },
     duration: {
-        type: sequelize_1.DataTypes.TEXT,
-        allowNull: false,
+        type: sequelize_1.DataTypes.INTEGER,
+        allowNull: true,
     },
     sets: {
-        type: sequelize_1.DataTypes.TEXT,
-        allowNull: false,
+        type: sequelize_1.DataTypes.INTEGER,
+        allowNull: true,
     },
     reps: {
-        type: sequelize_1.DataTypes.TEXT,
-        allowNull: false,
+        type: sequelize_1.DataTypes.INTEGER,
+        allowNull: true,
     },
     media: {
         type: sequelize_1.DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
     },
-    workoutId: {
+    userId: {
         type: sequelize_1.DataTypes.UUID,
+        allowNull: false,
         references: {
-            model: _1.Workout,
+            model: "users",
             key: "id",
         },
+    },
+    createdBy: {
+        type: sequelize_1.DataTypes.JSONB,
+        allowNull: false,
     },
     createdAt: {
         type: sequelize_1.DataTypes.DATE,

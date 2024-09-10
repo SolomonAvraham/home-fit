@@ -24,10 +24,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const userService_1 = __importDefault(require("../services/userService"));
+const uuid_1 = require("uuid");
 class UserController {
     createUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                if (!req.body.email || !req.body.password || !req.body.name) {
+                    res.status(400).json({ message: "All fields are required" });
+                }
                 const user = yield userService_1.default.createUser(req.body);
                 res.cookie("token", user.token, {
                     httpOnly: true,
@@ -39,7 +43,7 @@ class UserController {
             }
             catch (error) {
                 if (error instanceof Error) {
-                    res.status(400).json({ error: error.message });
+                    res.status(400).json({ message: error.message });
                 }
                 console.error(error);
             }
@@ -59,7 +63,7 @@ class UserController {
             }
             catch (error) {
                 if (error instanceof Error) {
-                    res.status(401).json({ error: error.message });
+                    res.status(401).json({ message: error.message });
                 }
                 console.error(error);
             }
@@ -78,7 +82,7 @@ class UserController {
             }
             catch (error) {
                 if (error instanceof Error) {
-                    res.status(400).json({ error: error.message });
+                    res.status(400).json({ message: error.message });
                 }
                 console.error(error);
             }
@@ -87,23 +91,19 @@ class UserController {
     getUserById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const userId = req.params.id;
-            const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-            if (!uuidRegex.test(userId)) {
+            if (!(0, uuid_1.validate)(userId)) {
                 res.status(400).json({ message: "Invalid UUID format" });
-                return;
             }
             try {
                 const user = yield userService_1.default.getUserById(userId);
-                if (user) {
-                    res.status(200).json(user);
-                }
-                else {
+                if (!user) {
                     res.status(404).json({ message: "User not found" });
                 }
+                res.status(200).json(user);
             }
             catch (error) {
                 if (error instanceof Error) {
-                    res.status(400).json({ error: error.message });
+                    res.status(400).json({ message: error.message });
                 }
                 console.error(error);
             }
@@ -117,7 +117,7 @@ class UserController {
             }
             catch (error) {
                 if (error instanceof Error) {
-                    res.status(400).json({ error: error.message });
+                    res.status(400).json({ message: error.message });
                 }
                 console.error(error);
             }
@@ -125,20 +125,18 @@ class UserController {
     }
     updateUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const userId = req.params.id;
             const data = req.body;
-            const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-            if (!uuidRegex.test(userId)) {
+            if (!(0, uuid_1.validate)(data.id)) {
                 res.status(400).json({ message: "Invalid UUID format" });
                 return;
             }
             try {
-                const updatedUser = yield userService_1.default.updateUser(userId, data);
+                const updatedUser = yield userService_1.default.updateUser(data.id, data);
                 res.json(updatedUser);
             }
             catch (error) {
                 if (error instanceof Error) {
-                    res.status(400).json({ error: error.message });
+                    res.status(400).json({ message: error.message });
                 }
                 console.error(error);
             }
@@ -147,8 +145,7 @@ class UserController {
     deleteUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const { id } = req.params;
-            const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-            if (!uuidRegex.test(id)) {
+            if (!(0, uuid_1.validate)(id)) {
                 res.status(400).json({ message: "Invalid UUID format" });
                 return;
             }
@@ -158,12 +155,15 @@ class UserController {
                     res.status(404).json({ message: "User not found" });
                     return;
                 }
+                if (res) {
+                    res.clearCookie("token");
+                }
                 res.status(204).json();
             }
             catch (error) {
                 if (error instanceof Error) {
                     console.error("Delete user error:", error.message, error.stack); // Added logging
-                    res.status(400).json({ error: error.message });
+                    res.status(400).json({ message: error.message });
                 }
                 console.error(error);
             }

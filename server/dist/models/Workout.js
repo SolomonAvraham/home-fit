@@ -5,13 +5,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
 const database_1 = __importDefault(require("../config/database"));
-const _1 = require(".");
 class Workout extends sequelize_1.Model {
-    static associate(model) {
-        Workout.belongsTo(model.User, { foreignKey: "userId", as: "user" });
-        Workout.hasMany(model.Exercise, {
+    static associate(models) {
+        Workout.belongsTo(models.User, {
+            foreignKey: "userId",
+            as: "user",
+        });
+        Workout.belongsToMany(models.Exercise, {
+            through: models.Workout_exercises,
             foreignKey: "workoutId",
+            otherKey: "exerciseId",
             as: "exercises",
+        });
+        Workout.hasMany(models.ScheduledWorkout, {
+            foreignKey: "workoutId",
+            as: "scheduledWorkouts",
         });
     }
 }
@@ -21,28 +29,28 @@ Workout.init({
         defaultValue: sequelize_1.DataTypes.UUIDV4,
         primaryKey: true,
     },
-    date: {
-        type: sequelize_1.DataTypes.DATE,
+    name: {
+        type: sequelize_1.DataTypes.STRING(255),
         allowNull: false,
-    },
-    duration: {
-        type: sequelize_1.DataTypes.INTEGER,
-        allowNull: false,
-    },
-    userId: {
-        type: sequelize_1.DataTypes.UUID,
-        allowNull: false,
-        references: {
-            model: _1.User,
-            key: "id",
-        },
     },
     description: {
         type: sequelize_1.DataTypes.TEXT,
         allowNull: false,
     },
-    name: {
-        type: sequelize_1.DataTypes.STRING(255),
+    duration: {
+        type: sequelize_1.DataTypes.INTEGER,
+        allowNull: true,
+    },
+    userId: {
+        type: sequelize_1.DataTypes.UUID,
+        allowNull: false,
+        references: {
+            model: "users",
+            key: "id",
+        },
+    },
+    createdBy: {
+        type: sequelize_1.DataTypes.JSONB,
         allowNull: false,
     },
     createdAt: {
