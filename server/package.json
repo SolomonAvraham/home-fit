@@ -11,7 +11,8 @@
     "start": "nodemon dist/index.js",
     "migrate": "npx sequelize-cli db:migrate",
     "migrate:undo": "npx sequelize-cli db:migrate:undo",
-    "seed": "ts-node ./node_modules/.bin/sequelize-cli db:seed:all"
+    "seed": "ts-node ./node_modules/.bin/sequelize-cli db:seed:all",
+    "test:integration": "PORT=9001 npx mocha --require ts-node/register 'test/integration/**/*.test.ts' --exit"
   },
   "keywords": [],
   "author": "",

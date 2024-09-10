@@ -1,4 +1,3 @@
-// test/integration/middleware/authMiddleware.spec.ts
 import request from "supertest";
 import { expect } from "chai";
 import app from "../../../src/index";
@@ -9,7 +8,7 @@ describe("Auth Middleware", () => {
   it("should return 401 if no token is provided", async () => {
     const res = await request(app).get("/api/test/protected");
     expect(res.status).to.equal(401);
-    expect(res.body.error).to.equal("No token provided");
+    expect(res.body.message).to.equal("Token not provided");  
   });
 
   it("should return 401 if an invalid token is provided", async () => {

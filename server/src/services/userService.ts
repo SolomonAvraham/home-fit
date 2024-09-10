@@ -5,7 +5,7 @@ import { validate as validateUUID } from "uuid";
 import { Exercise, Workout, sequelize } from "../models/index";
 
 class UserService {
-  public static async createUser(data: UserCreationAttributes) {
+  async createUser(data: UserCreationAttributes) {
     if (!data.email || !data.password || !data.name) {
       throw new Error("All fields are required");
     }
@@ -55,7 +55,8 @@ class UserService {
     };
   }
 
-  public static async getUserById(id: string) {
+  async getUserById(id: string) {
+    
     if (!validateUUID(id)) {
       throw new Error("Invalid UUID format");
     }
@@ -85,11 +86,11 @@ class UserService {
     };
   }
 
-  public static async getAllUsers() {
+  async getAllUsers() {
     return User.findAll();
   }
 
-  public static async updateUser(id: string, data: any) {
+  async updateUser(id: string, data: any) {
     if (!validateUUID(id)) {
       throw new Error("Invalid UUID format");
     }
@@ -100,30 +101,36 @@ class UserService {
       throw new Error("User not found");
     }
 
-    const isEmailExists = await User.findOne({ where: { email: data.email } });
+    if (data.email !== undefined) {
+      const isEmailExists = await User.findOne({
+        where: { email: data.email },
+      });
 
-    if (isEmailExists && isEmailExists.id !== id) {
-      throw new Error("Email already exists");
+      if (isEmailExists && isEmailExists.id !== id) {
+        throw new Error("Email already exists");
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(data.email)) {
+        throw new Error("Invalid email format");
+      }
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (data.name !== undefined) {
+      const nameRegex = /^[a-zA-Z ]{2,30}$/;
 
-    if (!emailRegex.test(data.email)) {
-      throw new Error("Invalid email format");
-    }
-
-    const nameRegex = /^[a-zA-Z ]{2,30}$/;
-
-    if (!nameRegex.test(data.name)) {
-      throw new Error(
-        "Name must be between 2 and 30 characters and contain only letters and spaces"
-      );
+      if (!nameRegex.test(data.name)) {
+        throw new Error(
+          "Name must be between 2 and 30 characters and contain only letters and spaces"
+        );
+      }
     }
 
     return await user.update(data);
   }
 
-  public static async deleteUser(id: string) {
+  async deleteUser(id: string) {
     if (!validateUUID(id)) {
       throw new Error("Invalid UUID format");
     }
@@ -142,7 +149,6 @@ class UserService {
       await user.destroy({ transaction });
       await transaction.commit();
 
-      
       return 1;
     } catch (error: any) {
       await transaction.rollback();
@@ -151,7 +157,7 @@ class UserService {
     }
   }
 
-  public static async authenticateUser(email: string, password: string) {
+  async authenticateUser(email: string, password: string) {
     if (!email || !password) {
       throw new Error("All fields are required");
     }
@@ -189,4 +195,4 @@ class UserService {
   }
 }
 
-export default UserService;
+export default new UserService();

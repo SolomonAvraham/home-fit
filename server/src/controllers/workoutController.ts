@@ -6,6 +6,10 @@ class WorkoutController {
   public async isWorkoutExist(req: Request, res: Response): Promise<Response> {
     const { workoutId, userId } = req.query;
 
+    if (!uuidValidate(workoutId as string) || !uuidValidate(userId as string)) {
+      return res.status(400).json({ message: "Invalid UUID format" });
+    }
+
     try {
       const exists = await WorkoutService.isWorkoutExist(
         workoutId as string,
@@ -16,11 +20,9 @@ class WorkoutController {
         return res.status(404).json({ message: "Workout not found" });
       }
 
-      return res.json(exists);
-    } catch (error: unknown) {
-      return res
-        .status(500)
-        .json({ message: "Failed to check workout existence", error: error });
+      return res.status(200).json(exists);
+    } catch (error:any) {
+      return res.status(500).json({ message: error.message });
     }
   }
   public async addWorkout(req: Request, res: Response): Promise<Response> {
@@ -46,12 +48,12 @@ class WorkoutController {
   ): Promise<Response> {
     const { id: userId } = req.params;
 
-    const page = parseInt(req.query.page as string, 10) || 1;
-    const limit = parseInt(req.query.limit as string, 10) || 10;
-
     if (!uuidValidate(userId)) {
       return res.status(400).json({ message: "Invalid user ID" });
     }
+
+    const page = parseInt(req.query.page as string, 10) || 1;
+    const limit = parseInt(req.query.limit as string, 10) || 10;
 
     try {
       const result = await WorkoutService.getWorkoutsByUserId(
@@ -59,11 +61,12 @@ class WorkoutController {
         page,
         limit
       );
+
       return res.status(200).json(result);
     } catch (error: any) {
       console.error("Error in getWorkoutsByUserId:", error.message);
       return res
-        .status(400)
+        .status(500)
         .json({ message: "Failed to get workouts", error: error.message });
     }
   }
@@ -98,16 +101,20 @@ class WorkoutController {
   public async getWorkoutById(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
+
       if (!uuidValidate(id)) {
         return res.status(400).json({ message: "Invalid UUID format" });
       }
+
       const workout = await WorkoutService.getWorkoutById(id);
+
       if (!workout) {
         return res.status(404).json({ message: "Workout not found" });
       }
+
       return res.status(200).json(workout);
     } catch (error: any) {
-      return res.status(400).json({ message: error.message, error });
+      return res.status(500).json({ message: error.message });
     }
   }
 
@@ -142,13 +149,17 @@ class WorkoutController {
         name,
         exercises,
       });
+
       if (!workout) {
         return res.status(404).json({ message: "Workout not found" });
       }
       return res.status(200).json(workout);
     } catch (error: any) {
+      if (process.env.NODE_ENV === "test") {
+        console.log("sgsfgsfgsgsf");
+      }
       return res
-        .status(400)
+        .status(500)
         .json({ message: "Failed to update workout", error: error.message });
     }
   }

@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches:
+      branches:
       - main
   pull_request:
     branches:
@@ -16,9 +16,9 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.DB_NAME }}
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
           - 5432:5432
         options: >-
@@ -48,14 +48,28 @@ jobs:
             sleep 1
           done
 
+      - name: Create Test Database
+        run: |
+          PGPASSWORD=$DB_PASSWORD psql -h localhost -U $DB_USER -c "CREATE DATABASE test_db;"
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}  
+          DB_USER: ${{ secrets.DB_USER }} 
+
+    
+
       - name: Build the project
         run: |
           npm run build
         working-directory: ./server
 
+      - name: Run migrations
+        run: |
+          npx sequelize-cli db:migrate --env test
+        working-directory: ./server
+
       - name: Run tests
         env:
-          DATABASE_URL_TEST: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
+          DATABASE_URL_TEST: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           npm test

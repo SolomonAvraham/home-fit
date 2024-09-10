@@ -7,7 +7,7 @@ import { Op } from "sequelize";
 import { CreatedByType } from "../types/services";
 
 class ExerciseService {
-  static async isExerciseExist(data: {
+  async isExerciseExist(data: {
     exerciseId: string;
     userId: string;
   }): Promise<boolean> {
@@ -38,11 +38,11 @@ class ExerciseService {
       return true;
     } catch (error) {
       console.error("Check Exercise Existence Error:", error);
-      throw new Error("Failed to check exercise existence");
+      throw error;
     }
   }
 
-  static async addExercise(data: { exerciseId: string; userId: string }) {
+  async addExercise(data: { exerciseId: string; userId: string }) {
     try {
       const { exerciseId, userId } = data;
 
@@ -52,14 +52,19 @@ class ExerciseService {
         throw new Error("Exercise not found");
       }
 
-      const originalExerciseId = exercise.createdBy?.[0]?.originalExerciseId;
+      const originalExerciseId =
+        exercise.createdBy?.[0]?.originalExerciseId || exerciseId;
 
       const userHasExercise = await Exercise.findOne({
         where: {
           userId,
-          createdBy: {
-            [Op.contains]: [{ originalExerciseId }],
-          },
+          [Op.or]: [
+            {
+              createdBy: {
+                [Op.contains]: [{ originalExerciseId }],
+              },
+            },
+          ],
         },
       });
 
@@ -71,6 +76,13 @@ class ExerciseService {
         ...exercise.toJSON(),
         id: uuidv4(),
         userId,
+        createdBy: [
+          {
+            creatorName: exercise.createdBy?.[0]?.creatorName,
+            creatorId: exercise.createdBy?.[0]?.creatorId,
+            originalExerciseId,
+          },
+        ],
       });
 
       if (!newExercise) {
@@ -84,7 +96,7 @@ class ExerciseService {
     }
   }
 
-  static async isExerciseInWorkout(data: {
+  async isExerciseInWorkout(data: {
     exerciseId: string;
     userId: string;
   }): Promise<
@@ -138,16 +150,16 @@ class ExerciseService {
       }
 
       return excludedWorkouts;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Check Exercise Existence Error:", error);
+      if (error.message === "Exercise not found") {
+        throw new Error("Exercise not found");
+      }
       throw new Error("Failed to check exercise existence");
     }
   }
 
-  static async addExerciseToWorkout(data: {
-    exerciseId: string;
-    workoutId: string;
-  }) {
+  async addExerciseToWorkout(data: { exerciseId: string; workoutId: string }) {
     const { exerciseId, workoutId } = data;
 
     try {
@@ -186,15 +198,20 @@ class ExerciseService {
     }
   }
 
-  static async createExercise(exercise: ExerciseAttributes) {
+  async createExercise(exercise: ExerciseAttributes) {
     try {
+      if (!exercise.name || !exercise.description) {
+        throw new Error("All fields are required");
+      }
+
       const id = uuidv4();
 
       if (!isValidUUID(id)) {
         throw new Error("Invalid UUID format");
       }
 
-      const getYoutubeEmbedUrl = (url: string) => {
+      const getYoutubeEmbedUrl = (url: string | undefined) => {
+        if (!url) return null;
         const regExp =
           /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
         const match = url.match(regExp);
@@ -234,11 +251,14 @@ class ExerciseService {
       return newExercise;
     } catch (error: any) {
       console.error("Create Exercise Service Error:", error);
+      if (error.parent && error.parent.code === "22P02") {
+        throw new Error("Invalid UUID format");
+      }
       throw new Error(error.message as string);
     }
   }
 
-  static async getAllExercises(page: number = 1, limit: number = 10) {
+  async getAllExercises(page: number = 1, limit: number = 10) {
     try {
       const offset = (page - 1) * limit;
 
@@ -295,7 +315,7 @@ class ExerciseService {
     }
   }
 
-  static async getExercisesByUserId(
+  async getExercisesByUserId(
     userId: string,
     page: number = 1,
     limit: number = 10
@@ -321,9 +341,9 @@ class ExerciseService {
         const exerciseJSON = exercise.toJSON() as ExerciseAttributes;
 
         const formattedTime = exerciseJSON.duration
-        ? formatMinutesToHours(exerciseJSON.duration)
-        : null;
- 
+          ? formatMinutesToHours(exerciseJSON.duration)
+          : null;
+
         return {
           id: exerciseJSON.id,
           name: exerciseJSON.name,
@@ -355,7 +375,7 @@ class ExerciseService {
     }
   }
 
-  static async getExerciseById(id: string) {
+  async getExerciseById(id: string) {
     console.log("🚀 ~ ExerciseService ~ getExerciseById ~ id:", id);
 
     try {
@@ -372,11 +392,11 @@ class ExerciseService {
       return exercise;
     } catch (error) {
       console.error("Get Exercise By ID Service Error:", error);
-      throw new Error("Failed to fetch exercise");
+      throw error;
     }
   }
 
-  static async updateExercise(id: string, data: any) {
+  async updateExercise(id: string, data: any) {
     try {
       if (!isValidUUID(id)) {
         throw new Error("Invalid UUID format");
@@ -389,11 +409,11 @@ class ExerciseService {
       return updatedExercise;
     } catch (error) {
       console.error("Update Exercise Service Error:", error);
-      throw new Error("Failed to update exercise");
+      throw error;
     }
   }
 
-  static async deleteExercise(id: string) {
+  async deleteExercise(id: string) {
     try {
       if (!isValidUUID(id)) {
         throw new Error("Invalid UUID format");
@@ -408,24 +428,19 @@ class ExerciseService {
       const WorkoutExercise = await Workout_exercises.destroy({
         where: { exerciseId: id },
       });
-      console.log(
-        "🚀 ~ ExerciseService ~ deleteExercise ~ WorkoutExercise:",
-        WorkoutExercise
-      );
 
       await exercise.destroy();
 
       const a = await Workout_exercises.findAll({
         where: { exerciseId: id },
       });
-      console.log("🚀 ~ ExerciseService ~ deleteExercise ~ a:", a);
 
       return exercise;
     } catch (error) {
       console.error("Delete Exercise Service Error:", error);
-      throw new Error("Failed to delete exercise");
+      throw error;
     }
   }
 }
 
-export default ExerciseService;
+export default new ExerciseService();
