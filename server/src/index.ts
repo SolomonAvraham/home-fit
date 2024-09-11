@@ -12,7 +12,10 @@ dotenv.config();
 const app: Application = express();
 const PORT = process.env.PORT || 9001;
 
-const allowedOrigins = ["http://localhost:3000"];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://homefit-pro.vercel.app",
+];
 
 app.use(
   cors({
