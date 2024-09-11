@@ -10,7 +10,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 dotenv.config();
 const app: Application = express();
-const PORT = process.env.PORT || 9000;
+const PORT = process.env.PORT || 9001;
 
 const allowedOrigins = ["http://localhost:3000"];
 
