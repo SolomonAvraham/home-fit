@@ -15,9 +15,9 @@ export default function About() {
         <p className="text-base font-extralight mb-4">
           Welcome to our HomeFit, a platform designed to bring personalized
           fitness plans and community engagement right to your fingertips.
-          Whether you're just starting your fitness journey or are a seasoned
-          athlete, our app provides the tools and resources you need to stay on
-          track and achieve your goals.
+          Whether you&apos;re just starting your fitness journey or are a
+          seasoned athlete, our app provides the tools and resources you need to
+          stay on track and achieve your goals.
         </p>
         <div className="bg-blue-50 p-4 rounded-lg mb-4">
           <h2 className="text-2xl font-Acme font-semibold text-blue-500 mb-2">
@@ -26,7 +26,7 @@ export default function About() {
           <p className="text-base text-black font-light mb-4">
             Our app offers a wide range of workouts tailored to different
             fitness levels and goals. From strength training and cardio to yoga
-            and flexibility routines, you'll find workouts designed by top
+            and flexibility routines, you&apos;ll find workouts designed by top
             trainers to keep you motivated and challenged.
           </p>
         </div>
@@ -48,11 +48,11 @@ export default function About() {
             Building a Fitness Community
           </h2>
           <p className="text-base text-black font-light mb-4">
-            We believe that fitness is more than just working out; it's about
-            building a community of like-minded individuals who support and
-            motivate each other. Our app's social features allow you to connect
-            with friends, share your progress, and even participate in
-            challenges together.
+            We believe that fitness is more than just working out; it&apos;s
+            about building a community of like-minded individuals who support
+            and motivate each other. Our app&apos;s social features allow you
+            to connect with friends, share your progress, and even participate
+            in challenges together.
           </p>
         </div>
         <div className="bg-purple-50 p-4 rounded-lg mb-4">

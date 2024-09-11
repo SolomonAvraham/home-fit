@@ -9,7 +9,7 @@ import { WorkoutProps } from "@/types/workout";
 import Link from "next/dist/client/link";
 import React, { useState } from "react";
 
-export default function UserWorkouts({ operation }: { operation: string }) {
+export default function UserWorkouts() {
   const { user } = useUserStore();
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,17 +22,6 @@ export default function UserWorkouts({ operation }: { operation: string }) {
     limit
   );
 
-  const renderButton = (operation: string) => {
-    switch (operation) {
-      case "edit":
-        return "Edit Workout";
-      case "delete":
-        return "Delete Workout";
-      default:
-        return "My Workouts";
-    }
-  };
-
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -43,12 +32,6 @@ export default function UserWorkouts({ operation }: { operation: string }) {
     <div className="container mx-auto p-4 min-h-screen py-10">
       <div className=" -mt-10">
         <Breadcrumb currentPath={currentPath} excludePaths={[]} />
-      </div>
-      <div className="text-center">
-        <h1 className="text-6xl drop-shadow-lg cursor-default font-bold font-Acme text-center text-slate-100">
-          {renderButton(operation)}
-        </h1>
-        <hr className="border-gray-700 w-2/4 mx-auto opacity-30 mt-5" />
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-4 min-h-screen py-10">

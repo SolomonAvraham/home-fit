@@ -167,10 +167,11 @@ const ExerciseForm = ({ workoutId }: { workoutId: string }) => {
           </div>
         </div>
 
-
         <div className="form-control py-4">
           <label className="label" htmlFor="media">
-            <span className="label-text mx-auto font-bold">Exercise's Youtube Link</span>
+            <span className="label-text mx-auto font-bold">
+              Exercise&apos;cs Youtube Link
+            </span>
           </label>
           <input
             type="text"

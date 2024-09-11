@@ -3,11 +3,10 @@ import axios from "axios";
 const baseURL =
   process.env.NODE_ENV === "production"
     ? process.env.NEXT_PUBLIC_SERVER_URL
-    : "http://localhost:3000";
+    : process.env.NEXT_PUBLIC_LOCAL_SERVER_URL;
 
-    
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_LOCAL_SERVER_URL,
+  baseURL,
   headers: {
     "Content-Type": "application/json",
   },
