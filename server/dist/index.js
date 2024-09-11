@@ -17,7 +17,7 @@ const database_1 = __importDefault(require("./config/database"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const errorMiddleware_1 = __importDefault(require("./middleware/errorMiddleware"));
 const index_1 = require("./routes/index");
-require("../src/models/index");
+require("./models/index");
 const cors_1 = __importDefault(require("cors"));
 const testRoutes_1 = __importDefault(require("./routes/testRoutes"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));

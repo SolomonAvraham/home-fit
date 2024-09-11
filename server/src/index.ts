@@ -3,7 +3,7 @@ import sequelize from "./config/database";
 import bodyParser from "body-parser";
 import errorMiddleware from "./middleware/errorMiddleware";
 import { userRoute, workoutRoute, exerciseRoutes } from "./routes/index";
-import "../src/models/index";
+import "./models/index";
 import cors from "cors";
 import testRoutes from "./routes/testRoutes";
 import cookieParser from "cookie-parser";
