@@ -21,6 +21,8 @@ require("./models/index");
 const cors_1 = __importDefault(require("cors"));
 const testRoutes_1 = __importDefault(require("./routes/testRoutes"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 9000;
 const allowedOrigins = ["http://localhost:3000"];

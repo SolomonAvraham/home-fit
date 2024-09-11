@@ -7,7 +7,8 @@ import "./models/index";
 import cors from "cors";
 import testRoutes from "./routes/testRoutes";
 import cookieParser from "cookie-parser";
-
+import dotenv from "dotenv";
+dotenv.config();
 const app: Application = express();
 const PORT = process.env.PORT || 9000;
 
