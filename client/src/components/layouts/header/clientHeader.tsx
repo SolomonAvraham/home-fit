@@ -47,7 +47,7 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
               : "";
           const response = await axios.get(`${baseUrl}/api/auth/status`, {
             withCredentials: true,
-          });
+          }); 
 
           if (response.data) {
             setIsLoggedIn(true);
