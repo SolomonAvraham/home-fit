@@ -41,7 +41,11 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
     if (!user || user) {
       const checkAuthStatus = async () => {
         try {
-          const response = await axios.get("/api/auth/status", {
+          const baseUrl =
+            process.env.NODE_ENV === "production"
+              ? "https://homefit-pro.vercel.app"
+              : "";
+          const response = await axios.get(`${baseUrl}/api/auth/status`, {
             withCredentials: true,
           });
 
