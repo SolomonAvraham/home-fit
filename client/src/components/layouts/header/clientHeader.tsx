@@ -38,29 +38,26 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (!user || user) {
-      const checkAuthStatus = async () => {
-        try {
-          const baseUrl =
-            process.env.NODE_ENV === "production"
-              ? "https://homefit-pro.vercel.app"
-              : "";
-          const response = await axios.get(`${baseUrl}/api/auth/status`, {
-            withCredentials: true,
-          }); 
+    const checkAuthStatus = async () => {
+      try {
+        const response = await axios.get(`/api/auth/status`, {
+          withCredentials: true,
+        });
 
-          if (response.data) {
-            setIsLoggedIn(true);
-          }
-        } catch (error: any) {
-          console.error(error.message);
-          setUser(null);
+        if (response.data) {
+          setIsLoggedIn(true);
+        } else {
           setIsLoggedIn(false);
+          setUser(null);
         }
-      };
-      checkAuthStatus();
-    }
-  }, [user, setUser]);
+      } catch (error: any) {
+        console.error(error.message);
+        setUser(null);
+        setIsLoggedIn(false);
+      }
+    };
+    checkAuthStatus();
+  }, [user]);
 
   useEffect(() => {
     setIsClient(true);

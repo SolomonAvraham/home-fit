@@ -41,6 +41,10 @@ class UserController {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
+        path: "/",
+        domain:
+        process.env.NODE_ENV === "production" ? ".vercel.app" : undefined,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
       res.status(200).json({ id, name, role });

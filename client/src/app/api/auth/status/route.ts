@@ -1,22 +1,13 @@
 import { jwtVerify } from "jose";
 import { NextRequest, NextResponse } from "next/server";
 
-export const runtime = "edge"; 
+export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   try {
+    const token = req.cookies.get("token")?.value;
 
-    const cookies = req.headers.get("cookie");
-    console.log("All Cookies from headers:", cookies);
-
-    const token = cookies
-      ?.split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1];
-    console.log("Extracted token:", token);
- 
-    //const token = req.cookies.get("token")?.value;
-     if (!token) {
+    if (!token) {
       console.log("🚀 ~ GET ~ No token found in cookies");
       return NextResponse.json(false, { status: 401 });
     }
