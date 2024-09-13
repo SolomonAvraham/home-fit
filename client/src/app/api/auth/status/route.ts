@@ -1,12 +1,14 @@
 import { jwtVerify } from "jose";
 import { NextRequest, NextResponse } from "next/server";
 
-export const runtime = "edge";
-
+ 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.cookies.get("token")?.value;
+   console.log("All cookies:", req.cookies);
+  const token = req.cookies.get("token")?.value;
+    
 
+   console.log("Extracted token:", token);
     if (!token) {
       console.log("🚀 ~ GET ~ No token found in cookies");
       return NextResponse.json(false, { status: 401 });
