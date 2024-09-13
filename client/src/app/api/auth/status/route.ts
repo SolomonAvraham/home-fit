@@ -5,11 +5,18 @@ export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   try {
-        console.log("All cookies:", req.cookies);
 
-    const token = req.cookies.get("token")?.value;
- console.log("Extracted token:", token);
-    if (!token) {
+    const cookies = req.headers.get("cookie");
+    console.log("All Cookies from headers:", cookies);
+
+    const token = cookies
+      ?.split("; ")
+      .find((row) => row.startsWith("token="))
+      ?.split("=")[1];
+    console.log("Extracted token:", token);
+ 
+    //const token = req.cookies.get("token")?.value;
+     if (!token) {
       console.log("🚀 ~ GET ~ No token found in cookies");
       return NextResponse.json(false, { status: 401 });
     }
