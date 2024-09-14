@@ -26,7 +26,8 @@ import {
   FaTrash,
   FaRunning,
 } from "react-icons/fa";
-import { GiWeightLiftingUp } from "react-icons/gi"; 
+import { GiWeightLiftingUp } from "react-icons/gi";
+import axiosInstance from "@/utils/axiosInstance";
 
 const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
   const logoutMutation = UseLogoutMutation();
@@ -40,9 +41,11 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await axios.get(`/api/auth/status`, {
-          withCredentials: true,
-        });
+        // const response = await axios.get(`/api/auth/status`, {
+        //   withCredentials: true,
+        // });
+
+        const response = await axiosInstance.get(`/api`);
 
         if (response.data) {
           setIsLoggedIn(true);
@@ -51,7 +54,7 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
           setUser(null);
         }
       } catch (error: any) {
-        console.error("checkAuthStatus",error.message);
+        console.error("checkAuthStatus", error.message);
         setUser(null);
         setIsLoggedIn(false);
       }

@@ -49,9 +49,11 @@ app.use("/api/workouts", workoutRoute);
 app.use("/api/exercises", exerciseRoutes);
 
 app.get("/api", (req, res) => {
-  const token = req.headers["authorization"]?.split(" ")[1];
+ // const token = req.headers["authorization"]?.split(" ")[1];
+  
+    const token = req.cookies.token;
   console.log("🚀 ~ app.get ~ token:", token)
-
+ 
   if (!token) {
     return res.status(401).json(false);
   }
