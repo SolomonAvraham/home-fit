@@ -15,23 +15,14 @@ const app: Application = express();
 
 const PORT = process.env.PORT || 9001;
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://homefit-pro.vercel.app",
-];
+ 
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        const msg =
-          "The CORS policy for this site does not allow access from the specified Origin.";
-        return callback(new Error(msg), false);
-      }
-      return callback(null, true);
-    },
+    origin:
+      process.env.NODE_ENV === "production"
+        ? "https://homefit-pro.vercel.app"
+        : "http://localhost:3000",
     credentials: true,
   })
 );
@@ -48,10 +39,10 @@ app.use(errorMiddleware);
 app.use("/api/workouts", workoutRoute);
 app.use("/api/exercises", exerciseRoutes);
 
-app.get("/api", (req, res) => {
- // const token = req.headers["authorization"]?.split(" ")[1];
-  
-    const token = req.cookies.token;
+app.get("/api", (req, res) => {  
+  const token =
+    req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
+
   console.log("🚀 ~ app.get ~ token:", token)
  
   if (!token) {

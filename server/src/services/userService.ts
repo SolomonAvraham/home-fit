@@ -43,7 +43,7 @@ class UserService {
     const token = jwt.sign(
       { id: user.id, email: user.email, name: user.name, role: user.role },
       process.env.JWT_SECRET as string,
-      { expiresIn: "1h" }
+      { expiresIn:   7 * 24 * 60 * 60 * 1000  }
     );
 
     return {
@@ -182,7 +182,7 @@ class UserService {
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET as string,
-      { expiresIn: "1h" }
+      { expiresIn: 7 * 24 * 60 * 60 * 1000 }
     );
 
     return {

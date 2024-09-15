@@ -15,6 +15,8 @@ class UserController {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
+        //domain: "https://homefit-pro.vercel.app",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
       const { token, ...userData } = user;
@@ -37,13 +39,17 @@ class UserController {
         password
       );
 
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Changed this
+  path: "/",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+  domain:
+    process.env.NODE_ENV === "production"
+      ? "homefit-pro.vercel.app"
+      : undefined,
+});
 
       res.status(200).json({ id, name, role });
     } catch (error: any) {
@@ -61,6 +67,7 @@ class UserController {
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         expires: new Date(0),
+        domain: "https://homefit-pro.vercel.app",
       });
 
       res.status(200).json({ message: "Logout successful" });
