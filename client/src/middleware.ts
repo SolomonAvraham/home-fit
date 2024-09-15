@@ -3,13 +3,20 @@ import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
 export async function middleware(req: NextRequest) {
+  console.log("🚀 ~ middleware ~ req:", req)
   const token =
-    req.cookies.get("token")?.value ||
-    req.headers.get("Authorization")?.replace("Bearer ", "");
-
+    req.cookies.get("token")?.value 
+    
   console.log("🚀 ~ middleware ~ token:", token);
+  
+    const a = req.headers 
+    console.log("🚀 ~ middleware ~ a:", a)
 
+  const aa = req.cookies.getAll();
+  console.log("🚀 ~ middleware ~ aa:", aa)
+ 
   const JWT_SECRET = process.env.JWT_SECRET;
+  console.log("🚀 ~ middleware ~ JWT_SECRET:", JWT_SECRET)
 
   let response = NextResponse.next();
 
