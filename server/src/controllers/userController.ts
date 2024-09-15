@@ -47,13 +47,7 @@ class UserController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      res.cookie("auth_status", "authenticated", {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+  
 
       res.status(200).json({ id, name, role });
     } catch (error: any) {
@@ -72,13 +66,7 @@ class UserController {
         sameSite: "none",
         path: "/",
       });
-
-      res.clearCookie("auth_status", {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
-        path: "/",
-      });
+ 
 
       res.status(200).json({ message: "Logout successful" });
     } catch (error: any) {
