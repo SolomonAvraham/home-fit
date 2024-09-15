@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
+import axios from "axios";
 
 export async function middleware(req: NextRequest) {
-
-const testing = await fetch("/api");
-console.log("🚀 ~ middleware ~ testing:", testing)
-
-
+  const testing = await axios.get("/api", {
+    withCredentials: true,
+  });
+  console.log("🚀 ~ middleware ~ testing:", testing);
 
   console.log("🚀 ~ middleware ~ req:", req);
   const token = req.cookies.get("token")?.value;
