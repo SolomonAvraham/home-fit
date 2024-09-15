@@ -44,7 +44,7 @@ class UserController {
         secure: process.env.NODE_ENV === "production",
         sameSite: "none",
         path: "/",
-        expires: expires,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
         domain: ".homefit-pro.vercel.app",
       });
 
