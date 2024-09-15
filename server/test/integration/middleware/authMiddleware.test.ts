@@ -24,7 +24,7 @@ describe("Auth Middleware", () => {
     const token = jwt.sign(
       { id: "testuser", email: "test@example.com" },
       process.env.JWT_SECRET || "your_jwt_secret",
-      { expiresIn: "1h" }
+      { expiresIn: "7d" }
     );
 
     const res = await request(app)

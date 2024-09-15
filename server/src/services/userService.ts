@@ -43,7 +43,7 @@ class UserService {
     const token = jwt.sign(
       { id: user.id, email: user.email, name: user.name, role: user.role },
       process.env.JWT_SECRET as string,
-      { expiresIn:   7 * 24 * 60 * 60 * 1000  }
+      { expiresIn: "7d" }
     );
 
     return {
@@ -56,7 +56,6 @@ class UserService {
   }
 
   async getUserById(id: string) {
-    
     if (!validateUUID(id)) {
       throw new Error("Invalid UUID format");
     }
@@ -182,7 +181,7 @@ class UserService {
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET as string,
-      { expiresIn: 7 * 24 * 60 * 60 * 1000 }
+      { expiresIn: "7d" }
     );
 
     return {

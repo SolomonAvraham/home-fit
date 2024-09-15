@@ -156,7 +156,7 @@ class UserService {
             const isPasswordValid = yield bcryptjs_1.default.compare(password, user.password);
             if (!isPasswordValid)
                 throw new Error("Invalid password");
-            const token = jsonwebtoken_1.default.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+            const token = jsonwebtoken_1.default.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
             return {
                 id: user.id,
                 name: user.name,

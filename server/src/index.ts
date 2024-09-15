@@ -15,8 +15,6 @@ const app: Application = express();
 
 const PORT = process.env.PORT || 9001;
 
- 
-
 app.use(
   cors({
     origin:
@@ -39,12 +37,10 @@ app.use(errorMiddleware);
 app.use("/api/workouts", workoutRoute);
 app.use("/api/exercises", exerciseRoutes);
 
-app.get("/api", (req, res) => {  
+app.get("/api", (req, res) => {
   const token =
     req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
 
-  console.log("🚀 ~ app.get ~ token:", token)
- 
   if (!token) {
     return res.status(401).json(false);
   }

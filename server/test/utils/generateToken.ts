@@ -7,7 +7,7 @@ interface TokenUser {
 const generateToken = (user: TokenUser) => {
   const payload = { id: user.id, email: user.email };
   const secret = process.env.JWT_SECRET || "your_jwt_secret";
-  const options = { expiresIn: "1h" };
+  const options = { expiresIn: "7d" };
 
   return jwt.sign(payload, secret, options);
 };
