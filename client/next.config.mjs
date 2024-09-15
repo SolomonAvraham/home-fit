@@ -5,8 +5,8 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/:path*", // All API requests
-        destination: "https://adgdbgbbbfcgbdsbdg.online/:path*", // Proxy to backend
+        source: "/api", // All API requests
+        destination: "https://adgdbgbbbfcgbdsbdg.online/api", // Proxy to backend
       },
     ];
   },
