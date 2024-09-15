@@ -41,7 +41,7 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await axiosInstance.get(`/api`);
+        const response = await axiosInstance.get(`/api/verifyToken`);
 
         if (response.data) {
           setIsLoggedIn(true);

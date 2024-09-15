@@ -37,7 +37,7 @@ app.use(errorMiddleware);
 app.use("/api/workouts", workoutRoute);
 app.use("/api/exercises", exerciseRoutes);
 
-app.get("/api", (req, res) => {
+app.get("/api/verifyToken", (req, res) => {
   const token =
     req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
 
