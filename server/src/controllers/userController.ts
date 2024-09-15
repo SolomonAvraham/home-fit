@@ -55,13 +55,7 @@ class UserController {
 
   public async logout(req: Request, res: Response): Promise<void> {
     try {
-      res.cookie("token", "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
-        expires: new Date(0),
-       });
-
+      res.clearCookie("token");
       res.status(200).json({ message: "Logout successful" });
     } catch (error: any) {
       if (error instanceof Error) {

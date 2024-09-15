@@ -73,13 +73,10 @@ export async function middleware(req: NextRequest) {
 
   try {
     // Make a request to your Express API to check authentication status
-    const authCheckResponse = await axiosInstance.get("/api", {
-      headers: {
-        Cookie: req.headers.get("cookie") || "",
-      },
-    });
+    const authCheckResponse = await axiosInstance.get("/api");
+    console.log("🚀 ~ middleware ~ authCheckResponse:", authCheckResponse)
 
-    if (authCheckResponse.data.isAuthenticated) {
+    if (authCheckResponse.data) {
       response.cookies.set("auth_status", "authenticated", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
