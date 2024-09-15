@@ -45,7 +45,14 @@ class UserController {
         sameSite: "none",
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        domain: ".homefit-pro.vercel.app",
+      });
+
+      res.cookie("auth_status", "authenticated", {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "none",
+        path: "/",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
       res.status(200).json({ id, name, role });
