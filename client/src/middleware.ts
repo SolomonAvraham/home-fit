@@ -16,7 +16,7 @@ export async function middleware(req: NextRequest) {
 
   try {
     //const response = await axiosInstance.get("/api/verifyToken");
-    const response = await fetch(`${process.env.BASE_URL}/api/verifyToken`, {
+    const response = await fetch(`${baseURL}/api/verifyToken`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       credentials: "include", // Include the token in the request
