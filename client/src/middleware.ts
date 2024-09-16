@@ -18,6 +18,7 @@ export async function middleware(req: NextRequest) {
     const response = await axiosInstance.get("/api/verifyToken");
 
     const isTokenValid = response.data;
+    console.log("🚀 Token Verification Response:", response.data);
 
     if (isTokenValid === true) {
       return NextResponse.next();
