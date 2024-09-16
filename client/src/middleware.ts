@@ -3,6 +3,8 @@ import type { NextRequest } from "next/server";
 import { baseURL } from "./utils/axiosInstance";
 
 export async function middleware(req: NextRequest) {
+    const token = req.cookies.get("token")?.value;
+    console.log("Token from cookie:", token);  
   const axios = require("axios");
 
   const axiosInstance = axios.create({
