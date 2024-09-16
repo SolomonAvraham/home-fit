@@ -37,8 +37,6 @@ class UserController {
         password
       );
 
-      const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
       res.cookie("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -46,8 +44,6 @@ class UserController {
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
-
-  
 
       res.status(200).json({ id, name, role });
     } catch (error: any) {
@@ -66,7 +62,6 @@ class UserController {
         sameSite: "none",
         path: "/",
       });
- 
 
       res.status(200).json({ message: "Logout successful" });
     } catch (error: any) {

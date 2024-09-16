@@ -3,9 +3,9 @@ import ClientHeader from "./clientHeader";
 
 async function verifyToken() {
   const cookieStore = cookies();
-  const authStatus = cookieStore.get("auth_status");
+  const authStatus = cookieStore.get("auth_status")?.value;
 
-  return authStatus?.value === "authenticated";
+  return authStatus === "authenticated";
 }
 
 export default async function Header() {

@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-  const authStatus = req.cookies.get("auth_status");
+  const authStatus = req.cookies.get("auth_status")?.value;
 
-  if (authStatus?.value !== "authenticated") {
+  if (authStatus !== "authenticated" || authStatus === undefined) {
     redirectToLogin(req);
     return;
   }
