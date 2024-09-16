@@ -15,10 +15,20 @@ export async function middleware(req: NextRequest) {
   });
 
   try {
-    const response = await axiosInstance.get("/api/verifyToken");
+    //const response = await axiosInstance.get("/api/verifyToken");
+    const response = await fetch(`${process.env.BASE_URL}/api/verifyToken`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include", // Include the token in the request
+    });
+    console.log("🚀 ~ middleware ~ response:", response);
 
-    const isTokenValid = response.data;
-    console.log("🚀 Token Verification Response:", response.data);
+    if (!response.ok) {
+      throw new Error(`Failed to verify token: ${response.status}`);
+    }
+
+    const isTokenValid = await response.json();
+    console.log("🚀 Token Verification Response:", isTokenValid);
 
     if (isTokenValid === true) {
       return NextResponse.next();
