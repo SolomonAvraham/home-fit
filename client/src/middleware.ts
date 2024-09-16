@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { baseURL } from "./utils/axiosInstance";
 
-export async function middleware(request: NextRequest) {
+export async function middleware(req: NextRequest) {
   const axios = require("axios");
 
   const axiosInstance = axios.create({
@@ -22,11 +22,13 @@ export async function middleware(request: NextRequest) {
     if (isTokenValid === true) {
       return NextResponse.next();
     } else {
-      return NextResponse.redirect("/auth/login");
+      const loginUrl = new URL("/auth/login", req.nextUrl.origin);
+      return NextResponse.redirect(loginUrl);
     }
   } catch (error) {
     console.error("Error in middleware:", error);
-    return NextResponse.redirect("/auth/login");
+    const loginUrl = new URL("/auth/login", req.nextUrl.origin);
+    return NextResponse.redirect(loginUrl);
   }
 }
 
