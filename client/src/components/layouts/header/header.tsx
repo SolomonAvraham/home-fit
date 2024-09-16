@@ -1,11 +1,9 @@
-import { cookies } from "next/headers";
 import ClientHeader from "./clientHeader";
+import axiosInstance from "@/utils/axiosInstance";
 
 async function verifyToken() {
-  const cookieStore = cookies();
-  const authStatus = cookieStore.get("auth_status")?.value;
-
-  return authStatus === "authenticated";
+  const response = await axiosInstance.get(`/api/verifyToken`);
+  return response.data;
 }
 
 export default async function Header() {

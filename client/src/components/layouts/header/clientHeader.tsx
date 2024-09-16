@@ -44,15 +44,8 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
         const response = await axiosInstance.get(`/api/verifyToken`);
 
         if (response.data) {
-          document.cookie =
-            "auth_status=authenticated; path=/; Secure; SameSite=Strict; max-age=" +
-            7 * 24 * 60 * 60;
-
           setIsLoggedIn(true);
         } else {
-          document.cookie =
-            "auth_status=unauthenticated; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-
           setIsLoggedIn(false);
           setUser(null);
         }
@@ -60,9 +53,6 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
         console.error("checkAuthStatus", error.message);
         setUser(null);
         setIsLoggedIn(false);
-
-        document.cookie =
-          "auth_status=unauthenticated; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       }
     };
     checkAuthStatus();

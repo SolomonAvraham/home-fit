@@ -22,11 +22,11 @@ export async function middleware(request: NextRequest) {
     if (isTokenValid === true) {
       return NextResponse.next();
     } else {
-      return new NextResponse("token not found", { status: 401 });
+      return NextResponse.redirect("/auth/login");
     }
   } catch (error) {
     console.error("Error in middleware:", error);
-    return new NextResponse("token not found", { status: 401 });
+    return NextResponse.redirect("/auth/login");
   }
 }
 
