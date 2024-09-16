@@ -42,17 +42,17 @@ app.get("/api/verifyToken", (req, res) => {
     req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
 
   if (!token) {
-    return res.status(401).json(false);
+    return res.json(false);
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
 
     if (!decoded) {
-      return res.status(401).json(false);
+      return res.json(false);
     }
 
-    return res.status(200).json(true);
+    return res.json(true);
   } catch (error: any) {
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({ success: false, message: "Token expired" });
