@@ -1,40 +1,35 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { baseURL } from "./utils/axiosInstance";
 
-export function middleware(req: NextRequest) {
-    console.log("Middleware triggered for path:", req.nextUrl.pathname);
-  console.log("All cookies:", req.cookies.getAll());
-  
-  const authStatus = req.cookies.get("auth_status")?.value;
+export async function middleware(request: NextRequest) {
+  const axios = require("axios");
 
-  console.log("Auth status:", authStatus); // Add this for debugging
-
-  if (authStatus !== "authenticated") {
-    console.log("Redirecting to login"); // Add this for debugging
-    return redirectToLogin(req);
-  }
-
-  console.log("Access granted"); // Add this for debugging
-  return NextResponse.next();
-}
-
-function redirectToLogin(req: NextRequest) {
-  const loginUrl = new URL("/auth/login", req.url);
-  loginUrl.searchParams.set("from", req.nextUrl.pathname);
-
-  const response = NextResponse.redirect(loginUrl);
-
-  response.cookies.set("lastVisitedPath", req.nextUrl.pathname, {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60,
+  const axiosInstance = axios.create({
+    baseURL: baseURL,
+    timeout: 5000,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    withCredentials: true,
   });
 
-  response.cookies.delete("auth_status"); // Change this line
+  try {
+    const response = await axiosInstance.get("/api/verifyToken");
 
-  return response;
+    const isTokenValid = response.data;
+
+    if (isTokenValid === true) {
+      return NextResponse.next();
+    } else {
+      return new NextResponse("token not found", { status: 401 });
+    }
+  } catch (error) {
+    console.error("Error in middleware:", error);
+    return new NextResponse("token not found", { status: 401 });
+  }
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: "/dashboard/:path*",
 };
