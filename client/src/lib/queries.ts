@@ -1,6 +1,6 @@
 "use client";
 
-import { login, logout, register } from "@/services/authService";
+import { register } from "@/services/authService";
 import {
   addExercise,
   addExerciseToWorkout,
@@ -23,12 +23,7 @@ import {
 } from "@/services/workoutService";
 import useAlertStore from "@/store/alertStore";
 import useUserStore from "@/store/userStore";
-import {
-  APIError,
-  LoginCredentials,
-  RegisterCredentials,
-  User,
-} from "@/types/auth";
+import { APIError, RegisterCredentials, User } from "@/types/auth";
 import { ExerciseAttributes } from "@/types/exercise";
 import {
   useMutation,
@@ -37,61 +32,9 @@ import {
   keepPreviousData,
 } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import { deleteUser, updateUser } from "@/services/userService";
 
 //////USER QUERIES//////
-
-export function UseLogoutMutation() {
-  const router = useRouter();
-  const { setAlert } = useAlertStore();
-
-  return useMutation({
-    mutationKey: ["logout"],
-    mutationFn: logout,
-    onSuccess: () => {
-      localStorage.removeItem("userId");
-      localStorage.removeItem("userName");
-      router.refresh();
-    },
-    onError: (error: APIError) => {
-      console.log(error);
-      setAlert(error.response.data.message, true);
-    },
-  });
-}
-
-export function UseLoginMutation(
-  setError: React.Dispatch<React.SetStateAction<string | null>>
-) {
-  const router = useRouter();
-  const { setUser } = useUserStore();
-
-  return useMutation<User, APIError, LoginCredentials>({
-    mutationKey: ["login"],
-    mutationFn: login,
-    onSuccess: (data) => {
-      localStorage.setItem("userId", data.id);
-      localStorage.setItem("userName", data.name);
-      setUser(data);
-
-      const lastVisitedPath = Cookies.get("lastVisitedPath")?.toString();
-
-      router.refresh();
-
-      if (lastVisitedPath !== undefined) {
-        router.push(lastVisitedPath);
-        Cookies.remove("lastVisitedPath");
-      } else {
-        router.push("/");
-      }
-    },
-    onError: (error: APIError) => {
-      console.log(error);
-      setError(error.response.data.message);
-    },
-  });
-}
 
 export function UseRegisterMutation(
   setError: React.Dispatch<React.SetStateAction<string | null>>

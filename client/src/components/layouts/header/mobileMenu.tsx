@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { MenuItemProps } from "@/types/header";
 import { FaCaretDown, FaExpand } from "react-icons/fa";
@@ -9,14 +9,12 @@ const MobileMenu: React.FC<{
   isLoggedIn: boolean;
   setMobileMenuOpen: (open: boolean) => void;
   handleLogout: () => Promise<void>;
-  isPending: boolean;
 }> = ({
   menuItems,
   mobileMenuOpen,
   setMobileMenuOpen,
   isLoggedIn,
   handleLogout,
-  isPending,
 }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -93,7 +91,6 @@ const MobileMenu: React.FC<{
             >
               <button
                 onClick={handleLogout}
-                disabled={isPending}
                 className="flex flex-col justify-center items-center p-3"
               >
                 <FaExpand className="h-5 w-5" />

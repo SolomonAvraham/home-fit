@@ -5,7 +5,6 @@ import axios from "axios";
 import Loading from "@/app/loading";
 import { ClientHeaderProps } from "@/types/header";
 import Logo from "@/components/ui/logo/logo";
-import { UseLogoutMutation } from "@/lib/queries";
 import useUserStore from "@/store/userStore";
 import DesktopMenu from "./desktopMenu";
 import MobileMenu from "./mobileMenu";
@@ -27,11 +26,10 @@ import {
   FaRunning,
 } from "react-icons/fa";
 import { GiWeightLiftingUp } from "react-icons/gi";
-import axiosInstance from "@/utils/axiosInstance";
+import { useRouter } from "next/navigation";
 
 const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
-  const logoutMutation = UseLogoutMutation();
-
+  const router = useRouter();
   const { setUser, user } = useUserStore();
 
   const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
@@ -41,7 +39,12 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await axiosInstance.get(`/api/verifyToken`);
+        const response = await axios.get(`/api/verifyToken`, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        });
 
         if (response.data) {
           setIsLoggedIn(true);
@@ -72,9 +75,7 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
       setUser(null);
       localStorage.removeItem("userId");
       localStorage.removeItem("userName");
-      logoutMutation.mutate();
-      document.cookie =
-        "auth_status=unauthenticated; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      handleLogout();
     }
   }, []);
 
@@ -82,12 +83,18 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
     return <Loading />;
   }
 
-  const handleLogout = async () => {
-    await logoutMutation.mutateAsync();
-    setIsLoggedIn(false);
-    setUser(null);
-    setMobileMenuOpen(false);
-  };
+  async function handleLogout() {
+    try {
+      const response = await axios.get("/api/logout");
+
+      setIsLoggedIn(false);
+      setUser(null);
+      setMobileMenuOpen(false);
+      router.replace("/");
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -235,7 +242,6 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
             menuItems={menuItems}
             isLoggedIn={isLoggedIn}
             handleLogout={handleLogout}
-            isPending={logoutMutation.isPending}
           />
         </div>
       </div>
@@ -246,7 +252,6 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
           setMobileMenuOpen={setMobileMenuOpen}
           isLoggedIn={isLoggedIn}
           handleLogout={handleLogout}
-          isPending={logoutMutation.isPending}
         />
       </div>
     </header>

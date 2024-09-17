@@ -1,13 +1,11 @@
 import ClientHeader from "./clientHeader";
-import axiosInstance from "@/utils/axiosInstance";
-
-async function verifyToken() {
-  const response = await axiosInstance.get(`/api/verifyToken`);
-  return response.data;
-}
+import { cookies } from "next/headers";
 
 export default async function Header() {
-  const isLoggedIn = await verifyToken();
+  const cookieStore = cookies();
+  const token = cookieStore.get("token")?.value;
+
+  const isLoggedIn = token ? true : false;
 
   return <ClientHeader initialIsLoggedIn={isLoggedIn} />;
 }

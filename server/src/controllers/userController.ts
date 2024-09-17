@@ -37,15 +37,7 @@ class UserController {
         password
       );
 
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      res.status(200).json({ id, name, role });
+      res.status(200).json({ id, name, role, token });
     } catch (error: any) {
       if (error instanceof Error) {
         res.status(401).json({ message: error.message });
@@ -54,23 +46,7 @@ class UserController {
     }
   }
 
-  public async logout(req: Request, res: Response): Promise<void> {
-    try {
-      res.clearCookie("token", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
-        path: "/",
-      });
-
-      res.status(200).json({ message: "Logout successful" });
-    } catch (error: any) {
-      if (error instanceof Error) {
-        res.status(400).json({ message: error.message });
-      }
-      console.error(error);
-    }
-  }
+ 
 
   public async getUserById(req: Request, res: Response): Promise<void> {
     const userId = req.params.id;

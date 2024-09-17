@@ -7,7 +7,6 @@ import "./models/index";
 import cors from "cors";
 import testRoutes from "./routes/testRoutes";
 import cookieParser from "cookie-parser";
-import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -36,35 +35,6 @@ app.use(errorMiddleware);
 
 app.use("/api/workouts", workoutRoute);
 app.use("/api/exercises", exerciseRoutes);
-
-app.get("/api/verifyToken", (req, res) => {
-  const token =
-    req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
-
-  if (!token) {
-    return res.json(false);
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-
-    if (!decoded) {
-      return res.json(false);
-    }
-
-    return res.json(true);
-  } catch (error: any) {
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({ success: false, message: "Token expired" });
-    }
-    if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({ success: false, message: "Invalid token" });
-    }
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
-  }
-});
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, world!");

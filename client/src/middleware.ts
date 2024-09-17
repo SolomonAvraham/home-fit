@@ -1,50 +1,50 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { baseURL } from "./utils/axiosInstance";
+import { jwtVerify } from "jose";
 
 export async function middleware(req: NextRequest) {
-    const token = req.cookies.get("token")?.value;
-    console.log("Token from cookie:", token);  
-  const axios = require("axios");
+  const token = req.cookies.get("token")?.value;
+  const JWT_SECRET = process.env.JWT_SECRET;
 
-  const axiosInstance = axios.create({
-    baseURL: baseURL,
-    timeout: 5000,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    withCredentials: true,
-  });
+  if (!token || !JWT_SECRET) {
+    return redirectToLogin(req);
+  }
 
   try {
-    //const response = await axiosInstance.get("/api/verifyToken");
-    const response = await fetch(`${baseURL}/api/verifyToken`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // Include the token in the request
-    });
-    console.log("🚀 ~ middleware ~ response:", response);
-
-    if (!response.ok) {
-      throw new Error(`Failed to verify token: ${response.status}`);
-    }
-
-    const isTokenValid = await response.json();
-    console.log("🚀 Token Verification Response:", isTokenValid);
-
-    if (isTokenValid === true) {
-      return NextResponse.next();
-    } else {
-      const loginUrl = new URL("/auth/login", req.nextUrl.origin);
-      return NextResponse.redirect(loginUrl);
-    }
+    await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
+    return NextResponse.next();
   } catch (error) {
-    console.error("Error in middleware:", error);
-    const loginUrl = new URL("/auth/login", req.nextUrl.origin);
-    return NextResponse.redirect(loginUrl);
+    console.error("JWT Verification Error:", error);
+    return handleAuthError(req, error);
   }
 }
 
+function redirectToLogin(req: NextRequest) {
+  const response = NextResponse.redirect(new URL("/auth/login", req.url));
+  setLastVisitedPath(req, response);
+  return response;
+}
+
+function handleAuthError(req: NextRequest, error: unknown) {
+  const response = NextResponse.redirect(new URL("/auth/login", req.url));
+
+  if ((error as any).code === "ERR_JWT_EXPIRED") {
+    response.cookies.set("token", "", { expires: new Date(0) });
+  }
+
+  setLastVisitedPath(req, response);
+  return response;
+}
+
+function setLastVisitedPath(req: NextRequest, response: NextResponse) {
+  const currentPath = req.nextUrl.pathname;
+  response.cookies.set("lastVisitedPath", currentPath, {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60, // 1 hour
+  });
+}
+
 export const config = {
-  matcher: "/dashboard/:path*",
+  matcher: ["/dashboard/:path*"],
 };

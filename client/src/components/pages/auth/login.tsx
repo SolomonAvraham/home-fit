@@ -3,9 +3,12 @@
 import React, { useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import Link from "next/link";
-import { UseLoginMutation } from "@/lib/queries";
 import Logo from "@/components/ui/logo/logo";
 import Image from "next/image";
+import axios from "axios";
+import useUserStore from "@/store/userStore";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -13,8 +16,10 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const loginMutation = UseLoginMutation(setError);
+  const { setUser } = useUserStore();
+  const router = useRouter();
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -45,7 +50,41 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    await loginMutation.mutateAsync({ email, password });
+    try {
+      setIsLoading(true);
+      const response = await axios.post("/api/login", { email, password });
+
+      const data = response.data;
+
+      if (response.status === 200) {
+        localStorage.setItem("userId", data.id);
+        localStorage.setItem("userName", data.name);
+        setUser(data);
+
+        const lastVisitedPath = Cookies.get("lastVisitedPath")?.toString();
+
+       // router.refresh();
+
+        if (lastVisitedPath !== undefined) {
+          router.push(lastVisitedPath);
+          Cookies.remove("lastVisitedPath");
+        } else {
+          router.push("/");
+        }
+      }
+    } catch (error: any) {
+      if (error.response) {
+        const errorMessage = error.response.data;
+        setError(errorMessage);
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+      } else {
+        console.error("Error:", error.message);
+        setError("An error occurred while making the request.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -105,7 +144,7 @@ const LoginPage: React.FC = () => {
             type="submit"
             className="btn btn-neutral bg-gray-600 text-white text-xl font-extralight tracking-wide w-full"
           >
-            {loginMutation.isPending ? "Login in..." : "Log In"}
+            {isLoading ? "Login in..." : "Log In"}
           </button>
           <div className="flex justify-center items-center mt-4">
             <Link href="/auth/register" className="link link-primary">
