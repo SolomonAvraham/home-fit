@@ -6,7 +6,7 @@ export const baseURL =
     : process.env.NEXT_PUBLIC_LOCAL_SERVER_URL;
 
 const axiosInstance = axios.create({
-  baseURL,
+  baseURL:"/",
   headers: {
     "Content-Type": "application/json",
   },
