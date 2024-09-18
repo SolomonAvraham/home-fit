@@ -1,5 +1,4 @@
 import axios from "axios";
-import Cookies from "js-cookie";
 
 export const baseURL =
   process.env.NODE_ENV === "production"
@@ -14,17 +13,27 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
+// Add a request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = Cookies.get("token");
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
+    // The token is automatically included in requests due to withCredentials: true
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add a response interceptor
+axiosInstance.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Redirect to login page on 401 Unauthorized
+      window.location.href = "/auth/login";
+    }
     return Promise.reject(error);
   }
 );

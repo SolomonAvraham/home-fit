@@ -6,13 +6,24 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   const JWT_SECRET = process.env.JWT_SECRET;
 
+  const requestHeaders = new Headers(req.headers);
+
   if (!token || !JWT_SECRET) {
     return redirectToLogin(req);
   }
 
   try {
     await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
-    return NextResponse.next();
+
+    if (token) {
+      requestHeaders.set("Authorization", `Bearer ${token}`);
+    }
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
   } catch (error) {
     console.error("JWT Verification Error:", error);
     return handleAuthError(req, error);
@@ -41,7 +52,7 @@ function setLastVisitedPath(req: NextRequest, response: NextResponse) {
   response.cookies.set("lastVisitedPath", currentPath, {
     httpOnly: false,
     secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60, // 1 hour
+    maxAge: 60 * 60,  
   });
 }
 

@@ -7,5 +7,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ authenticated: false }, { status: 200 });
   }
 
-  return NextResponse.json({ authenticated: true }, { status: 200 });
+  const response = NextResponse.json({ authenticated: true }, { status: 200 });
+
+  return response;
 }

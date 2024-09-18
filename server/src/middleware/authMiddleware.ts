@@ -14,6 +14,7 @@ const authMiddleware = (
   const headerToken = req.header("Authorization")?.replace("Bearer ", "");
 
   const token = cookieToken || headerToken;
+  
 
   if (!token) {
     return res.status(401).json({ message: "Token not provided" });
