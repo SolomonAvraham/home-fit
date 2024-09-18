@@ -42,7 +42,7 @@ export const getExerciseById = async (
 
   const response = await axiosInstance.get<ExerciseAttributes>(
     `/api/exercises/getExerciseById/${id}`,
-    config
+     
   );
 
   return response.data;

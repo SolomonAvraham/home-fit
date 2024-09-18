@@ -41,8 +41,10 @@ async function handleRequest(request: NextRequest, slugs: string[]) {
   }
 
   const apiPath = "/" + slugs.join("/");
+  console.log("🚀 ~ handleRequest ~ apiPath:", apiPath)
   const url = `${API_BASE_URL}${apiPath}${request.nextUrl.search}`;
 
+  console.log("🚀 ~ handleRequest ~ url:", url)
   const headers = new Headers(request.headers);
   headers.set("Authorization", `Bearer ${token}`);
 
@@ -58,6 +60,6 @@ async function handleRequest(request: NextRequest, slugs: string[]) {
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("API Proxy Error:", error);
-    return NextResponse.json({ message: "An error occurred" }, { status: 500 });
+    return NextResponse.json({ message: "An error occurred",error }, { status: 500 });
   }
 }

@@ -4,7 +4,7 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "https://adgdbgbbbfcgbdsbdg.online/api/:path*", // Ensure the URL starts with "https://"
+        destination: "https://adgdbgbbbfcgbdsbdg.online/api/:path*",
       },
     ];
   },
