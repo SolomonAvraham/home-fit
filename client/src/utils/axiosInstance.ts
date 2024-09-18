@@ -8,36 +8,30 @@ export const baseURL =
 const isServer = typeof window === "undefined";
 
 const axiosInstance = axios.create({
-  baseURL: baseURL,
-  timeout: 10000,
+  baseURL: "/",
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: true,
 });
 
- axiosInstance.interceptors.request.use(
-  async (config) => {
-    let token;
-
-    if (isServer) {
-      const { cookies } = await import("next/headers");
-      const cookieStore = cookies();
-      token = cookieStore.get("token")?.value;
-    } else {
-      token = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("token="))
-        ?.split("=")[1];
-    }
-
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
-
+axiosInstance.interceptors.request.use(
+  (config) => {
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+axiosInstance.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      window.location.href = "/auth/login";
+    }
     return Promise.reject(error);
   }
 );

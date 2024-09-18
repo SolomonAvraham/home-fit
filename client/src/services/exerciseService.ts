@@ -36,13 +36,14 @@ export const getExerciseById = async (
   id: string,
   token: string | undefined
 ): Promise<ExerciseAttributes> => {
+  console.log("🚀 ~ token:", token)
   const config = {
     headers: { Authorization: token ? `Bearer ${token}` : "" },
   };
 
   const response = await axiosInstance.get<ExerciseAttributes>(
     `/api/exercises/getExerciseById/${id}`,
-     
+     config
   );
 
   return response.data;
