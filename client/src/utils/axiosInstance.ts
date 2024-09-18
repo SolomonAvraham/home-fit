@@ -6,17 +6,15 @@ export const baseURL =
     : process.env.NEXT_PUBLIC_LOCAL_SERVER_URL;
 
 const axiosInstance = axios.create({
-  baseURL:"/",
+  baseURL: "/",
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: true,
 });
 
-// Add a request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    // The token is automatically included in requests due to withCredentials: true
     return config;
   },
   (error) => {
@@ -24,14 +22,12 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Add a response interceptor
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Redirect to login page on 401 Unauthorized
       window.location.href = "/auth/login";
     }
     return Promise.reject(error);

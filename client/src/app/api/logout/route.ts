@@ -9,5 +9,9 @@ export async function GET(req: NextRequest) {
     path: "/",
   });
 
-  return NextResponse.json(true, { status: 201 });
+  const response = NextResponse.json({ success: true }, { status: 200 });
+
+  response.headers.set("X-Need-Reload", "true");
+
+  return response;
 }

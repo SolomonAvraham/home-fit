@@ -87,12 +87,16 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
     try {
       const response = await axios.get("/api/logout");
 
-      setIsLoggedIn(false);
-      setUser(null);
-      setMobileMenuOpen(false);
-      router.replace("/");
+      if (response.headers["x-need-reload"] === "true") {
+        setIsLoggedIn(false);
+        setUser(null);
+        setMobileMenuOpen(false);
+        router.replace("/");
+      } else {
+        router.push("/auth/login");
+      }
     } catch (error) {
-      console.log(error);
+      console.error("Logout failed:", error);
     }
   }
 

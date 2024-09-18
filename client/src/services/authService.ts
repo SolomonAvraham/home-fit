@@ -1,8 +1,9 @@
+import axios from "axios";
 import { LoginCredentials, RegisterCredentials, User } from "../types/auth";
-import axiosInstance from "../utils/axiosInstance";
+import axiosInstance, { baseURL } from "../utils/axiosInstance";
 
 export const login = async (credentials: LoginCredentials) => {
-  const response = await axiosInstance.post(`/api/users/login`, credentials);
+  const response = await axios.post(`${baseURL}/api/users/login`, credentials);
   return response;
 };
  
