@@ -4,7 +4,6 @@ import { jwtVerify } from "jose";
 
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
-  console.log("🚀 ~ middleware ~ token:", token);
   const JWT_SECRET = process.env.JWT_SECRET;
 
   if (!token || !JWT_SECRET) {

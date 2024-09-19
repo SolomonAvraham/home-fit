@@ -46,8 +46,12 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
           withCredentials: true,
         });
 
-        if (response.data) {
+        if (response.data.authenticated) {
           setIsLoggedIn(true);
+
+          if (!user || user?.token !== response.data.token) {
+            setUser({ ...user, token: response.data.token });
+          }
         } else {
           setIsLoggedIn(false);
           setUser(null);
