@@ -9,22 +9,28 @@ export const baseURL =
 const isServer = typeof window === "undefined";
 
 const axiosInstance = axios.create({
-  baseURL: baseURL,
+  baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: true,
 });
 let a;
+
 axiosInstance.interceptors.request.use(
-  (config) => {
+  async (config) => {
     if (isServer) {
-      const cookies = parseCookies();
-      const token = cookies.token; // Assuming the HTTP-only cookie is named 'token'
-      console.log("🚀 ~ token:", token)
-      a= token
-      if (token) {
-        config.headers["Cookie"] = `token=${token}`;
+      try {
+        const { parseCookies } = await import("nookies");
+        const cookies = parseCookies();
+        const token = cookies.token; // Assuming the HTTP-only cookie is named 'token'
+
+        a = token;
+        if (token) {
+          config.headers["Cookie"] = `token=${token}`;
+        }
+      } catch (error) {
+        console.error("Error importing or parsing cookies:", error);
       }
     }
     return config;
@@ -33,7 +39,8 @@ axiosInstance.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-console.log("a",a)
+
+console.log("a", a);
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;
