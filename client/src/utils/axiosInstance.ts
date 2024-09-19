@@ -43,28 +43,28 @@ axiosInstance.interceptors.request.use(
 
 console.log("a", a);
 
-axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    console.error("Response error:", error);
-    if (error.response) {
-      console.error("Error data:", error.response.data);
-      console.error("Error status:", error.response.status);
-      console.error("Error headers:", error.response.headers);
-    } else if (error.request) {
-      console.error("No response received:", error.request);
-    } else {
-      console.error("Error setting up request:", error.message);
-    }
-    console.error("Error config:", error.config);
+// axiosInstance.interceptors.response.use(
+//   (response) => {
+//     return response;
+//   },
+//   (error) => {
+//     console.error("Response error:", error);
+//     if (error.response) {
+//       console.error("Error data:", error.response.data);
+//       console.error("Error status:", error.response.status);
+//       console.error("Error headers:", error.response.headers);
+//     } else if (error.request) {
+//       console.error("No response received:", error.request);
+//     } else {
+//       console.error("Error setting up request:", error.message);
+//     }
+//     console.error("Error config:", error.config);
 
-    if (!isServer && error.response && error.response.status === 401) {
-      window.location.href = "/auth/login";
-    }
-    return Promise.reject(error);
-  }
-);
+//     if (!isServer && error.response && error.response.status === 401) {
+//       window.location.href = "/auth/login";
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 export default axiosInstance;
