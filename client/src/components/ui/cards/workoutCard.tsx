@@ -206,7 +206,7 @@ export default function WorkoutCard({
             <span className={`${!operation && "col-span-full"} `}>
               <AddWorkoutButton
                 workoutId={workout.id as string}
-                userId={user.id}
+                userId={user.id as string}
               />
             </span>
           )}

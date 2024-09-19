@@ -19,11 +19,11 @@ const WorkoutForm = () => {
     if (user) {
       setWorkout({
         ...workout,
-        userId: user.id,
+        userId: user.id as string,
         createdBy: [
           {
-            creatorId: user.id,
-            creatorName: user.name,
+            creatorId: user.id as string,
+            creatorName: user.name as string,
             originalWorkoutId: "",
           },
         ],

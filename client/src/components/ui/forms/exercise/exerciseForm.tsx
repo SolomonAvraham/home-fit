@@ -4,10 +4,10 @@ import { getWorkoutByIdAction } from "@/actions/workoutActions";
 import { UseCreateExerciseMutation } from "@/lib/queries";
 import useUserStore from "@/store/userStore";
 import { ExerciseAttributes } from "@/types/exercise";
- import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const ExerciseForm = ({ workoutId }: { workoutId: string }) => {
-   const formRef = useRef<HTMLFormElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const { user } = useUserStore();
 
   const [exercise, setExercise] = useState<ExerciseAttributes>({
@@ -26,11 +26,11 @@ const ExerciseForm = ({ workoutId }: { workoutId: string }) => {
     if (user) {
       setExercise((prevExercise) => ({
         ...prevExercise,
-        userId: user.id,
+        userId: user.id as string,
         createdBy: [
           {
-            creatorId: user.id,
-            creatorName: user.name,
+            creatorId: user.id as string,
+            creatorName: user.name as string,
             originalExerciseId: "",
           },
         ],
