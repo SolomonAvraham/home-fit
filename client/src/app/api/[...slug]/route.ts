@@ -4,11 +4,30 @@ import { baseURL } from "@/utils/axiosInstance";
 
 const API_BASE_URL = baseURL;
 
+const uuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { slug: string[] } }
 ) {
-  return handleRequest(request, params.slug);
+  const slugArray = params.slug;
+  console.log("🚀 ~ Slug Array:", slugArray);
+
+  // Check if the last part of the slug array is a UUID
+  const lastSlug = slugArray[slugArray.length - 1];
+  const isUUID = uuidPattern.test(lastSlug);
+
+  if (isUUID) {
+    console.log("🚀 ~ UUID detected:", lastSlug);
+    // Handle the request with the UUID in the URL
+   } else {
+    console.log("🚀 ~ No UUID detected",{
+      message: `You accessed /api/${slugArray.join("/")}`,
+    });
+ }
+    return handleRequest(request, params.slug);
+  
 }
 
 export async function POST(

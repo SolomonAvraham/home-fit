@@ -63,7 +63,7 @@ const LoginPage: React.FC = () => {
 
         const lastVisitedPath = Cookies.get("lastVisitedPath")?.toString();
 
-       // router.refresh();
+      router.refresh();
 
         if (lastVisitedPath !== undefined) {
           router.push(lastVisitedPath);

@@ -16,8 +16,28 @@ export const getWorkouts = async (page: number = 1, limit: number = 10) => {
 };
 
 export const getWorkoutById = async (id: string) => {
-  const response = await axiosInstance.get(`/api/workouts/workoutById/${id}`);
-  return response.data;
+  try {
+    const response = await axiosInstance.get(`/api/workouts/workoutById/${id}`);
+    return response.data;
+  } catch (error:any) {
+    console.error("Error in getWorkoutById:", error.message);
+    if (error.response) {
+      // Server responded with a status code outside the 2xx range
+      console.error("Response data:", error.response.data);
+      console.error("Response status:", error.response.status);
+      console.error("Response headers:", error.response.headers);
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error(
+        "Request was made but no response received:",
+        error.request
+      );
+    } else {
+      // Something happened in setting up the request
+      console.error("Error setting up the request:", error.message);
+    }
+    throw error; // Optionally rethrow the error after logging it
+  }
 };
 
 export const getWorkoutsByUserId = async (

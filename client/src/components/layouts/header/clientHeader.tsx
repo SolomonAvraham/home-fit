@@ -91,8 +91,7 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ initialIsLoggedIn }) => {
         setIsLoggedIn(false);
         setUser(null);
         setMobileMenuOpen(false);
-        router.replace("/");
-      } else {
+        router.refresh();
         router.push("/auth/login");
       }
     } catch (error) {

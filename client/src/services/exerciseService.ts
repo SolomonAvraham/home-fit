@@ -36,8 +36,7 @@ export const getExerciseById = async (
   id: string,
   token: string | undefined
 ): Promise<ExerciseAttributes> => {
-  console.log("🚀 ~ token:", token)
-  const config = {
+   const config = {
     headers: { Authorization: token ? `Bearer ${token}` : "" },
   };
 
