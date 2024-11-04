@@ -55,6 +55,7 @@ export default function HeroSection() {
           autoPlay
           loop
           muted
+          playsInline
           className="absolute top-0 bottom-0 right-0 left-0 w-full h-full object-cover opacity-80"
         >
           <source src="/videos/vid-1.mp4" type="video/mp4" />
